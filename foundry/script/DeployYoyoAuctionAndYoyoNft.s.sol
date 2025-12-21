@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import { Script, console } from 'forge-std/Script.sol';
-import { YoyoAuction } from '../src/YoyoAuction.sol';
-import { YoyoNft, ConstructorParams } from '../src/YoyoNft.sol';
+import { YoyoAuction } from '../src/YoyoAuction/YoyoAuction.sol';
+import { YoyoNft } from '../src/YoyoNft/YoyoNft.sol';
+import {ConstructorParams} from '../src/YoyoTypes.sol';
 
 contract DeployYoyoAuctionAndYoyoNft is Script {
     string public baseUri = vm.envString('BASE_URI');

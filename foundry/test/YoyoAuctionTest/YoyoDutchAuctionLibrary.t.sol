@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Test} from "forge-std/Test.sol";
-import {YoyoDutchAuctionLibrary} from "../src/YoyoDutchAuctionLibrary.sol";
+import { Test } from 'forge-std/Test.sol';
+import { YoyoDutchAuctionLibrary } from '../../src/YoyoAuction/YoyoDutchAuctionLibrary.sol';
 
 contract YoyoDutchAuctionLibraryTest is Test {
     using YoyoDutchAuctionLibrary for uint256;
@@ -31,12 +31,11 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 intervals = 10;
         uint256 dropAmount = 1 ether;
 
-        uint256 startPrice = YoyoDutchAuctionLibrary
-            .startPriceFromIntervalsAndDropAmountCalculator(
-                reservePrice,
-                intervals,
-                dropAmount
-            );
+        uint256 startPrice = YoyoDutchAuctionLibrary.startPriceFromIntervalsAndDropAmountCalculator(
+            reservePrice,
+            intervals,
+            dropAmount
+        );
 
         assertEq(startPrice, 110 ether);
     }
@@ -48,13 +47,12 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 dropAmount = 0.5 ether;
         uint256 dropDuration = 10 minutes;
 
-        uint256 startPrice = YoyoDutchAuctionLibrary
-            .startPriceFromAuctionDurationAndDropAmountCalculator(
-                reservePrice,
-                auctionDuration,
-                dropAmount,
-                dropDuration
-            );
+        uint256 startPrice = YoyoDutchAuctionLibrary.startPriceFromAuctionDurationAndDropAmountCalculator(
+            reservePrice,
+            auctionDuration,
+            dropAmount,
+            dropDuration
+        );
 
         assertEq(startPrice, 55 ether); // 50 + (100/10)*0.5
     }
@@ -65,12 +63,11 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 reservePrice = 150 ether;
         uint256 dropAmount = 10 ether;
 
-        uint256 intervals = YoyoDutchAuctionLibrary
-            .numberOfIntervalsFromDropAmountCalculator(
-                startPrice,
-                reservePrice,
-                dropAmount
-            );
+        uint256 intervals = YoyoDutchAuctionLibrary.numberOfIntervalsFromDropAmountCalculator(
+            startPrice,
+            reservePrice,
+            dropAmount
+        );
 
         assertEq(intervals, 5); // (200-150)/10
     }
@@ -80,8 +77,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 intervals = 8;
         uint256 dropDuration = 15 minutes;
 
-        uint256 duration = YoyoDutchAuctionLibrary
-            .auctionDurationFromIntervalsCalculator(intervals, dropDuration);
+        uint256 duration = YoyoDutchAuctionLibrary.auctionDurationFromIntervalsCalculator(intervals, dropDuration);
 
         assertEq(duration, 120 minutes);
     }
@@ -92,12 +88,11 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 reservePrice = 60 ether;
         uint256 intervals = 4;
 
-        uint256 dropAmount = YoyoDutchAuctionLibrary
-            .dropAmountFromPricesAndIntervalsCalculator(
-                reservePrice,
-                startPrice,
-                intervals
-            );
+        uint256 dropAmount = YoyoDutchAuctionLibrary.dropAmountFromPricesAndIntervalsCalculator(
+            reservePrice,
+            startPrice,
+            intervals
+        );
 
         assertEq(dropAmount, 10 ether); // (100-60)/4
     }
@@ -108,12 +103,11 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 multiplier = 150; // 150% (1.5x)
         uint256 base = 100;
 
-        uint256 startPrice = YoyoDutchAuctionLibrary
-            .startPriceFromReserveAndMultiplierCalculator(
-                reservePrice,
-                multiplier,
-                base
-            );
+        uint256 startPrice = YoyoDutchAuctionLibrary.startPriceFromReserveAndMultiplierCalculator(
+            reservePrice,
+            multiplier,
+            base
+        );
 
         assertEq(startPrice, 1.5 ether);
     }
@@ -126,13 +120,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 dropDuration = 10 minutes;
         uint256 startTime = block.timestamp;
 
-        uint256 currentPrice = getCurrentPrice(
-            startPrice,
-            reservePrice,
-            dropAmount,
-            dropDuration,
-            startTime
-        );
+        uint256 currentPrice = getCurrentPrice(startPrice, reservePrice, dropAmount, dropDuration, startTime);
 
         assertEq(currentPrice, startPrice);
     }
@@ -148,13 +136,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         // Advance by 25 minutes (2.5 intervals)
         vm.warp(startTime + 25 minutes);
 
-        uint256 currentPrice = getCurrentPrice(
-            startPrice,
-            reservePrice,
-            dropAmount,
-            dropDuration,
-            startTime
-        );
+        uint256 currentPrice = getCurrentPrice(startPrice, reservePrice, dropAmount, dropDuration, startTime);
 
         // Should be 100 - (2 * 5) = 90 ether
         assertEq(currentPrice, 90 ether);
@@ -171,13 +153,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         // Advance by 20 minutes (2 intervals)
         vm.warp(startTime + 20 minutes);
 
-        uint256 currentPrice = getCurrentPrice(
-            startPrice,
-            reservePrice,
-            dropAmount,
-            dropDuration,
-            startTime
-        );
+        uint256 currentPrice = getCurrentPrice(startPrice, reservePrice, dropAmount, dropDuration, startTime);
 
         // 100 - (2*30) = 40, but cannot go below 50
         assertEq(currentPrice, reservePrice);
@@ -188,11 +164,10 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 100 minutes;
         uint256 dropDuration = 30 minutes;
 
-        uint256 intervals = YoyoDutchAuctionLibrary
-            .numberOfIntervalsFromDropDurationCalculator(
-                auctionDuration,
-                dropDuration
-            );
+        uint256 intervals = YoyoDutchAuctionLibrary.numberOfIntervalsFromDropDurationCalculator(
+            auctionDuration,
+            dropDuration
+        );
 
         // 100 / 30 = 3.333... -> 3 intervals
         assertEq(intervals, 3);
@@ -205,13 +180,12 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 60 minutes;
         uint256 dropDuration = 15 minutes;
 
-        uint256 dropAmount = YoyoDutchAuctionLibrary
-            .dropAmountFromDurationsCalculator(
-                reservePrice,
-                startPrice,
-                auctionDuration,
-                dropDuration
-            );
+        uint256 dropAmount = YoyoDutchAuctionLibrary.dropAmountFromDurationsCalculator(
+            reservePrice,
+            startPrice,
+            auctionDuration,
+            dropDuration
+        );
 
         // (200-100) / (60/15) = 100 / 4 = 25 ether
         assertEq(dropAmount, 25 ether);
@@ -229,15 +203,14 @@ contract YoyoDutchAuctionLibraryTest is Test {
         // Advance by 30 minutes (half the auction)
         vm.warp(startTime + 30 minutes);
 
-        uint256 currentPrice = YoyoDutchAuctionLibrary
-            .currentPriceFromTimeRangeCalculator(
-                startPrice,
-                reservePrice,
-                dropAmount,
-                startTime,
-                endTime,
-                intervals
-            );
+        uint256 currentPrice = YoyoDutchAuctionLibrary.currentPriceFromTimeRangeCalculator(
+            startPrice,
+            reservePrice,
+            dropAmount,
+            startTime,
+            endTime,
+            intervals
+        );
 
         // 100 - (3 * 10) = 70 ether
         assertEq(currentPrice, 70 ether);
@@ -254,13 +227,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         // Advance by 1 hour
         vm.warp(startTime + 60 minutes);
 
-        uint256 currentPrice = getCurrentPrice(
-            startPrice,
-            reservePrice,
-            dropAmount,
-            dropDuration,
-            startTime
-        );
+        uint256 currentPrice = getCurrentPrice(startPrice, reservePrice, dropAmount, dropDuration, startTime);
 
         assertEq(currentPrice, startPrice);
     }
@@ -270,11 +237,10 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 0;
         uint256 dropDuration = 10 minutes;
 
-        uint256 intervals = YoyoDutchAuctionLibrary
-            .numberOfIntervalsFromDropDurationCalculator(
-                auctionDuration,
-                dropDuration
-            );
+        uint256 intervals = YoyoDutchAuctionLibrary.numberOfIntervalsFromDropDurationCalculator(
+            auctionDuration,
+            dropDuration
+        );
 
         assertEq(intervals, 0);
     }
@@ -286,13 +252,12 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 dropDuration = 10 minutes;
         uint256 dropAmount = 1 ether;
 
-        uint256 startPrice = YoyoDutchAuctionLibrary
-            .startPriceFromReserveAndDurationsCalculator(
-                reservePrice,
-                auctionDuration,
-                dropDuration,
-                dropAmount
-            );
+        uint256 startPrice = YoyoDutchAuctionLibrary.startPriceFromReserveAndDurationsCalculator(
+            reservePrice,
+            auctionDuration,
+            dropDuration,
+            dropAmount
+        );
 
         // Calculation: 100 + (60/10)*1 = 106 ether
         assertEq(startPrice, 106 ether);
@@ -303,11 +268,10 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 120 minutes;
         uint256 numberOfIntervals = 6;
 
-        uint256 dropDuration = YoyoDutchAuctionLibrary
-            .dropDurationFromAuctionDurationCalculator(
-                auctionDuration,
-                numberOfIntervals
-            );
+        uint256 dropDuration = YoyoDutchAuctionLibrary.dropDurationFromAuctionDurationCalculator(
+            auctionDuration,
+            numberOfIntervals
+        );
 
         // 120 / 6 = 20 minutes
         assertEq(dropDuration, 20 minutes);
@@ -320,13 +284,12 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 reservePrice = 50 ether;
         uint256 startPrice = 150 ether;
 
-        uint256 dropAmount = YoyoDutchAuctionLibrary
-            .fromAuctionDurationAndDropDurationToDropAmount(
-                auctionDuration,
-                dropDuration,
-                reservePrice,
-                startPrice
-            );
+        uint256 dropAmount = YoyoDutchAuctionLibrary.fromAuctionDurationAndDropDurationToDropAmount(
+            auctionDuration,
+            dropDuration,
+            reservePrice,
+            startPrice
+        );
 
         // Calculation: (150-50) / (100/20) = 100 / 5 = 20 ether
         assertEq(dropAmount, 20 ether);
@@ -338,12 +301,11 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 reservePrice = 150 ether;
         uint256 numberOfIntervals = 15;
 
-        uint256 dropAmount = YoyoDutchAuctionLibrary
-            .dropAmountFromStartAndReserveCalculator(
-                startPrice,
-                reservePrice,
-                numberOfIntervals
-            );
+        uint256 dropAmount = YoyoDutchAuctionLibrary.dropAmountFromStartAndReserveCalculator(
+            startPrice,
+            reservePrice,
+            numberOfIntervals
+        );
 
         // (300-150)/15 = 10 ether
         assertEq(dropAmount, 10 ether);
@@ -354,20 +316,18 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 95 minutes; // 5700 seconds
         uint256 dropDuration = 30 minutes; // 1800 seconds
 
-        uint256 intervals = YoyoDutchAuctionLibrary
-            .numberOfIntervalsFromDropDurationCalculator(
-                auctionDuration,
-                dropDuration
-            );
+        uint256 intervals = YoyoDutchAuctionLibrary.numberOfIntervalsFromDropDurationCalculator(
+            auctionDuration,
+            dropDuration
+        );
 
         // 5700 / 1800 = 3.166 → 3 intervals
         assertEq(intervals, 3);
 
-        uint256 dropDurationResult = YoyoDutchAuctionLibrary
-            .dropDurationFromAuctionDurationCalculator(
-                auctionDuration,
-                intervals
-            );
+        uint256 dropDurationResult = YoyoDutchAuctionLibrary.dropDurationFromAuctionDurationCalculator(
+            auctionDuration,
+            intervals
+        );
 
         // 5700 / 3 = 1900 seconds
         assertEq(dropDurationResult, 1900);
@@ -378,15 +338,8 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 auctionDuration = 100 minutes;
         uint256 numberOfIntervals = 0;
 
-        vm.expectRevert(
-            YoyoDutchAuctionLibrary
-                .YoyoDutchAuctionLibrary__NumberOfIntervalsCannotBeZero
-                .selector
-        );
-        YoyoDutchAuctionLibrary.dropDurationFromAuctionDurationCalculator(
-            auctionDuration,
-            numberOfIntervals
-        );
+        vm.expectRevert(YoyoDutchAuctionLibrary.YoyoDutchAuctionLibrary__NumberOfIntervalsCannotBeZero.selector);
+        YoyoDutchAuctionLibrary.dropDurationFromAuctionDurationCalculator(auctionDuration, numberOfIntervals);
     }
 
     // Division by zero check - startPriceFromReserveAndDurationsCalculator
@@ -396,11 +349,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         uint256 dropDuration = 0;
         uint256 dropAmount = 1 ether;
 
-        vm.expectRevert(
-            YoyoDutchAuctionLibrary
-                .YoyoDutchAuctionLibrary__DropDurationCannotBeZero
-                .selector
-        );
+        vm.expectRevert(YoyoDutchAuctionLibrary.YoyoDutchAuctionLibrary__DropDurationCannotBeZero.selector);
         YoyoDutchAuctionLibrary.startPriceFromReserveAndDurationsCalculator(
             reservePrice,
             auctionDuration,
@@ -420,13 +369,7 @@ contract YoyoDutchAuctionLibraryTest is Test {
         // Advance by 1 second
         vm.warp(startTime + 1);
 
-        uint256 currentPrice = getCurrentPrice(
-            startPrice,
-            reservePrice,
-            dropAmount,
-            dropDuration,
-            startTime
-        );
+        uint256 currentPrice = getCurrentPrice(startPrice, reservePrice, dropAmount, dropDuration, startTime);
 
         // Ensure no overflow occurred
         assertEq(currentPrice, startPrice - 1);

@@ -2,7 +2,10 @@
 pragma solidity ^0.8.0;
 
 import { ERC721 } from '@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import { Strings } from '@openzeppelin/contracts/utils/Strings.sol';
+import { ConstructorParams } from '../YoyoTypes.sol';
+import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
 /**
  * @title A Yoga NFT collection
@@ -12,22 +15,9 @@ import { Strings } from '@openzeppelin/contracts/utils/Strings.sol';
  * @dev The contract communicates with the YoyoAuction via a custom interface that only implements
  */
 
-/**  Type declarations
- * @notice Parameters structure for contract initialization
- * @dev Used to avoid stack too deep errors in constructor
- * @param s_baseURI the base URI for Yoyo NFTs' metadata stored in IPFS, the format of the string should be ipfs://<CID>
- * @param i_auctionContract the address of auction contract that allows to mint new nfts
- * @param s_basicMintPrice It is the initial mint price, also used as the auction starting bid in the YoyoAuction contract.
- */
-struct ConstructorParams {
-    string baseURI;
-    address auctionContract;
-    uint256 basicMintPrice;
-}
-
-contract YoyoNft is ERC721 {
+contract YoyoNft is ERC721, Ownable {
     /* Errors */
-    error YoyoNft__NotOwner();
+    error YoyoNft__NotNftOwner();
     error YoyoNft__InvalidAddress();
     error YoyoNft__ValueCantBeZero();
     error YoyoNft__TokenIdDoesNotExist();
@@ -43,29 +33,21 @@ contract YoyoNft is ERC721 {
     error YoyoNft__NotAuctionContract();
 
     /* State variables */
-    uint256 private s_tokenCounter;
     uint256 public constant MAX_NFT_SUPPLY = 20;
+    address private immutable i_auctionContract;
+    uint256 private s_tokenCounter;
     uint256 private s_basicMintPrice;
     string private s_baseURI;
-    address private immutable i_owner;
-    address private immutable i_auctionContract;
 
     /* Events */
     event YoyoNft__WithdrawCompleted(uint256 amount, uint256 timestamp);
     event YoyoNft__DepositCompleted(uint256 amount, uint256 timestamp);
     event YoyoNft__MintPriceUpdated(uint256 newBasicPrice, uint256 timestamp);
     event YoyoNft__NftMinted(address indexed owner, uint256 indexed tokenId, string tokenURI, uint256 timestamp);
-    event YoyoNft__NftTransferred(address indexed from, address indexed to, uint256 indexed tokenId, uint256 timestamp);
 
     /* Modifiers */
-    modifier yoyoOnlyOwner() {
-        if (msg.sender != i_owner) {
-            revert YoyoNft__NotOwner();
-        }
-        _;
-    }
 
-    modifier yoyoOnlyAuctionContract() {
+    modifier onlyAuction() {
         if (msg.sender != i_auctionContract) {
             revert YoyoNft__NotAuctionContract();
         }
@@ -76,14 +58,13 @@ contract YoyoNft is ERC721 {
      * @notice The ERC721 token is inizialized with the name "Yoyo Collection" and with the symbol "YOYO"
      * @dev The owner of the contract is set to be the sender of the deployment transaction
      */
-    constructor(ConstructorParams memory _params) ERC721('Yoyo Collection', 'YOYO') {
+    constructor(ConstructorParams memory _params) ERC721('Yoyo Collection', 'YOYO') Ownable(msg.sender) {
         if (bytes(_params.baseURI).length == 0) {
             revert YoyoNft__ValueCantBeZero();
         }
         if (_params.auctionContract == address(0)) {
             revert YoyoNft__InvalidAddress();
         }
-        i_owner = msg.sender;
         s_baseURI = _params.baseURI;
         s_tokenCounter = 0;
         i_auctionContract = _params.auctionContract;
@@ -106,12 +87,12 @@ contract YoyoNft is ERC721 {
     /**
      *@notice allows only the owner of the contract to widthraw founds from contract
      */
-    function withdraw() public yoyoOnlyOwner {
+    function withdraw() public onlyOwner {
         uint256 contractBalance = address(this).balance;
         if (contractBalance == 0) {
             revert YoyoNft__ContractBalanceIsZero();
         }
-        (bool success, ) = payable(i_owner).call{ value: contractBalance }('');
+        (bool success, ) = payable(owner()).call{ value: contractBalance }('');
         if (success) {
             emit YoyoNft__WithdrawCompleted(contractBalance, block.timestamp);
         } else {
@@ -122,7 +103,7 @@ contract YoyoNft is ERC721 {
     /**
      *@notice allows only the owner of the contract to deposit founds
      */
-    function deposit() public payable yoyoOnlyOwner {
+    function deposit() public payable onlyOwner {
         if (msg.value == 0) {
             revert YoyoNft__ValueCantBeZero();
         }
@@ -136,7 +117,7 @@ contract YoyoNft is ERC721 {
      *@dev result in the minting process failing.
      *@param _newBasicPrice  is the new minting price
      */
-    function setBasicMintPrice(uint256 _newBasicPrice) public yoyoOnlyAuctionContract {
+    function setBasicMintPrice(uint256 _newBasicPrice) public onlyAuction {
         if (_newBasicPrice == 0) {
             revert YoyoNft__ValueCantBeZero();
         }
@@ -153,7 +134,7 @@ contract YoyoNft is ERC721 {
      *@param _to it is the recipient to whom the NFT will be sent immediately after it is minted.
      *@param _tokenId it is the unique Id of the token just minted
      */
-    function mintNft(address _to, uint256 _tokenId) external payable yoyoOnlyAuctionContract {
+    function mintNft(address _to, uint256 _tokenId) external payable onlyAuction {
         if (s_tokenCounter == MAX_NFT_SUPPLY) {
             revert YoyoNft__NftMaxSupplyReached();
         }
@@ -188,11 +169,9 @@ contract YoyoNft is ERC721 {
             revert YoyoNft__InvalidAddress();
         }
         if (ownerOf(_tokenId) != msg.sender) {
-            revert YoyoNft__NotOwner();
+            revert YoyoNft__NotNftOwner();
         }
         _safeTransfer(msg.sender, _to, _tokenId);
-
-        emit YoyoNft__NftTransferred(msg.sender, _to, _tokenId, block.timestamp);
     }
 
     /**
@@ -224,10 +203,6 @@ contract YoyoNft is ERC721 {
 
     function getAccountBalance(address _account) public view returns (uint256) {
         return balanceOf(_account);
-    }
-
-    function getContractOwner() public view returns (address) {
-        return i_owner;
     }
 
     function getAuctionContract() public view returns (address) {

@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IYoyoNft } from './IYoyoNft.sol';
+import { IYoyoNft } from '../YoyoNft/IYoyoNft.sol';
 import { ReentrancyGuard } from '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol';
+import {
+    IAutomationRegistryConsumer
+} from '@chainlink/contracts/src/v0.8/automation/interfaces/IAutomationRegistryConsumer.sol';
 import { YoyoDutchAuctionLibrary } from './YoyoDutchAuctionLibrary.sol';
+import './YoyoAuctionEvents.sol';
+import './YoyoAuctionErrors.sol';
+import { AuctionStruct, AuctionState, AuctionType } from '../YoyoTypes.sol';
 
 /**
  * @title Nft Auction System
@@ -13,112 +20,79 @@ import { YoyoDutchAuctionLibrary } from './YoyoDutchAuctionLibrary.sol';
  * @dev Implements automated auction lifecycle with reentrancy protection and Chainlink upkeep integration
  */
 
-contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
+contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface {
     /**
      * @dev Interface that allows contract to acces the NFT contract
      */
     IYoyoNft private yoyoNftContract;
 
+    /**
+     * @dev Interface for the chainlink automation registry
+     */
+    IAutomationRegistryConsumer public immutable i_registry;
+
     /* Errors */
-    error YoyoAuction__NotOwner();
-    error YoyoAuction__InvalidAddress();
-    error YoyoAuction__ThisContractDoesntAcceptDeposit();
-    error YoyoAuction__CallValidFunctionToInteractWithContract();
-    error YoyoAuction__InvalidTokenId();
-    error YoyoAuction__InvalidValue();
-    error YoyoAuction__InvalidAuctionType();
-    error YoyoAuction__AuctionNotOpen();
-    error YoyoAuction__BidTooLow();
-    error YoyoAuction__AuctionDoesNotExist();
-    error YoyoAuction__PreviousBidderRefundFailed();
-    error YoyoAuction__NoTokenToMint();
-    error YoyoAuction__CannotChangeMintPriceDuringOpenAuction();
-    error YoyoAuction__AuctionStillOpen();
-    error YoyoAuction__UpkeepNotNeeded();
-    error YoyoAuction__NftContractNotSet();
-    error YoyoAuction__NftContractAlreadySet();
+    /**
+     * @dev Errors are declared in YoyoAuctionErrors.sol
+     */
 
     /* Type Declaration */
-
-    /** 
-     @dev notStarted: prevents the default value from being set to `open`.
-     @dev open: auction is active and bids can be placed.
-     @dev closed: auction has ended, no more bids can be placed, but the winner has not yet received the reward.
-     @dev finalized: after the auction is closed and the NFT is minted and delivered to the winner, the auction is considered finalized.
-     */
-    enum AuctionState {
-        NOT_STARTED,
-        OPEN,
-        CLOSED,
-        FINALIZED
-    }
-
-    enum AuctionType {
-        ENGLISH,
-        DUTCH
-    }
-
     /**
-     * @dev Core data structure that holds all information about a single auction
-     * @param auctionId Unique identifier for the auction
-     * @param tokenId ID of the NFT being auctioned
-     * @param nftOwner Address that will receive the NFT (set after finalization)
-     * @param state Current state of the auction (NOT_STARTED, OPEN, CLOSED, FINALIZED)
-     * @param auctionType Type of auction (ENGLISH or DUTCH)
-     * @param startPrice Initial price when the auction begins
-     * @param startTime Timestamp when the auction started
-     * @param endTime Timestamp when the auction is scheduled to end
-     * @param higherBidder Address of the current highest bidder
-     * @param higherBid Amount of the current highest bid
-     * @param minimumBidChangeAmount Minimum increment required for new bids (English) or drop amount (Dutch)
+     * @dev Enums and Structs are declared in YoyoTypes.sol
      */
-    struct AuctionStruct {
-        uint256 auctionId;
-        uint256 tokenId;
-        address nftOwner;
-        AuctionState state;
-        AuctionType auctionType;
-        uint256 startPrice;
-        uint256 startTime;
-        uint256 endTime;
-        address higherBidder;
-        uint256 higherBid;
-        uint256 minimumBidChangeAmount;
-    }
 
     /* State variables */
+
     /**
-     * @dev Contract owner address, set at deployment and immutable
+     * @dev Percentage of basic mint price used for minimum bid increment (in per-mille)
+     * @dev 25 per-mille = 2.5% (25/1000 = 0.025)
+     * @dev Used to calculate s_minimumBidChangeAmount for English auctions
      */
-    address private immutable i_owner;
-    
+    uint256 private constant MINIMUM_BID_INCREMENT_PERCENTAGE = 25;
+
+    /**
+     * @dev Denominator for percentage calculations (represents 100%)
+     * @dev Using 1000 instead of 100 provides better precision for decimal percentages
+     */
+    uint256 private constant PERCENTAGE_DENOMINATOR = 1000;
+
     /**
      * @dev Minimum amount required to increase a bid in English auctions
      * @dev Set to 2.5% of the basic mint price when NFT contract is initialized
      */
     uint256 private s_minimumBidChangeAmount;
-    
+
     /**
      * @dev Duration of each auction in seconds (default: 24 hours)
      */
-    uint256 private s_auctionDurationInHours = 24 hours;
-    
+    uint256 private constant AUCTION_DURATION = 24 hours;
+
+    /**
+     * @dev Time window during which only Chainlink Automation can close/restart auctions
+     * @dev After this period elapses, any user can call manual close functions as a fallback
+     * @dev Default: 6 hours (21600 seconds)
+     * @dev Provides resilience against Chainlink Automation downtime or failures
+     */
+    uint256 private constant GRACE_PERIOD = 6 hours;
+
     /**
      * @dev Counter that tracks the total number of auctions created
      * @dev Also serves as the ID for the current/latest auction
      */
     uint256 private s_auctionCounter;
-    
+
     /**
      * @dev Number of price drop intervals for Dutch auctions (default: 48)
      * @dev Price drops occur at regular intervals throughout the auction duration
      */
+    // @audit-issue : vedere se si può diminuire la uint e se è modificabile o meno
     uint256 private s_dutchAuctionDropNumberOfIntervals = 48;
-    
+
     /**
      * @dev Multiplier used to calculate Dutch auction starting price
      * @dev Start price = basic mint price * multiplier (default: 13x)
      */
+    // @audit-issue : vedere se si può diminuire la uint e se è modificabile o meno
     uint256 private s_dutchAuctionStartPriceMultiplier = 13;
 
     /** 
@@ -126,60 +100,33 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
     */
     mapping(uint256 => AuctionStruct) internal s_auctionsFromAuctionId;
 
-    /* Events */
-    event YoyoAuction__BidPlaced(
-        uint256 indexed auctionId,
-        address indexed bidder,
-        uint256 bidAmount,
-        AuctionType auctionType
-    );
-    event YoyoAuction__BidderRefunded(address prevBidderAddress, uint256 bidAmount, uint256 indexed auctionId);
-    event YoyoAuction__AuctionOpened(
-        uint256 indexed auctionId,
-        uint256 indexed tokenId,
-        AuctionType auctionType,
-        uint256 startPrice,
-        uint256 startTime,
-        uint256 endTime,
-        uint256 minimumBidIncrement
-    );
-    event YoyoAuction__AuctionRestarted(
-        uint256 indexed auctionId,
-        uint256 indexed tokenId,
-        uint256 newStartTime,
-        uint256 newStartPrice,
-        uint256 newEndTime,
-        uint256 minimumBidIncrement
-    );
-    event YoyoAuction__AuctionClosed(
-        uint256 indexed auctionId,
-        uint256 indexed tokenId,
-        uint256 startPrice,
-        uint256 startTime,
-        uint256 endTime,
-        address winner,
-        uint256 indexed higherBid
-    );
-    event YoyoAuction__AuctionFinalized(uint256 indexed auctionId, uint256 indexed tokenId, address indexed nftOwner);
-    event YoyoAuction__MintFailedLog(uint256 indexed auctionId, uint256 tokenId, address bidder, string reason);
+    /** 
+    @dev Mapping used to track the unsuccessful token mint to the winners.
+    */
+    //      tokenId --> winnerAddress --> mintPrice
+    mapping(uint256 => mapping(address => uint256)) internal s_unmintedTokensFromAuctionIdAndWinner;
 
-    /* Modifiers */
-    modifier onlyOwner() {
-        if (msg.sender != i_owner) {
-            revert YoyoAuction__NotOwner();
-        }
-        _;
-    }
+    /**
+     * @dev Mapping used to track unsuccessful refunds to previous bidders.
+     */
+    mapping(address => uint256) internal s_failedRefundsToPreviousBidders;
+
+    /* Events */
+    /**
+     * @dev Events are declared in YoyoAuctionEvents.sol
+     */
 
     /* Constructor */
     /**
      * @dev Contract constructor that sets the deployer as the owner
      * @dev Initializes auction counter to 0
      * @dev The NFT contract address must be set separately after deployment
+     * @dev The Chainlink Automation registry address must be set in the constructor
+     * @param _registry Address of the Chainlink Automation registry
      */
-    constructor() {
-        i_owner = msg.sender;
+    constructor(address _registry) Ownable(msg.sender) {
         s_auctionCounter = 0;
+        i_registry = IAutomationRegistryConsumer(_registry);
     }
 
     /*Functions */
@@ -191,11 +138,11 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @param _yoyoNftAddress the address of the nft collection smart contract
      */
     function setNftContract(address _yoyoNftAddress) external onlyOwner {
-        if (yoyoNftContract != IYoyoNft(address(0))) {
+        if (address(yoyoNftContract) != address(0)) {
             revert YoyoAuction__NftContractAlreadySet();
         }
         yoyoNftContract = IYoyoNft(_yoyoNftAddress);
-        s_minimumBidChangeAmount = yoyoNftContract.getBasicMintPrice() / 40; // 2,5% of the basic mint price
+        s_minimumBidChangeAmount = (yoyoNftContract.getBasicMintPrice() * MINIMUM_BID_INCREMENT_PERCENTAGE) / PERCENTAGE_DENOMINATOR; // 2,5% of the basic mint price
     }
 
     /**
@@ -231,9 +178,10 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
         bool auctionOpen = auction.state == AuctionState.OPEN;
         bool auctionEnded = block.timestamp >= auction.endTime;
         uint256 auctionId = auction.auctionId;
+        uint256 auctionEndTime = auction.endTime;
 
         upkeepNeeded = (auctionEnded && auctionOpen);
-        performData = abi.encode(auctionId);
+        performData = abi.encode(auctionId, auctionEndTime);
         return (upkeepNeeded, performData);
     }
 
@@ -243,23 +191,36 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @notice higher bidder, it means a bid has been placed and therefore
      * @notice the auction will be closed at the deadline. If instead there
      * @notice is no higher bidder, the auction will be restarted.
-     * @dev Decodes the auctionId from performData.
+     * @dev Decodes the auctionId and auctionEndTime from performData.
      * @dev Reverts if `checkUpkeep` returns `upkeepNeeded = false`.
+     * @dev Only Chainlink Automation can call this function within the grace period.
+     * @dev To avoid DOS if Chainlink goes down, after the grace period anyone can call this function.
      * @param performData Encoded data containing the auctionId to process.
      */
     function performUpkeep(bytes calldata performData) external override {
+        (uint256 auctionId, uint256 auctionEndTime) = abi.decode(performData, (uint256, uint256));
+
+        bool withinGracePeriod = block.timestamp < (auctionEndTime + GRACE_PERIOD);
+
+        if (withinGracePeriod) {
+            if (msg.sender != address(i_registry)) {
+                revert YoyoAuction__OnlyChainlinkAutomation();
+            }
+        } else {
+            emit YoyoAuction__ManualUpkeepExecuted(auctionId, msg.sender, block.timestamp);
+        }
+
         (bool upkeepNeeded, ) = checkUpkeep(performData);
         if (!upkeepNeeded) {
             revert YoyoAuction__UpkeepNotNeeded();
         }
-        uint256 auctionId = abi.decode(performData, (uint256));
 
         AuctionStruct memory auction = s_auctionsFromAuctionId[auctionId];
 
         if (auction.higherBidder != address(0)) {
-            closeAuction(auctionId);
+            _closeAuction(auctionId);
         } else {
-            restartAuction(auctionId);
+            _restartAuction(auctionId);
         }
     }
 
@@ -287,15 +248,19 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
             revert YoyoAuction__AuctionStillOpen();
         }
 
-        uint256 newAuctionId = ++s_auctionCounter;
-        uint256 endTime = block.timestamp + (s_auctionDurationInHours * 1 hours);
+        uint256 newAuctionId;
+        uint256 endTime;
+        unchecked {
+            newAuctionId = ++s_auctionCounter;
+            endTime = block.timestamp + (AUCTION_DURATION);
+        }
 
         AuctionStruct memory newAuction;
 
         if (_auctionType == AuctionType.ENGLISH) {
-            newAuction = openNewEnglishAuction(_tokenId, newAuctionId, endTime);
+            newAuction = _openNewEnglishAuction(_tokenId, newAuctionId, endTime);
         } else if (_auctionType == AuctionType.DUTCH) {
-            newAuction = openNewDutchAuction(_tokenId, newAuctionId, endTime);
+            newAuction = _openNewDutchAuction(_tokenId, newAuctionId, endTime);
         } else {
             revert YoyoAuction__InvalidAuctionType();
         }
@@ -321,7 +286,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @param _endTime Timestamp when the auction will end
      * @return AuctionStruct memory structure containing all auction parameters
      */
-    function openNewEnglishAuction(
+    function _openNewEnglishAuction(
         uint256 _tokenId,
         uint256 _auctionId,
         uint256 _endTime
@@ -353,7 +318,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @param _endTime Timestamp when the auction will end
      * @return AuctionStruct memory structure containing all auction parameters
      */
-    function openNewDutchAuction(
+    function _openNewDutchAuction(
         uint256 _tokenId,
         uint256 _auctionId,
         uint256 _endTime
@@ -382,7 +347,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
         return newAuction;
     }
 
-        /**
+    /**
      * @notice Allows users to place bids on active auctions
      * @dev Uses reentrancy guard to prevent reentrancy attacks
      * @dev Validates auction existence and state before processing bid
@@ -398,9 +363,9 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
             revert YoyoAuction__AuctionNotOpen();
         }
         if (auction.auctionType == AuctionType.DUTCH) {
-            placeBidOnDutchAuction(_auctionId, msg.sender);
+            _placeBidOnDutchAuction(_auctionId, msg.sender);
         } else if (auction.auctionType == AuctionType.ENGLISH) {
-            placeBidOnEnglishAuction(_auctionId, msg.sender);
+            _placeBidOnEnglishAuction(_auctionId, msg.sender);
         }
 
         // Emit an event for the new bid
@@ -414,7 +379,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @param _auctionId ID of the Dutch auction
      * @param _sender Address of the bidder
      */
-    function placeBidOnDutchAuction(uint256 _auctionId, address _sender) private {
+    function _placeBidOnDutchAuction(uint256 _auctionId, address _sender) private {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
         uint256 currentPrice = getCurrentAuctionPrice();
@@ -426,7 +391,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
         auction.higherBidder = _sender;
         auction.higherBid = msg.value;
 
-        closeAuction(auction.auctionId);
+        _closeAuction(auction.auctionId);
     }
 
     /**
@@ -436,7 +401,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @param _auctionId ID of the English auction
      * @param _sender Address of the bidder
      */
-    function placeBidOnEnglishAuction(uint256 _auctionId, address _sender) private {
+    function _placeBidOnEnglishAuction(uint256 _auctionId, address _sender) private {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
         if (msg.value < auction.higherBid + auction.minimumBidChangeAmount) {
@@ -444,7 +409,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
         }
         //refund previous bidder
         if (auction.higherBidder != address(0)) {
-            refundPreviousBidder(auction.higherBid, auction.higherBidder, auction.auctionId);
+            _refundPreviousBidder(auction.higherBid, auction.higherBidder);
         }
 
         // Update the auction with the new bid
@@ -457,25 +422,39 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @dev Uses low-level call to send ETH and handles failure appropriately
      * @param _amount Amount to refund
      * @param _previousBidder Address to receive the refund
-     * @param _auctionId Auction ID for event logging
      */
-    function refundPreviousBidder(uint256 _amount, address _previousBidder, uint256 _auctionId) private {
+    function _refundPreviousBidder(uint256 _amount, address _previousBidder) private nonReentrant {
         if (_previousBidder != address(0) && _amount > 0) {
             (bool success, ) = _previousBidder.call{ value: _amount }('');
             if (!success) {
-                revert YoyoAuction__PreviousBidderRefundFailed();
-            } else emit YoyoAuction__BidderRefunded(_previousBidder, _amount, _auctionId);
+                s_failedRefundsToPreviousBidders[_previousBidder] += _amount;
+                emit YoyoAuction__BidderRefundFailed(_previousBidder, _amount);
+            } else emit YoyoAuction__BidderRefunded(_previousBidder, _amount);
         }
+    }
+
+    function claimFailedRefunds() public nonReentrant {
+        if (s_failedRefundsToPreviousBidders[msg.sender] == 0) {
+            revert YoyoAuction__NoFailedRefundsToClaim();
+        }
+        uint256 amountToRefund = s_failedRefundsToPreviousBidders[msg.sender];
+        s_failedRefundsToPreviousBidders[msg.sender] = 0;
+        (bool success, ) = msg.sender.call{ value: amountToRefund }('');
+        if (!success) {
+            revert YoyoAuction__PreviousBidderRefundFailed();
+        }
+        emit YoyoAuction__BidderRefunded(msg.sender, amountToRefund);
     }
 
     /**
      * @notice Closes an auction and attempts to automatically mint the NFT to the winner
      * @dev Called automatically by Chainlink Keepers when an auction ends with new bids
      * @dev Changes auction state to CLOSED and attempts NFT minting
-     * @dev If minting succeeds, finalizes the auction; if it fails, logs the error
+     * @dev If minting to the winner succeeds, finalizes the auction; if it fails, logs the error and mint to this contract
+     * @dev Force to mint to this contract if minting to winner fails to allow open new auction and avoid confilct with mintPrice if it changes
      * @param _auctionId ID of the auction to close
      */
-    function closeAuction(uint256 _auctionId) private {
+    function _closeAuction(uint256 _auctionId) private nonReentrant {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
         if (auction.state == AuctionState.OPEN) {
             auction.state = AuctionState.CLOSED;
@@ -499,9 +478,24 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
 
             emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
         } catch Error(string memory reason) {
+            yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId);
+            auction.state = AuctionState.CLOSED;
+            auction.nftOwner = address(this);
+            s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
+
             emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
-        } catch {
-            emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, 'unknown error');
+        } catch (bytes memory) {
+            yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId);
+            auction.state = AuctionState.CLOSED;
+            auction.nftOwner = address(this);
+            s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
+
+            emit YoyoAuction__MintFailedLog(
+                auction.auctionId,
+                auction.tokenId,
+                auction.higherBidder,
+                'Low-level mint failure'
+            );
         }
     }
 
@@ -511,7 +505,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @dev Called automatically by Chainlink Keepers when an auction ends without bids
      * @param _auctionId ID of the auction to restart
      */
-    function restartAuction(uint256 _auctionId) private {
+    function _restartAuction(uint256 _auctionId) private {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
         uint256 startPrice;
@@ -524,7 +518,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
                 1 // Using 1 interval for restart
             );
         }
-        uint256 endTime = block.timestamp + (s_auctionDurationInHours * 1 hours);
+        uint256 endTime = block.timestamp + (AUCTION_DURATION);
 
         auction.startTime = block.timestamp;
         auction.endTime = endTime;
@@ -543,39 +537,33 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
     }
 
     /**
-     * @notice Manual function to mint NFT for auction winner when automatic minting fails
-     * @dev Can only be called by the contract owner
-     * @dev Used as a fallback when the automatic minting in closeAuction() fails
+     * @notice Manual function to mint NFT for auction winner when mint after auction close fails
+     * @dev Used as a fallback when the automatic minting in _closeAuction() fails
      * @dev Validates that the auction is in CLOSED state and has a winner
-     * @dev Minting process mirrors closeAuction() behavior:
-     *      - Forwards the winner's bid amount as value to mintNft()
-     *      - Uses try-catch to handle potential failures gracefully
-     *      - On success: sets state to FINALIZED and updates nftOwner
-     *      - On failure: emits MintFailedLog with error details for debugging
      * @dev Critical for maintaining auction integrity when automatic processes fail
-     * @dev Should be called promptly after identifying failed automatic minting
      * @param _auctionId ID of the auction to manually finalize
      */
-    function manualMintForWinner(uint256 _auctionId) public onlyOwner {
+    function claimNftForWinner(uint256 _auctionId) public {
         if (address(yoyoNftContract) == address(0)) {
             revert YoyoAuction__NftContractNotSet();
         }
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
-        if (auction.nftOwner != address(0) || auction.state != AuctionState.CLOSED) {
-            revert YoyoAuction__NoTokenToMint();
+        if (
+            auction.higherBidder != msg.sender &&
+            auction.state != AuctionState.CLOSED &&
+            auction.nftOwner != address(this)
+        ) {
+            revert YoyoAuction__NoTokenToClaim();
         }
 
-        try yoyoNftContract.mintNft{ value: auction.higherBid }(auction.higherBidder, auction.tokenId) {
-            auction.state = AuctionState.FINALIZED;
-            auction.nftOwner = auction.higherBidder;
+        auction.state = AuctionState.FINALIZED;
+        auction.nftOwner = auction.higherBidder;
+        delete s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder];
 
-            emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
-        } catch Error(string memory reason) {
-            emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
-        } catch {
-            emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, 'unknown error');
-        }
+        yoyoNftContract.transferNft(msg.sender, auction.tokenId);
+
+        emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
     }
 
     /**
@@ -587,6 +575,7 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      *      the basic mint price, which would make minting impossible
      * @param _newPrice New basic mint price in wei
      */
+    // @audit-issue : ci sono sicuramente bug nella logica di questa funzione da sistemare
     function changeMintPrice(uint256 _newPrice) public onlyOwner {
         if (address(yoyoNftContract) == address(0)) {
             revert YoyoAuction__NftContractNotSet();
@@ -599,13 +588,10 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
             revert YoyoAuction__CannotChangeMintPriceDuringOpenAuction();
         }
         yoyoNftContract.setBasicMintPrice(_newPrice);
-        s_minimumBidChangeAmount = _newPrice / 40; // 2,5% of the basic mint price
+        s_minimumBidChangeAmount = (_newPrice * MINIMUM_BID_INCREMENT_PERCENTAGE) / PERCENTAGE_DENOMINATOR; // 2,5% of the basic mint price
     }
 
     //Getter Functions
-    function getContractOwner() external view returns (address) {
-        return i_owner;
-    }
 
     /**
      * @notice Returns the address of the NFT contract managed by this auction
@@ -633,8 +619,8 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
      * @dev Used in auction creation functions (`openNewAuction`, `restartAuction`) to calculate `endTime`.
      * @return uint256 Auction duration in hours
      */
-    function getAuctionDurationInHours() external view returns (uint256) {
-        return s_auctionDurationInHours;
+    function getAuctionDuration() external pure returns (uint256) {
+        return AUCTION_DURATION / 1 hours;
     }
 
     /**
@@ -711,5 +697,27 @@ contract YoyoAuction is ReentrancyGuard, AutomationCompatibleInterface {
             );
         }
         return currentPrice;
+    }
+
+    /**
+     * @notice Returns the amount of failed refunds for a specific bidder
+     * @dev Used to track and allow bidders to claim any failed refunds
+     * @param _bidder Address of the bidder to check
+     * @return uint256 Amount of failed refunds in wei
+     */
+    function getFailedRefundAmount(address _bidder) public view returns (uint256) {
+        return s_failedRefundsToPreviousBidders[_bidder];
+    }
+
+    /**
+     * @notice Checks if a winner is eligible to claim their unminted NFT from a specific auction
+     * @dev Used to verify if the caller has an unminted token from the specified auction
+     * @param _tokenId ID of the NFT token to check eligibility for
+     * @return bool True if the caller is eligible to claim the token, false otherwise
+     */
+    function getElegibiltyToClaimToken(uint256 _tokenId) public view returns (bool) {
+        if (s_unmintedTokensFromAuctionIdAndWinner[_tokenId][msg.sender] > 0) {
+            return true;
+        } else return false;
     }
 }
