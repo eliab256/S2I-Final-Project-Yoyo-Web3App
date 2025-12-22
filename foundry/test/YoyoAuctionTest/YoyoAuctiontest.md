@@ -45,42 +45,7 @@ contract YoyoAuctionTest is Test {
         vm.deal(USER_NO_BALANCE, STARTING_BALANCE_USER_NO_BALANCE);
     }
 
-    function testIfDeployAuctionContractAssignOwnerAndAuctionCounter() public {
-        assertEq(yoyoAuction.owner(), deployer);
-        assertEq(yoyoAuction.getAuctionCounter(), 0);
-    }
-
-    function testIfDeployNftContractAssignOwnerAndAuctionContract() public {
-        assertEq(yoyoNft.owner(), deployer);
-        assertEq(yoyoAuction.owner(), deployer);
-        assertEq(yoyoNft.getAuctionContract(), address(yoyoAuction));
-        assertEq(yoyoAuction.getNftContract(), address(yoyoNft));
-    }
-
-    function testIfSetNftContractRevertsIfNotOwner() public {
-        vm.startPrank(USER_1);
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, USER_1));
-        yoyoAuction.setNftContract(address(yoyoNft));
-        vm.stopPrank();
-    }
-
-    function testIfSetNftContractRevertsIfAlreadySet() public {
-        vm.startPrank(deployer);
-        vm.expectRevert(YoyoAuction__NftContractAlreadySet.selector);
-        yoyoAuction.setNftContract(address(yoyoNft));
-        vm.stopPrank();
-    }
-
-    //test fallback and receive functions
-    function testIfReceiveFunctionReverts() public {
-        vm.expectRevert(YoyoAuction__ThisContractDoesntAcceptDeposit.selector);
-        address(yoyoAuction).call{ value: 1 ether }('');
-    }
-
-    function testIfFallbackFunctionReverts() public {
-        vm.expectRevert(YoyoAuction__CallValidFunctionToInteractWithContract.selector);
-        address(yoyoAuction).call{ value: 1 ether }('metadata');
-    }
+    
 
     //Test checkUpkeep
     function testPerformeUpkeepCanOnlyRunIfCheckUpkeepReturnsTrue() public {
@@ -809,7 +774,7 @@ contract YoyoAuctionTest is Test {
         yoyoAuction.openNewAuction(tokenId, auctionType);
 
         vm.startPrank(deployer);
-        vm.expectRevert(YoyoAuction__NoTokenToMint.selector);
+        vm.expectRevert(YoyoAuction__InvalidTokenId.selector);
         yoyoAuction.manualMintForWinner(1);
         vm.stopPrank();
     }
@@ -828,7 +793,7 @@ contract YoyoAuctionTest is Test {
         yoyoAuction.placeBidOnAuction{ value: bidAmount }(1);
 
         vm.startPrank(deployer);
-        vm.expectRevert(YoyoAuction__NoTokenToMint.selector);
+        vm.expectRevert(YoyoAuction__InvalidTokenId.selector);
         yoyoAuction.manualMintForWinner(1);
         vm.stopPrank();
     }

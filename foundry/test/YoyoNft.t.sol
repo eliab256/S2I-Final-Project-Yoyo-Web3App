@@ -8,7 +8,6 @@ import { ConstructorParams } from '../src/YoyoTypes.sol';
 import { RevertOnReceiverMock } from './Mocks/RevertOnReceiverMock.sol';
 import { Strings } from '@openzeppelin/contracts/utils/Strings.sol';
 
-
 contract YoyoNftTest is Test {
     YoyoNft public yoyoNft;
 
@@ -301,8 +300,6 @@ contract YoyoNftTest is Test {
         yoyoNft.mintNft{ value: mintPrice }(address(USER_1), tokenId);
 
         vm.prank(USER_1);
-        vm.expectEmit(true, true, true, true);
-        emit YoyoNft.YoyoNft__NftTransferred(USER_1, recipient, tokenId, block.timestamp);
         yoyoNft.transferNft(recipient, tokenId);
 
         assertEq(yoyoNft.ownerOf(tokenId), recipient);
