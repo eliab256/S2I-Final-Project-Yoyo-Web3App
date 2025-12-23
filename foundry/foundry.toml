@@ -7,6 +7,13 @@ remappings = [
     "@chainlink/contracts=lib/chainlink/contracts",
 ]
 
+# Lint settings - show only high severity errors and exclude specific warnings
+# To re-enable all warnings, comment out or remove this section
+# Or use: severity = ["high", "med", "low", "info", "gas"]
+[profile.default.lint]
+severity = ["high"]
+exclude_lints = ["mixed-case-variable", "unchecked-call"]
+
 # Etherscan settings 
 [etherscan]
 sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://api-sepolia.etherscan.io/api" }

@@ -53,7 +53,7 @@ library YoyoDutchAuctionLibrary {
         if (dropDuration == 0) {
             revert YoyoDutchAuctionLibrary__DropDurationCannotBeZero();
         }
-        return reservePrice + ((auctionDuration / dropDuration) * dropAmount);
+        return reservePrice + ((auctionDuration * dropAmount) / dropDuration);
     }
 
     /// @notice Calculates the number of price drop intervals from price difference and drop amount
@@ -149,10 +149,7 @@ library YoyoDutchAuctionLibrary {
         uint256 startPrice
     ) internal pure returns (uint256) {
         uint256 dropAmount = (startPrice - reservePrice) /
-            numberOfIntervalsFromDropDurationCalculator(
-                auctionDuration,
-                dropDuration
-            );
+            numberOfIntervalsFromDropDurationCalculator(auctionDuration, dropDuration);
         return dropAmount;
     }
 
@@ -234,9 +231,7 @@ library YoyoDutchAuctionLibrary {
         uint256 intervalsElapsed = timeElapsed / dropIntervalDuration;
         uint256 totalDrop = intervalsElapsed * dropAmount;
 
-        uint256 currentPrice = startPrice > totalDrop
-            ? startPrice - totalDrop
-            : reservePrice;
+        uint256 currentPrice = startPrice > totalDrop ? startPrice - totalDrop : reservePrice;
 
         return currentPrice >= reservePrice ? currentPrice : reservePrice;
     }

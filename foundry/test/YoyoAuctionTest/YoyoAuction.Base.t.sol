@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { Test } from 'forge-std/Test.sol';
+import { Test, console2, console } from 'forge-std/Test.sol';
 import { DeployYoyoAuctionAndYoyoNft } from '../../script/DeployYoyoAuctionAndYoyoNft.s.sol';
 import { YoyoAuction } from '../../src/YoyoAuction/YoyoAuction.sol';
 import { YoyoNft } from '../../src/YoyoNft/YoyoNft.sol';
+import { AuctionType, AuctionState } from '../../src/YoyoTypes.sol';
 
 contract YoyoAuctionBaseTest is Test {
     YoyoAuction public yoyoAuction;
@@ -23,9 +24,18 @@ contract YoyoAuctionBaseTest is Test {
     uint256 public constant STARTING_BALANCE_USER_2 = 10 ether;
     uint256 public constant STARTING_BALANCE_USER_NO_BALANCE = 0 ether;
 
+    // Helper Constants
+    uint256 constant VALID_TOKEN_ID = 5;
+    uint256 public invalidTokenId; // Inizializzato nel setUp()
+    AuctionType constant ENGLISH_TYPE = AuctionType.ENGLISH;
+    AuctionType constant DUTCH_TYPE = AuctionType.DUTCH;
+
     function setUp() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
         (yoyoAuction, yoyoNft, deployer, ) = deployerScript.run();
+
+        // Initialize invalidTokenId after yoyoNft is set
+        invalidTokenId = yoyoNft.MAX_NFT_SUPPLY() + 10;
 
         //Set up balances for each address
         vm.deal(deployer, STARTING_BALANCE_DEPLOYER);
@@ -34,5 +44,26 @@ contract YoyoAuctionBaseTest is Test {
         vm.deal(USER_1, STARTING_BALANCE_USER_1);
         vm.deal(USER_2, STARTING_BALANCE_USER_2);
         vm.deal(USER_NO_BALANCE, STARTING_BALANCE_USER_NO_BALANCE);
+    }
+
+    // Helper Functions
+    function openEnglishAuctionHelper() internal returns (uint256) {
+        vm.startPrank(deployer);
+        uint256 auctionid = yoyoAuction.openNewAuction(VALID_TOKEN_ID, ENGLISH_TYPE);
+        vm.stopPrank();
+        return auctionid;
+    }
+
+    function openDutchAuctionHelper() internal returns (uint256) {
+        vm.startPrank(deployer);
+        uint256 auctionid = yoyoAuction.openNewAuction(VALID_TOKEN_ID, DUTCH_TYPE);
+        vm.stopPrank();
+        return auctionid;
+    }
+
+    function placeBidHelper(uint256 _auctionId, address _bidder, uint256 _bidAmount) internal {
+        vm.startPrank(_bidder);
+        yoyoAuction.placeBidOnAuction{ value: _bidAmount }(_auctionId);
+        vm.stopPrank();
     }
 }

@@ -251,7 +251,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @param _tokenId The ID of the NFT to be auctioned.
      * @param _auctionType The type of auction (ENGLISH or DUTCH).
      */
-    function openNewAuction(uint256 _tokenId, AuctionType _auctionType) public onlyOwner nftContractSet {
+    function openNewAuction(uint256 _tokenId, AuctionType _auctionType) public onlyOwner nftContractSet returns(uint256 auctionId){
         if (yoyoNftContract.getIfTokenIdIsMintable(_tokenId) == false) {
             revert YoyoAuction__InvalidTokenId();
         }
@@ -289,6 +289,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
             newAuction.endTime,
             newAuction.minimumBidChangeAmount
         );
+
+        return newAuctionId;
     }
 
     /**
@@ -486,7 +488,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @dev Force to mint to this contract if minting to winner fails to allow open new auction and avoid confilct with mintPrice if it changes
      * @param _auctionId ID of the auction to close
      */
-    function _closeAuction(uint256 _auctionId) private nonReentrant {
+    function _closeAuction(uint256 _auctionId) private {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
         if (auction.state == AuctionState.OPEN) {
             auction.state = AuctionState.CLOSED;
@@ -692,14 +694,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         return s_auctionCounter;
     }
 
-    /**
-     * @notice Returns the duration of each auction in hours
-     * @dev Default is 24 hours unless modified.
-     * @dev Used in auction creation functions (`openNewAuction`, `restartAuction`) to calculate `endTime`.
-     * @return uint256 Auction duration in hours
-     */
     function getAuctionDuration() external pure returns (uint256) {
-        return AUCTION_DURATION / 1 hours;
+        return AUCTION_DURATION;
     }
 
     /**
@@ -728,7 +724,11 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
 
     function getPercentageDenominator() external pure returns (uint256) {
         return PERCENTAGE_DENOMINATOR;
-    }   
+    }
+
+    function getDutchAuctionNumberOfIntervals() external pure returns (uint256) {
+        return DUTCH_AUCTION_DROP_NUMBER_OF_INTERVALS;
+    }
 
     /**
      * @notice Returns all information about a specific auction by its ID
