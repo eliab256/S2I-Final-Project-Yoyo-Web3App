@@ -219,10 +219,15 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         bool withinGracePeriod = block.timestamp < (auctionEndTime + GRACE_PERIOD);
 
         if (withinGracePeriod) {
-            if (msg.sender != address(i_registry) && msg.sender != owner()) {
+            // During grace period: only Chainlink Automation can call
+            if (msg.sender != address(i_registry)) {
                 revert YoyoAuction__OnlyChainlinkAutomationOrOwner();
             }
         } else {
+            // After grace period: only Chainlink Automation or owner can call
+            if (msg.sender != address(i_registry) && msg.sender != owner()) {
+                revert YoyoAuction__OnlyChainlinkAutomationOrOwner();
+            }
             emit YoyoAuction__ManualUpkeepExecuted(auctionId, msg.sender, block.timestamp);
         }
 
@@ -251,7 +256,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @param _tokenId The ID of the NFT to be auctioned.
      * @param _auctionType The type of auction (ENGLISH or DUTCH).
      */
-    function openNewAuction(uint256 _tokenId, AuctionType _auctionType) public onlyOwner nftContractSet returns(uint256 auctionId){
+    function openNewAuction(
+        uint256 _tokenId,
+        AuctionType _auctionType
+    ) public onlyOwner nftContractSet returns (uint256 auctionId) {
         if (yoyoNftContract.getIfTokenIdIsMintable(_tokenId) == false) {
             revert YoyoAuction__InvalidTokenId();
         }
@@ -588,6 +596,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         );
     }
 
+    // function claimNftForWinner() public nonReentrant{
+    //     revert YoyoAuction__FunctionDeprecated();
+    // }
+
     /**
      * @notice Manual function to claim NFT for auction winner when automatic mint to the winner fails and contract have to mint to itself
      * @dev Critical for maintaining auction integrity when automatic processes fail
@@ -728,6 +740,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
 
     function getDutchAuctionNumberOfIntervals() external pure returns (uint256) {
         return DUTCH_AUCTION_DROP_NUMBER_OF_INTERVALS;
+    }
+
+    function getGracePeriod() external pure returns (uint256) {
+        return GRACE_PERIOD;
     }
 
     /**

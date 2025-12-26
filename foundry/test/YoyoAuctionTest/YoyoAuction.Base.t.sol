@@ -3,16 +3,21 @@ pragma solidity ^0.8.0;
 
 import { Test, console2, console } from 'forge-std/Test.sol';
 import { DeployYoyoAuctionAndYoyoNft } from '../../script/DeployYoyoAuctionAndYoyoNft.s.sol';
+import { HelperConfig } from '../../script/HelperConfig.sol';
 import { YoyoAuction } from '../../src/YoyoAuction/YoyoAuction.sol';
 import { YoyoNft } from '../../src/YoyoNft/YoyoNft.sol';
 import { AuctionType, AuctionState } from '../../src/YoyoTypes.sol';
+import { EthAndNftRefuseMock } from '../Mocks/EthAndNftRefuseMock.sol';
 
 contract YoyoAuctionBaseTest is Test {
     YoyoAuction public yoyoAuction;
     YoyoNft public yoyoNft;
+    HelperConfig public helperConfig;
+    EthAndNftRefuseMock public ethAndNftRefuseMock;
 
     //Test Partecipants
     address public deployer;
+    address public keeperMock; // Chainlink Automation mock for tests
     address public USER_1 = makeAddr('User1');
     address public USER_2 = makeAddr('User2');
     address public USER_NO_BALANCE = makeAddr('user no balance');
@@ -32,7 +37,12 @@ contract YoyoAuctionBaseTest is Test {
 
     function setUp() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, ) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig) = deployerScript.run();
+
+        ethAndNftRefuseMock = new EthAndNftRefuseMock(address(yoyoAuction));
+
+        // Get keeperMock from YoyoAuction contract
+        keeperMock = address(yoyoAuction.i_registry());
 
         // Initialize invalidTokenId after yoyoNft is set
         invalidTokenId = yoyoNft.MAX_NFT_SUPPLY() + 10;

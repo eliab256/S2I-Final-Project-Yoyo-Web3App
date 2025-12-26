@@ -10,7 +10,7 @@ import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import { console2 } from 'forge-std/console2.sol';
 
 contract YoyoAuctionOpenAuctionTest is YoyoAuctionBaseTest {
-    // Add tests specific to open auctions here
+   
     function testIfOpenNewAuctionRevertsIfNotOwner() public {
         vm.startPrank(USER_1);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, USER_1));

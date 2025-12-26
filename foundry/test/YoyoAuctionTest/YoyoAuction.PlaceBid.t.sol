@@ -3,15 +3,11 @@ pragma solidity ^0.8.0;
 
 import { YoyoAuctionBaseTest } from './YoyoAuction.Base.t.sol';
 import { YoyoAuction } from '../../src/YoyoAuction/YoyoAuction.sol';
-import { EthRefuseMock } from '../Mocks/EthRefuseMock.sol';
 import '../../src/YoyoAuction/YoyoAuctionErrors.sol';
 import '../../src/YoyoAuction/YoyoAuctionEvents.sol';
 import { AuctionType, AuctionState, AuctionStruct, ConstructorParams } from '../../src/YoyoTypes.sol';
-import { console2 } from 'forge-std/console2.sol';
-
+import { EthAndNftRefuseMock } from '../Mocks/EthAndNftRefuseMock.sol';
 contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
-    EthRefuseMock public ethRefuseMock;
-
     function testIfPlaceBidOnAuctionRevertsIfDoesNotExist() public {
         uint256 auctionId = openEnglishAuctionHelper();
         uint256 invalidAuctionId = 10;
@@ -145,19 +141,18 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
             yoyoAuction.getMinimumBidChangeAmount();
 
         vm.startPrank(USER_1);
-        ethRefuseMock = new EthRefuseMock{ value: firstBid }(address(yoyoAuction));
-        ethRefuseMock.placeBid(auctionId, firstBid);
+        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
         vm.stopPrank();
 
-        assertEq(yoyoAuction.getAuctionFromAuctionId(auctionId).higherBidder, address(ethRefuseMock));
-        assertEq(yoyoAuction.getFailedRefundAmount(address(ethRefuseMock)), 0);
-        assertEq(address(ethRefuseMock).balance, 0);
+        assertEq(yoyoAuction.getAuctionFromAuctionId(auctionId).higherBidder, address(ethAndNftRefuseMock));
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), 0);
+        assertEq(address(ethAndNftRefuseMock).balance, 0);
 
         uint256 secondBid = firstBid + yoyoAuction.getMinimumBidChangeAmount();
 
         vm.startPrank(USER_2);
         vm.expectEmit(false, false, true, true);
-        emit YoyoAuction__BidderRefundFailed(address(ethRefuseMock), firstBid);
+        emit YoyoAuction__BidderRefundFailed(address(ethAndNftRefuseMock), firstBid);
         vm.expectEmit(true, true, false, false);
         emit YoyoAuction__BidPlaced(auctionId, USER_2, secondBid, ENGLISH_TYPE);
         yoyoAuction.placeBidOnAuction{ value: secondBid }(auctionId);
@@ -165,8 +160,8 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
 
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
         assertEq(currentAuction.higherBidder, USER_2);
-        assertEq(yoyoAuction.getFailedRefundAmount(address(ethRefuseMock)), firstBid);
-        assertEq(address(ethRefuseMock).balance, 0);
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), firstBid);
+        assertEq(address(ethAndNftRefuseMock).balance, 0);
     }
 
     function testIfClaimFailedRefundWorks() public {
@@ -174,13 +169,61 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
         uint256 firstBid = yoyoAuction.getAuctionFromAuctionId(auctionId).higherBid +
             yoyoAuction.getMinimumBidChangeAmount();
 
-        vm.startPrank(USER_1);
-        ethRefuseMock = new EthRefuseMock{ value: firstBid }(address(yoyoAuction));
-        ethRefuseMock.placeBid(auctionId, firstBid);
-        vm.stopPrank();
+        vm.prank(USER_1);
+        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
 
         uint256 secondBid = firstBid + yoyoAuction.getMinimumBidChangeAmount();
 
         placeBidHelper(auctionId, USER_2, secondBid);
+
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), firstBid);
+        assertEq(address(ethAndNftRefuseMock).balance, 0);
+
+        //Set the mock to accept ETH
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveEth(true);
+
+        vm.expectEmit(false, false, true, true);
+        emit YoyoAuction__BidderRefunded(address(ethAndNftRefuseMock), firstBid);
+        ethAndNftRefuseMock.claimRefund();
+        vm.stopPrank();
+
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), 0);
+        assertEq(address(ethAndNftRefuseMock).balance, firstBid);
+    }
+
+    function testIfClaimFailedRefundHandleFailsCorrectly() public {
+        uint256 auctionId = openEnglishAuctionHelper();
+        uint256 firstBid = yoyoAuction.getAuctionFromAuctionId(auctionId).higherBid +
+            yoyoAuction.getMinimumBidChangeAmount();
+
+        vm.prank(USER_1);
+        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
+        
+
+        uint256 secondBid = firstBid + yoyoAuction.getMinimumBidChangeAmount();
+
+        placeBidHelper(auctionId, USER_2, secondBid);
+
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), firstBid);
+        assertEq(address(ethAndNftRefuseMock).balance, 0);
+
+        //Set the mock to accept ETH
+        vm.startPrank(USER_1);
+
+        vm.expectRevert(YoyoAuction__PreviousBidderRefundFailed.selector);
+        ethAndNftRefuseMock.claimRefund();
+        vm.stopPrank();
+
+        assertEq(yoyoAuction.getFailedRefundAmount(address(ethAndNftRefuseMock)), firstBid);
+        assertEq(address(ethAndNftRefuseMock).balance, 0);
+    }
+
+    function testIfclaimFailRefundRevertsIfNoFailedRefund() public {
+        assertEq(yoyoAuction.getFailedRefundAmount(USER_1), 0);
+        vm.startPrank(USER_1);
+        vm.expectRevert(YoyoAuction__NoFailedRefundsToClaim.selector);
+        yoyoAuction.claimFailedRefunds();
+        vm.stopPrank();
     }
 }
