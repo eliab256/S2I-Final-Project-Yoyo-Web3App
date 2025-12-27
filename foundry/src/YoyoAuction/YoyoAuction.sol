@@ -519,44 +519,60 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         try yoyoNftContract.mintNft{ value: auction.higherBid }(auction.higherBidder, auction.tokenId) {
             auction.state = AuctionState.FINALIZED;
             auction.nftOwner = auction.higherBidder;
-
             emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
         } catch Error(string memory reason) {
-            try yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId) {
-                auction.state = AuctionState.CLOSED;
-                auction.nftOwner = address(this);
-                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = type(uint256).max;
-
-                emit YoyoAuction__MintToWinnerFailedLog(
-                    auction.auctionId,
-                    auction.tokenId,
-                    auction.higherBidder,
-                    reason
-                );
-            } catch {
-                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = auction.higherBid;
-                emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
-            }
+            _handleFallbackMint(auction, reason);
         } catch (bytes memory) {
-            try yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId) {
-                auction.state = AuctionState.CLOSED;
-                auction.nftOwner = address(this);
-                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = type(uint256).max;
-                emit YoyoAuction__MintToWinnerFailedLog(
-                    auction.auctionId,
-                    auction.tokenId,
-                    auction.higherBidder,
-                    'Low-level mint failure'
-                );
-            } catch {
-                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = auction.higherBid;
-                emit YoyoAuction__MintFailedLog(
-                    auction.auctionId,
-                    auction.tokenId,
-                    auction.higherBidder,
-                    'Low-level mint failure'
-                );
-            }
+            _handleFallbackMint(auction, 'Low-level mint failure');
+        }
+    }
+
+    /**
+     * @notice Handles fallback minting logic when minting to the winner fails.
+     * @dev Attempts to mint the NFT to this contract if minting to the winner fails, and emits appropriate events.
+     *      If minting to this contract also fails, logs the failure for manual resolution.
+     * @param auction The auction struct for which fallback minting is being handled.
+     * @param reason The error message or reason for the initial mint failure to the winner.
+     */
+    function _handleFallbackMint(AuctionStruct storage auction, string memory reason) internal {
+        (bool success, string memory fallbackReason) = _tryFallbackMintToThisContract(
+            auction.higherBidder,
+            auction.tokenId,
+            auction.higherBid
+        );
+        if (success) {
+            auction.state = AuctionState.CLOSED;
+            auction.nftOwner = address(this);
+            emit YoyoAuction__MintToWinnerFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
+        } else {
+            emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, fallbackReason);
+        }
+    }
+
+    /**
+     * @notice Attempts to mint the NFT to this contract as a fallback if minting to the winner fails.
+     * @dev If minting to this contract succeeds, updates the unclaimed tokens mapping for the winner.
+     *      If it fails, stores the mint price for manual claim and returns the failure reason.
+     * @param _finalClaimer The address of the original auction winner entitled to claim the NFT.
+     * @param _tokenId The ID of the NFT to mint.
+     * @param _mintPrice The price to pay for minting the NFT.
+     * @return success True if minting to this contract succeeded, false otherwise.
+     * @return reason The error message or reason for the mint failure, if any.
+     */
+    function _tryFallbackMintToThisContract(
+        address _finalClaimer,
+        uint256 _tokenId,
+        uint256 _mintPrice
+    ) internal returns (bool, string memory) {
+        try yoyoNftContract.mintNft{ value: _mintPrice }(address(this), _tokenId) {
+            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = type(uint256).max;
+            return (true, '');
+        } catch Error(string memory reason) {
+            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = _mintPrice;
+            return (false, reason);
+        } catch {
+            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = _mintPrice;
+            return (false, 'Low-level mint failure');
         }
     }
 
@@ -604,7 +620,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @param _auctionId The ID of the auction for which the winner is claiming the NFT.
      */
     function claimNftForWinner(uint256 _auctionId) public nonReentrant {
-        bool eligible = getElegimilityForClaimingNft(_auctionId, msg.sender);
+        bool eligible = getElegibilityForClaimingNft(_auctionId, msg.sender);
 
         if (eligible) {
             uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
@@ -819,7 +835,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @param _claimer The address of the potential claimer.
      * @return eligible True if the caller can claim the NFT, false otherwise.
      */
-    function getElegimilityForClaimingNft(uint256 _auctionId, address _claimer) public view returns (bool eligible) {
+    function getElegibilityForClaimingNft(uint256 _auctionId, address _claimer) public view returns (bool eligible) {
         uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
         eligible = s_unclaimedTokensFromWinner[_claimer][tokenId] != 0;
     }

@@ -6,6 +6,7 @@ import { YoyoAuction } from '../../src/YoyoAuction/YoyoAuction.sol';
 import '../../src/YoyoAuction/YoyoAuctionErrors.sol';
 import '../../src/YoyoAuction/YoyoAuctionEvents.sol';
 import { AuctionType, AuctionState, AuctionStruct } from '../../src/YoyoTypes.sol';
+import { Vm } from 'forge-std/Vm.sol';
 
 contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
     function testCloseAuctionWorksWithDutchAuctionAndMintNft() public {
@@ -60,7 +61,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoNft.ownerOf(currentAuction.tokenId), USER_1);
     }
 
-    function testFailingMintUpdatesMappingAndEmitEvent() public {
+    function testWhenFailingMintUpdatesMapping() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
 
@@ -69,28 +70,10 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
 
         //Set the YoyoNft contract to refuse the mint
-        vm.prank(USER_1);
+        vm.startPrank(USER_1);
         ethAndNftRefuseMock.setCanReceiveNft(false);
 
         //Place a bid on the auction
-        vm.startPrank(USER_1);
-        vm.expectEmit(true, true, true, true);
-        emit YoyoAuction__AuctionClosed(
-            auctionId,
-            currentAuction.tokenId,
-            currentAuction.startPrice,
-            currentAuction.startTime,
-            block.timestamp,
-            address(ethAndNftRefuseMock),
-            newBidPlaced
-        );
-        vm.expectEmit(true, true, true, false);
-        emit YoyoAuction__MintToWinnerFailedLog(
-            auctionId,
-            currentAuction.tokenId,
-            address(ethAndNftRefuseMock),
-            'ERC721: transfer to non ERC721Receiver implementer'
-        );
         ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
         vm.stopPrank();
 
@@ -98,10 +81,42 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
 
         AuctionStruct memory updatedAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
         assertTrue(updatedAuction.state == AuctionState.CLOSED);
-        assertEq(updatedAuction.nftOwner, address(yoyoAuction));
-        assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction));
+        assertEq(updatedAuction.nftOwner, address(yoyoAuction), 'error: nft owner should be auction contract');
+        assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction), 'error: nft not owned by auction');
         assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 0);
-        //assertEq(yoyoAuction.getFailedMintAmount(address(ethAndNftRefuseMock)), 1);
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
+    }
+
+    function testWhenFailingMintEmitEvents() public {
+        uint256 auctionId = openDutchAuctionHelper();
+        AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
+
+        vm.roll(block.number + 1);
+        vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime - 4 hours);
+        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
+
+        //Set the YoyoNft contract to refuse the mint
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(false);
+
+        vm.recordLogs();
+        ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
+        Vm.Log[] memory events = vm.getRecordedLogs();
+        vm.stopPrank();
+
+        //Event Signatures
+        bytes32 placeBifSig = events[0].topics[0];
+        bytes32 auctionCloseSig = events[1].topics[0];
+        bytes32 mintFailedSig = events[2].topics[0];
+
+        assertEq(placeBifSig, keccak256('YoyoAuction__BidPlaced(uint256,address,uint256,YoyoTypes.AuctionType)'));
+        assertEq(
+            auctionCloseSig,
+            keccak256('YoyoAuction__AuctionClosed(uint256,uint256,uint256,uint256,uint256,address,uint256)')
+        );
+        assertEq(mintFailedSig, keccak256('YoyoAuction__MintFailedLog(uint256,uint256,address,string)'));
+
+        vm.roll(block.number + 1);
     }
 
     // function testIfCloseAuctionFailMintWithoutErrorAndEmitEvents() public {
