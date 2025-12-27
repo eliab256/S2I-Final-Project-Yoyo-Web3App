@@ -57,6 +57,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
     uint256 private constant PERCENTAGE_DENOMINATOR = 1000;
 
     /**
+     * @notice Minimum multiplier to calculate the minimum mint price
+     * @dev Used to ensure minimum mint price is big enough to avoid rounding issues with percentage calculations
+     */
+    uint256 private constant MINIMUM_POSSIBLE_MINT_PRICE = PERCENTAGE_DENOMINATOR / MINIMUM_BID_INCREMENT_PERCENTAGE;
+
+    /**
      * @dev Minimum amount required to increase a bid in English auctions
      * @dev Set to 2.5% of the basic mint price when NFT contract is initialized
      */
@@ -214,6 +220,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @dev To avoid DOS if Chainlink goes down, after the grace period anyone can call this function.
      * @param performData Encoded data containing the auctionId to process.
      */
+
     function performUpkeep(bytes calldata performData) external override {
         (uint256 auctionId, uint256 auctionEndTime) = abi.decode(performData, (uint256, uint256));
 
@@ -689,7 +696,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @param _newPrice New basic mint price in wei
      */
     function changeMintPrice(uint256 _newPrice) public onlyOwner nftContractSet {
-        if (_newPrice == 0) {
+        if (_newPrice <= MINIMUM_POSSIBLE_MINT_PRICE) {
             revert YoyoAuction__InvalidValue();
         }
         AuctionStruct memory currentAuction = s_auctionsFromAuctionId[s_auctionCounter];
@@ -752,6 +759,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
 
     function getPercentageDenominator() external pure returns (uint256) {
         return PERCENTAGE_DENOMINATOR;
+    }
+
+    function getMinimumPossibleMintPrice() external pure returns (uint256) {
+        return MINIMUM_POSSIBLE_MINT_PRICE;
     }
 
     function getDutchAuctionNumberOfIntervals() external pure returns (uint256) {

@@ -112,7 +112,7 @@ contract HelperConfig is CodeConstants, Script {
                     deployerAccount: ANVIL_DEPLOYER_ADDRESS,
                     keepersRegistry: keeperMock,
                     basicMintPrice: ANVIL_BASIC_MINT_PRICE,
-                    baseUri: vm.envOr('BASE_URI', string('ipfs://default-test-uri/'))
+                    baseUri: vm.envString('BASE_URI')
                 });
         }
 
@@ -123,7 +123,7 @@ contract HelperConfig is CodeConstants, Script {
                 deployerAccount: ANVIL_DEPLOYER_ADDRESS,
                 keepersRegistry: keeperMock,
                 basicMintPrice: ANVIL_BASIC_MINT_PRICE,
-                baseUri: vm.envOr('BASE_URI', string('ipfs://default-test-uri/'))
+                baseUri: vm.envString('BASE_URI')
             });
     }
 
@@ -199,15 +199,6 @@ contract HelperConfig is CodeConstants, Script {
      */
     function getBasicMintPrice() public view returns (uint256) {
         return activeNetworkConfig.basicMintPrice;
-    }
-
-    /**
-     * @notice Returns the base URI for NFT metadata on current chain
-     * @dev Typically an IPFS link pointing to metadata folder
-     * @return string Base URI for NFT metadata
-     */
-    function getBaseUri() public view returns (string memory) {
-        return activeNetworkConfig.baseUri;
     }
 
     /**
