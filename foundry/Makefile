@@ -7,7 +7,7 @@ build :; forge build
 test :; forge test -vv
 
 # Test singolo per nome (uso: make test-single NAME=testNomeFunzione)
-test-single :; forge test --match-test $(NAME) -vvv
+test-name :; forge test --match-test $(NAME) -vvv
 
 # Test per file specifico nella cartella YoyoAuctionTest (uso: make test-file FILE=YoyoAuction.PlaceBid.t.sol)
 test-file :; forge test --match-path test/YoyoAuctionTest/YoyoAuction.$(FILE).t.sol -vvv

@@ -8,10 +8,12 @@ import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/aut
 import {
     IAutomationRegistryConsumer
 } from '@chainlink/contracts/src/v0.8/automation/interfaces/IAutomationRegistryConsumer.sol';
+import { IERC721Receiver } from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import { YoyoDutchAuctionLibrary } from './YoyoDutchAuctionLibrary.sol';
 import './YoyoAuctionEvents.sol';
 import './YoyoAuctionErrors.sol';
 import { AuctionStruct, AuctionState, AuctionType } from '../YoyoTypes.sol';
+import { console2 } from 'forge-std/console2.sol';
 
 /**
  * @title Nft Auction System
@@ -20,7 +22,7 @@ import { AuctionStruct, AuctionState, AuctionType } from '../YoyoTypes.sol';
  * @dev Implements automated auction lifecycle with reentrancy protection and Chainlink upkeep integration
  */
 
-contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface {
+contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface, IERC721Receiver {
     /**
      * @dev Interface that allows contract to acces the NFT contract
      */
@@ -166,6 +168,24 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         s_minimumBidChangeAmount =
             (yoyoNftContract.getBasicMintPrice() * MINIMUM_BID_INCREMENT_PERCENTAGE) /
             PERCENTAGE_DENOMINATOR; // 2,5% of the basic mint price
+    }
+
+    /**
+     * @notice Allows this contract to safely receive ERC721 tokens (NFTs).
+     * @dev Implements the ERC721Receiver interface to accept safe transfers and mints.
+     * @param operator The address which called `safeTransferFrom` or `mintNft`.
+     * @param from The address which previously owned the token.
+     * @param tokenId The NFT identifier which is being transferred.
+     * @param data Additional data with no specified format.
+     * @return selector The selector to confirm the token transfer.
+     */
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external pure returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     /**
@@ -394,9 +414,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
             revert YoyoAuction__AuctionNotOpen();
         }
         if (auction.auctionType == AuctionType.DUTCH) {
-            _placeBidOnDutchAuction(_auctionId, msg.sender);
+            _placeBidOnDutchAuction(_auctionId);
         } else if (auction.auctionType == AuctionType.ENGLISH) {
-            _placeBidOnEnglishAuction(_auctionId, msg.sender);
+            _placeBidOnEnglishAuction(_auctionId);
         }
 
         // Emit an event for the new bid
@@ -408,21 +428,15 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @dev In Dutch auctions, any bid at or above current price wins immediately
      * @dev Closes the auction immediately upon successful bid
      * @param _auctionId ID of the Dutch auction
-     * @param _sender Address of the bidder
      */
-    function _placeBidOnDutchAuction(uint256 _auctionId, address _sender) private {
-        AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
-
+    function _placeBidOnDutchAuction(uint256 _auctionId) private {
         uint256 currentPrice = getCurrentAuctionPrice();
 
         if (msg.value < currentPrice) {
             revert YoyoAuction__BidTooLow();
         }
-        // Update the auction with the new bid
-        auction.higherBidder = _sender;
-        auction.higherBid = msg.value;
 
-        _closeAuction(auction.auctionId);
+        _closeAuction(_auctionId);
     }
 
     /**
@@ -430,9 +444,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @dev Validates that bid meets minimum increment requirements
      * @dev Refunds the previous highest bidder before accepting new bid
      * @param _auctionId ID of the English auction
-     * @param _sender Address of the bidder
      */
-    function _placeBidOnEnglishAuction(uint256 _auctionId, address _sender) private {
+    function _placeBidOnEnglishAuction(uint256 _auctionId) private {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
         if (msg.value < auction.higherBid + auction.minimumBidChangeAmount) {
@@ -442,8 +455,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         uint256 previousHigherBid = auction.higherBid;
         address previousHigherBidder = auction.higherBidder;
 
-        // Update the auction with the new bid
-        auction.higherBidder = _sender;
+        // Update the auction with the new bid from the current bidder
+        auction.higherBidder = msg.sender;
         auction.higherBid = msg.value;
 
         //refund previous bidder
@@ -512,6 +525,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         }
         if (auction.auctionType == AuctionType.DUTCH) {
             auction.endTime = block.timestamp; // Set end time to current time for Dutch auction
+            // Update the auction with the new bid
+            auction.higherBidder = msg.sender;
+            auction.higherBid = msg.value;
         }
         emit YoyoAuction__AuctionClosed(
             auction.auctionId,

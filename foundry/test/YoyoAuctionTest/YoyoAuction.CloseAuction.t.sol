@@ -61,31 +61,32 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoNft.ownerOf(currentAuction.tokenId), USER_1);
     }
 
-    // function testWhenFailingMintUpdatesMapping() public {
-    //     uint256 auctionId = openDutchAuctionHelper();
-    //     AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
+    function testWhenFailingMintUpdatesMapping() public {
+        uint256 auctionId = openDutchAuctionHelper();
+        AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
 
-    //     vm.roll(block.number + 1);
-    //     vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime - 4 hours);
-    //     uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
+        vm.roll(block.number + 1);
+        vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime - 4 hours);
+        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
 
-    //     //Set the YoyoNft contract to refuse the mint
-    //     vm.startPrank(USER_1);
-    //     ethAndNftRefuseMock.setCanReceiveNft(false);
+        //Set the YoyoNft contract to refuse the mint
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(false);
+        ethAndNftRefuseMock.setThrowPanicError(false);
 
-    //     //Place a bid on the auction
-    //     ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
-    //     vm.stopPrank();
+        //Place a bid on the auction
+        ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
+        vm.stopPrank();
 
-    //     vm.roll(block.number + 1);
+        vm.roll(block.number + 1);
 
-    //     AuctionStruct memory updatedAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
-    //     assertTrue(updatedAuction.state == AuctionState.CLOSED);
-    //     assertEq(updatedAuction.nftOwner, address(yoyoAuction), 'error: nft owner should be auction contract');
-    //     assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction), 'error: nft not owned by auction');
-    //     assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 0);
-    //     assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
-    // }
+        AuctionStruct memory updatedAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
+        assertTrue(updatedAuction.state == AuctionState.CLOSED);
+        assertEq(updatedAuction.nftOwner, address(yoyoAuction));
+        assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction));
+        assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 0);
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
+    }
 
     function testWhenFailingMintEmitEvents() public {
         uint256 auctionId = openDutchAuctionHelper();
@@ -108,13 +109,6 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         bytes32 placeBifSig = events[0].topics[0];
         bytes32 auctionCloseSig = events[1].topics[0];
         bytes32 mintFailedSig = events[2].topics[0];
-
-        // assertEq(placeBifSig, ('YoyoAuction__BidPlaced(uint256,address,uint256,YoyoTypes.AuctionType)'));
-        // assertEq(
-        //     auctionCloseSig,
-        //     ('YoyoAuction__AuctionClosed(uint256,uint256,uint256,uint256,uint256,address,uint256)')
-        // );
-        // assertEq(mintFailedSig, ('YoyoAuction__MintFailedLog(uint256,uint256,address,string)'));
 
         vm.roll(block.number + 1);
     }
