@@ -98,18 +98,19 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
     mapping(uint256 => AuctionStruct) internal s_auctionsFromAuctionId;
 
     /**
+     * @notice This mapping handles 3 different scenarios:
+     * 1. The address has no token to claim, therefore returns 0
+     * 2. The address has a token to claim and it was minted by this contract,
+     *    therefore returns uint256.max which indicates no payment is required
+     *    because the mint was already paid at auction close by this contract
+     * 3. The address returns a value different from 0 and uint256.max.
+     *    This means the address is entitled to claim a token that must be minted
+     *    and therefore must be paid for
      * @dev Mapping used to track the unsuccessful token claim to the winners.
      * @dev In case the mint to the winner fails, the winner can claim the token later.
-     * @dev tokenId --> winnerAddress --> mintPrice
+     * @dev winner --> tokenId --> mintPrice
      */
-    mapping(uint256 => mapping(address => uint256)) internal s_unclaimedTokensFromAuctionIdAndWinner;
-
-    /**
-     * @dev Mapping used to track the unsuccessful token mint.
-     * @dev In case the mint to the winner fails and also the mint to this contract fails, the owner can mint the token later.
-     * @dev tokenId --> winnerAddress --> mintPrice
-     */
-    mapping(uint256 => mapping(address => uint256)) internal s_unmintedTokensFromAuctionIdAndWinner;
+    mapping(address => mapping(uint256 => uint256)) internal s_unclaimedTokensFromWinner;
 
     /**
      * @dev Mapping used to track unsuccessful refunds to previous bidders.
@@ -494,6 +495,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
      * @dev Changes auction state to CLOSED and attempts NFT minting
      * @dev If minting to the winner succeeds, finalizes the auction; if it fails, logs the error and mint to this contract
      * @dev Force to mint to this contract if minting to winner fails to allow open new auction and avoid confilct with mintPrice if it changes
+     * @dev s_unclaimedTokensFromWinner is updated accordingly for manual claiming later
      * @param _auctionId ID of the auction to close
      */
     function _closeAuction(uint256 _auctionId) private {
@@ -523,7 +525,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
             try yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId) {
                 auction.state = AuctionState.CLOSED;
                 auction.nftOwner = address(this);
-                s_unclaimedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
+                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = type(uint256).max;
 
                 emit YoyoAuction__MintToWinnerFailedLog(
                     auction.auctionId,
@@ -532,15 +534,14 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
                     reason
                 );
             } catch {
-                s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
+                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = auction.higherBid;
                 emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
             }
         } catch (bytes memory) {
             try yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId) {
                 auction.state = AuctionState.CLOSED;
                 auction.nftOwner = address(this);
-                s_unclaimedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
-
+                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = type(uint256).max;
                 emit YoyoAuction__MintToWinnerFailedLog(
                     auction.auctionId,
                     auction.tokenId,
@@ -548,7 +549,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
                     'Low-level mint failure'
                 );
             } catch {
-                s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] = auction.higherBid;
+                s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId] = auction.higherBid;
                 emit YoyoAuction__MintFailedLog(
                     auction.auctionId,
                     auction.tokenId,
@@ -596,36 +597,43 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
         );
     }
 
-    // function claimNftForWinner() public nonReentrant{
-    //     revert YoyoAuction__FunctionDeprecated();
-    // }
-
     /**
-     * @notice Manual function to claim NFT for auction winner when automatic mint to the winner fails and contract have to mint to itself
-     * @dev Critical for maintaining auction integrity when automatic processes fail
-     * @dev Validates that the caller is the auction winner and that the auction is closed
-     * @dev Use s_unclaimedTokensFromAuctionIdAndWinner to track unclaimed tokens
-     * @param _auctionId ID of the auction to manually finalize
+     * @notice Allows the auction winner to manually claim their NFT if automatic minting or transfer failed.
+     * @dev Used as a fallback when the automatic minting in _closeAuction() and claimNftForWinner() fails
+     * @dev If the NFT was already minted to the contract, it will be transferred. If not, the contract will mint it and transfer.
+     * @param _auctionId The ID of the auction for which the winner is claiming the NFT.
      */
     function claimNftForWinner(uint256 _auctionId) public nonReentrant {
+        bool eligible = getElegimilityForClaimingNft(_auctionId, msg.sender);
+
+        if (eligible) {
+            uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
+
+            if (s_unclaimedTokensFromWinner[msg.sender][tokenId] == type(uint256).max) {
+                _claimNftForWinner(_auctionId);
+            } else {
+                _mintNftForWinner(_auctionId);
+            }
+        } else {
+            revert YoyoAuction__NoTokenToClaim();
+        }
+    }
+
+    /**
+     * @notice Internal function to transfer an already minted NFT from the contract to the winner.
+     * @dev Used when the NFT was minted to the contract due to a failed mint to the winner.
+     * @param _auctionId The ID of the auction for which the NFT is being claimed.
+     */
+    function _claimNftForWinner(uint256 _auctionId) internal {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
-        if (auction.higherBidder != msg.sender) {
-            revert YoyoAuction__NotAuctionWinner();
-        }
-        if (auction.state != AuctionState.CLOSED) {
-            revert YoyoAuction__AuctionNotClosed();
-        }
         if (auction.nftOwner != address(this)) {
             revert YoyoAuction__NftNotHeldByContract();
-        }
-        if (s_unclaimedTokensFromAuctionIdAndWinner[auction.tokenId][msg.sender] == 0) {
-            revert YoyoAuction__NoTokenToClaim();
         }
 
         auction.state = AuctionState.FINALIZED;
         auction.nftOwner = auction.higherBidder;
-        delete s_unclaimedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder];
+        delete s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
 
         yoyoNftContract.transferNft(msg.sender, auction.tokenId);
 
@@ -633,27 +641,19 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
     }
 
     /**
-     * @notice Manual function to mint NFT for auction winner when mint after auction close fails
-     * @dev Used as a fallback when the automatic minting in _closeAuction() and claimNftForWinner() fails
-     * @dev Validates that the auction is in CLOSED state and has a winner
-     * @dev Use s_unmintedTokensFromAuctionIdAndWinner to track unminted tokens
-     * @param _auctionId ID of the auction to manually finalize
+     * @notice Internal function to mint the NFT for the winner if it was not minted during auction close.
+     * @dev Used as a fallback when both automatic and manual transfer failed and the NFT is not yet minted.
+     * @param _auctionId The ID of the auction for which the NFT is being minted and claimed.
      */
-    function mintNftForWinner(uint256 _auctionId) public onlyOwner {
+    function _mintNftForWinner(uint256 _auctionId) internal {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
-        if (auction.state != AuctionState.CLOSED) {
-            revert YoyoAuction__AuctionNotClosed();
-        }
         if (auction.nftOwner != address(0)) {
             revert YoyoAuction__NftAlreadyMinted();
         }
-        if (s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder] == 0) {
-            revert YoyoAuction__NftAlreadyMinted();
-        }
 
-        uint256 paidAmount = s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder];
-        delete s_unmintedTokensFromAuctionIdAndWinner[auction.tokenId][auction.higherBidder];
+        uint256 paidAmount = s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
+        delete s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
 
         auction.state = AuctionState.FINALIZED;
         auction.nftOwner = auction.higherBidder;
@@ -813,14 +813,14 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface 
     }
 
     /**
-     * @notice Checks if a winner is eligible to claim their unminted NFT from a specific auction
-     * @dev Used to verify if the caller has an unminted token from the specified auction
-     * @param _tokenId ID of the NFT token to check eligibility for
-     * @return bool True if the caller is eligible to claim the token, false otherwise
+     * @notice Checks if the caller is eligible to claim an NFT for a specific auction.
+     * @dev Returns true if the caller has an unclaimed NFT for the given auction.
+     * @param _auctionId The ID of the auction to check eligibility for.
+     * @param _claimer The address of the potential claimer.
+     * @return eligible True if the caller can claim the NFT, false otherwise.
      */
-    function getElegibiltyToClaimToken(uint256 _tokenId) public view returns (bool) {
-        if (s_unclaimedTokensFromAuctionIdAndWinner[_tokenId][msg.sender] > 0) {
-            return true;
-        } else return false;
+    function getElegimilityForClaimingNft(uint256 _auctionId, address _claimer) public view returns (bool eligible) {
+        uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
+        eligible = s_unclaimedTokensFromWinner[_claimer][tokenId] != 0;
     }
 }

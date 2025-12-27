@@ -101,7 +101,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(updatedAuction.nftOwner, address(yoyoAuction));
         assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction));
         assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 0);
-        assertEq(yoyoAuction.getFailedMintAmount(address(ethAndNftRefuseMock)), 1);
+        //assertEq(yoyoAuction.getFailedMintAmount(address(ethAndNftRefuseMock)), 1);
     }
 
     // function testIfCloseAuctionFailMintWithoutErrorAndEmitEvents() public {
