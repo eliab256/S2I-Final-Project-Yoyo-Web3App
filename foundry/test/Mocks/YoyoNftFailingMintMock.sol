@@ -4,10 +4,10 @@ pragma solidity ^0.8.0;
 import { ERC721 } from '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import { Strings } from '@openzeppelin/contracts/utils/Strings.sol';
-import { ConstructorParams } from '../YoyoTypes.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
-import '../YoyoNft/YoyoNftErrors.sol';
-import '../YoyoNft/YoyoNftEvents.sol';
+import { ConstructorParams } from '../../src/YoyoTypes.sol';
+import '../../src/YoyoNft/YoyoNftErrors.sol';
+import '../../src/YoyoNft/YoyoNftEvents.sol';
 
 /**
  * @title A Yoga NFT collection
@@ -17,7 +17,7 @@ import '../YoyoNft/YoyoNftEvents.sol';
  * @dev The contract communicates with the YoyoAuction via a custom interface that only implements
  */
 
-contract YoyoNft is ERC721, Ownable {
+contract YoyoNftFailingMintMock is ERC721, Ownable {
     /* Errors */
     /**
      * @dev Errors are declared in YoyoNftErrors.sol
@@ -29,6 +29,10 @@ contract YoyoNft is ERC721, Ownable {
     uint256 private s_tokenCounter;
     uint256 private s_basicMintPrice;
     string private s_baseURI;
+
+    bool shouldFailMint;
+    bool shouldPanic;
+    string failureReason;
 
     /* Events */
     /**
@@ -116,6 +120,20 @@ contract YoyoNft is ERC721, Ownable {
         emit YoyoNft__MintPriceUpdated(_newBasicPrice, block.timestamp);
     }
 
+    function setShouldFailMint(bool _shouldFail, string memory _reason) external {
+        shouldFailMint = _shouldFail;
+        failureReason = _reason;
+        shouldPanic = false; // Reset panic mode
+    }
+
+    /**
+     * @dev Configures the mock to panic (without an error message)
+     */
+    function setShouldPanic(bool _shouldPanic) external {
+        shouldPanic = _shouldPanic;
+        shouldFailMint = false; // Reset failure mode
+    }
+
     /**
      *@notice It allows auction contract to mint a new Nft to send to the auction winner
      *@dev Implementation of the safeMint function from ERC721 standard
@@ -125,6 +143,18 @@ contract YoyoNft is ERC721, Ownable {
      *@param _tokenId it is the unique Id of the token just minted
      */
     function mintNft(address _to, uint256 _tokenId) public payable onlyAuction {
+        if (shouldPanic) {
+            // Triggers a panic (caught by generic catch)
+            assembly {
+                invalid() // Invalid opcode
+            }
+        }
+
+        if (shouldFailMint) {
+            // Revert with message (caught by catch Error)
+            revert(failureReason);
+        }
+
         if (s_tokenCounter == MAX_NFT_SUPPLY) {
             revert YoyoNft__NftMaxSupplyReached();
         }

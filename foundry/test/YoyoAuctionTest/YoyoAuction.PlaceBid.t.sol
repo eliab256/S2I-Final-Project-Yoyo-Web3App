@@ -72,14 +72,15 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
         assertEq(currentAuction.higherBid, newBidPlaced);
     }
 
-    function testIfPlaceBidOnDutchAuctionWorksAndCloseTheCurrentAuction() public {
+    function testIfPlaceBidOnDutchAuctionWorksAndEmitAuctionFinalizedEvent() public {
         uint256 auctionId = openDutchAuctionHelper();
         uint256 newBidPlaced = yoyoNft.getBasicMintPrice() * yoyoAuction.getDutchAuctionStartPriceMultiplier();
+        uint256 tokenId = yoyoAuction.getAuctionFromAuctionId(auctionId).tokenId;
 
         //Place a bid on the auction
         vm.startPrank(USER_1);
         vm.expectEmit(true, true, false, false);
-        emit YoyoAuction__BidPlaced(auctionId, USER_1, newBidPlaced, DUTCH_TYPE);
+        emit YoyoAuction__AuctionFinalized(auctionId, tokenId, USER_1);
         yoyoAuction.placeBidOnAuction{ value: newBidPlaced }(auctionId);
         vm.stopPrank();
 
@@ -141,7 +142,7 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
             yoyoAuction.getMinimumBidChangeAmount();
 
         vm.startPrank(USER_1);
-        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
+        ethAndNftRefuseMock.placeBid{ value: firstBid }(auctionId);
         vm.stopPrank();
 
         assertEq(yoyoAuction.getAuctionFromAuctionId(auctionId).higherBidder, address(ethAndNftRefuseMock));
@@ -170,7 +171,7 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
             yoyoAuction.getMinimumBidChangeAmount();
 
         vm.prank(USER_1);
-        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
+        ethAndNftRefuseMock.placeBid{ value: firstBid }(auctionId);
 
         uint256 secondBid = firstBid + yoyoAuction.getMinimumBidChangeAmount();
 
@@ -198,8 +199,7 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
             yoyoAuction.getMinimumBidChangeAmount();
 
         vm.prank(USER_1);
-        ethAndNftRefuseMock.placeBid{value: firstBid}(auctionId);
-        
+        ethAndNftRefuseMock.placeBid{ value: firstBid }(auctionId);
 
         uint256 secondBid = firstBid + yoyoAuction.getMinimumBidChangeAmount();
 

@@ -310,7 +310,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             newAuction = _openNewEnglishAuction(_tokenId, newAuctionId, endTime);
         } else if (_auctionType == AuctionType.DUTCH) {
             newAuction = _openNewDutchAuction(_tokenId, newAuctionId, endTime);
-        } 
+        }
 
         s_auctionsFromAuctionId[newAuctionId] = newAuction;
 
@@ -416,9 +416,6 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         } else if (auction.auctionType == AuctionType.ENGLISH) {
             _placeBidOnEnglishAuction(_auctionId);
         }
-
-        // Emit an event for the new bid
-        emit YoyoAuction__BidPlaced(_auctionId, msg.sender, msg.value, auction.auctionType);
     }
 
     /**
@@ -461,6 +458,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         if (previousHigherBidder != address(0)) {
             _refundPreviousBidder(previousHigherBid, previousHigherBidder);
         }
+
+        // Emit an event for the new bid
+        emit YoyoAuction__BidPlaced(_auctionId, msg.sender, msg.value, auction.auctionType);
     }
 
     /**
