@@ -7,7 +7,6 @@ error YoyoAuction__ThisContractDoesntAcceptDeposit();
 error YoyoAuction__CallValidFunctionToInteractWithContract();
 error YoyoAuction__InvalidTokenId();
 error YoyoAuction__InvalidValue();
-error YoyoAuction__InvalidAuctionType();
 error YoyoAuction__AuctionNotOpen();
 error YoyoAuction__BidTooLow();
 error YoyoAuction__AuctionDoesNotExist();

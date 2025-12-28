@@ -9,6 +9,9 @@ contract EthAndNftRefuseMock is IERC721Receiver {
     bool canReceiveEth = false;
     bool canReceiveNft = false;
     bool throwPanicError = false;
+    bool causeOutOfGas = false;
+
+    uint256 private gasWaster;
 
     constructor(address _auctionContractAddress) {
         auctionContract = IYoyoAuction(_auctionContractAddress);
@@ -20,6 +23,10 @@ contract EthAndNftRefuseMock is IERC721Receiver {
 
     function claimRefund() public {
         auctionContract.claimFailedRefunds();
+    }
+
+    function claimNftFromAuction(uint256 _auctionId) public {
+        auctionContract.claimNftForWinner(_auctionId);
     }
 
     function setCanReceiveEth(bool _canReceive) public {
@@ -34,23 +41,43 @@ contract EthAndNftRefuseMock is IERC721Receiver {
         throwPanicError = _throwPanic;
     }
 
+    function setCauseOutOfGas(bool _causeOutOfGas) public {
+        causeOutOfGas = _causeOutOfGas;
+    }
+
     function onERC721Received(
         address operator,
         address from,
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
+        if (causeOutOfGas) {
+            _causeOutOfGasFunction();
+            return 0x00000000; // Never reached
+        }
+
         if (!canReceiveNft) {
             if (throwPanicError) {
-                uint256 x = 100;
-                uint256 y = 0;
-                x = x / y; // This will panic
+                _causePanicError();
                 return 0x00000000; // Never reached
             } else {
                 return 0x00000000;
             }
         }
+
         return IERC721Receiver.onERC721Received.selector;
+    }
+
+    function _causePanicError() private pure {
+        uint256 x = 1;
+        uint256 y = 0;
+        x = x / y;
+    }
+
+    function _causeOutOfGasFunction() private {
+        while (true) {
+            gasWaster++;
+        }
     }
 
     /**

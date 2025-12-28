@@ -310,9 +310,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             newAuction = _openNewEnglishAuction(_tokenId, newAuctionId, endTime);
         } else if (_auctionType == AuctionType.DUTCH) {
             newAuction = _openNewDutchAuction(_tokenId, newAuctionId, endTime);
-        } else {
-            revert YoyoAuction__InvalidAuctionType();
-        }
+        } 
 
         s_auctionsFromAuctionId[newAuctionId] = newAuction;
 
@@ -566,9 +564,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         if (success) {
             auction.state = AuctionState.CLOSED;
             auction.nftOwner = address(this);
-            emit YoyoAuction__MintToWinnerFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
+            emit YoyoAuction__MintToWinnerFailed(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
         } else {
-            emit YoyoAuction__MintFailedLog(auction.auctionId, auction.tokenId, auction.higherBidder, fallbackReason);
+            emit YoyoAuction__MintFailed(auction.auctionId, auction.tokenId, auction.higherBidder, fallbackReason);
         }
     }
 

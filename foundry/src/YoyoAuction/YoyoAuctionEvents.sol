@@ -38,6 +38,6 @@ event YoyoAuction__AuctionClosed(
     uint256 indexed higherBid
 );
 event YoyoAuction__AuctionFinalized(uint256 indexed auctionId, uint256 indexed tokenId, address indexed nftOwner);
-event YoyoAuction__MintToWinnerFailedLog(uint256 indexed auctionId, uint256 tokenId, address bidder, string reason);
-event YoyoAuction__MintFailedLog(uint256 indexed auctionId, uint256 tokenId, address bidder, string reason);
+event YoyoAuction__MintToWinnerFailed(uint256 indexed auctionId, uint256 tokenId, address bidder, string reason);
+event YoyoAuction__MintFailed(uint256 indexed auctionId, uint256 tokenId, address bidder, string reason);
 event YoyoAuction__ManualUpkeepExecuted(uint256 indexed auctionId, address indexed executor, uint256 timestamp);
