@@ -65,7 +65,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
         vm.expectRevert(YoyoAuction__OnlyChainlinkAutomationOrOwner.selector);
         yoyoAuction.performUpkeep(performDataTest);
 
-        uint256 snapshotId = vm.snapshot();
+        uint256 snapshotId = vm.snapshotState();
 
         // After grace period, deployer can call performUpkeep (fallback mechanism)
         vm.prank(deployer);
@@ -73,7 +73,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
         emit YoyoAuction__ManualUpkeepExecuted(auctionId, deployer, ownerKeeperCallTimestamp);
         yoyoAuction.performUpkeep(performDataTest);
 
-        vm.revertTo(snapshotId); // Revert to before deployer call to test keeperMock call after grace period
+        vm.revertToState(snapshotId); // Revert to before deployer call to test keeperMock call after grace period
 
         vm.prank(keeperMock);
         vm.expectEmit(true, true, false, true);

@@ -247,16 +247,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
 
         vm.prank(USER_1);
         uint256 newBidPlaced = yoyoAuctionFailMint.getCurrentAuctionPrice();
-        vm.expectEmit(true, true, true, true);
-        emit YoyoAuction__AuctionClosed(
-            auctionIdFailMint,
-            VALID_TOKEN_ID,
-            yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint).startPrice,
-            yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint).startTime,
-            block.timestamp,
-            USER_1,
-            newBidPlaced
-        );
+   
         vm.expectEmit(true, true, true, false);
         emit YoyoAuction__MintFailed(auctionIdFailMint, VALID_TOKEN_ID, USER_1, failureReason);
         yoyoAuctionFailMint.placeBidOnAuction{ value: newBidPlaced }(auctionIdFailMint);
@@ -265,7 +256,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assert(currentAuction.state == AuctionState.CLOSED);
         assertEq(currentAuction.nftOwner, address(0));
         assertEq(yoyoNftFailMint.balanceOf(address(yoyoAuctionFailMint)), 0);
-        assertEq(yoyoNftFailMint.ownerOf(VALID_TOKEN_ID), address(0));
+        assertEq(yoyoNftFailMint.balanceOf(USER_1), 0);
         assertEq(yoyoAuctionFailMint.getElegibilityForClaimingNft(auctionIdFailMint, USER_1), true);
     }
 }

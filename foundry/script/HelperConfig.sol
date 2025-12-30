@@ -20,6 +20,14 @@ abstract contract CodeConstants {
     address public constant MAINNET_KEEPERS_REGISTRY = 0x6593c7De001fC8542bB1703532EE1E5aA0D458fD;
     address public constant SEPOLIA_KEEPERS_REGISTRY = 0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad;
 
+    //Chainlink Automation Registar address
+    address public constant MAINNET_KEEPERS_REGISTAR = 0x6B0B234fB2f380309D47A7E9391E29E9a179395a;
+    address public constant SEPOLIA_KEEPERS_REGISTAR = 0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976;
+
+    //LINK Token addresses
+    address public constant MAINNET_LINK_TOKEN = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
+    address public constant SEPOLIA_LINK_TOKEN = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
+
     // NFT Configuration
     uint256 public constant MAINNET_BASIC_MINT_PRICE = 0.01 ether;
     uint256 public constant SEPOLIA_BASIC_MINT_PRICE = 0.01 ether;

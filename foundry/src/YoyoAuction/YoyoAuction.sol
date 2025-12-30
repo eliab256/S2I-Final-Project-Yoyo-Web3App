@@ -561,6 +561,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             auction.tokenId,
             auction.higherBid
         );
+        console2.log("claimAmount:", s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId]);
         if (success) {
             auction.state = AuctionState.CLOSED;
             auction.nftOwner = address(this);
@@ -595,43 +596,6 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = _mintPrice;
             return (false, 'Low-level mint failure');
         }
-    }
-
-    /**
-     * @notice Automatically restarts an auction that ended without receiving any bids
-     * @dev Resets auction timing and pricing parameters for a new auction cycle
-     * @dev Called automatically by Chainlink Keepers when an auction ends without bids
-     * @param _auctionId ID of the auction to restart
-     */
-    function _restartAuction(uint256 _auctionId) private {
-        AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
-
-        uint256 startPrice;
-        if (auction.auctionType == AuctionType.ENGLISH) {
-            startPrice = yoyoNftContract.getBasicMintPrice();
-        } else if (auction.auctionType == AuctionType.DUTCH) {
-            startPrice = YoyoDutchAuctionLibrary.startPriceFromReserveAndMultiplierCalculator(
-                yoyoNftContract.getBasicMintPrice(),
-                DUTCH_AUCTION_START_PRICE_MULTIPLIER,
-                1 // Using 1 interval for restart
-            );
-        }
-        uint256 endTime = block.timestamp + (AUCTION_DURATION);
-
-        auction.startTime = block.timestamp;
-        auction.endTime = endTime;
-        auction.startPrice = startPrice;
-        auction.higherBid = startPrice;
-        auction.minimumBidChangeAmount = s_minimumBidChangeAmount;
-
-        emit YoyoAuction__AuctionRestarted(
-            auction.auctionId,
-            auction.tokenId,
-            auction.startTime,
-            auction.startPrice,
-            auction.endTime,
-            auction.minimumBidChangeAmount
-        );
     }
 
     /**
@@ -698,6 +662,43 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         yoyoNftContract.mintNft{ value: paidAmount }(auction.higherBidder, auction.tokenId);
 
         emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
+    }
+
+    /**
+     * @notice Automatically restarts an auction that ended without receiving any bids
+     * @dev Resets auction timing and pricing parameters for a new auction cycle
+     * @dev Called automatically by Chainlink Keepers when an auction ends without bids
+     * @param _auctionId ID of the auction to restart
+     */
+    function _restartAuction(uint256 _auctionId) private {
+        AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
+
+        uint256 startPrice;
+        if (auction.auctionType == AuctionType.ENGLISH) {
+            startPrice = yoyoNftContract.getBasicMintPrice();
+        } else if (auction.auctionType == AuctionType.DUTCH) {
+            startPrice = YoyoDutchAuctionLibrary.startPriceFromReserveAndMultiplierCalculator(
+                yoyoNftContract.getBasicMintPrice(),
+                DUTCH_AUCTION_START_PRICE_MULTIPLIER,
+                1 // Using 1 interval for restart
+            );
+        }
+        uint256 endTime = block.timestamp + (AUCTION_DURATION);
+
+        auction.startTime = block.timestamp;
+        auction.endTime = endTime;
+        auction.startPrice = startPrice;
+        auction.higherBid = startPrice;
+        auction.minimumBidChangeAmount = s_minimumBidChangeAmount;
+
+        emit YoyoAuction__AuctionRestarted(
+            auction.auctionId,
+            auction.tokenId,
+            auction.startTime,
+            auction.startPrice,
+            auction.endTime,
+            auction.minimumBidChangeAmount
+        );
     }
 
     /**
