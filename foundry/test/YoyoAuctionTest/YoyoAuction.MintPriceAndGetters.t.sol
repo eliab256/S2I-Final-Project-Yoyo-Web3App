@@ -72,8 +72,6 @@ contract YoyoAuctionMintPriceAndGettersTest is YoyoAuctionBaseTest {
         assertEq(minimumBidChangeAmount, expectedMinimumBidChangeAmount);
     }
 
-    //fuzz sull funzione changeMintPrice
-
     //getters tests
     function testGetNftContract() public {
         assertEq(yoyoAuction.getNftContract(), address(yoyoNft));
@@ -142,19 +140,14 @@ contract YoyoAuctionMintPriceAndGettersTest is YoyoAuctionBaseTest {
     }
 
     function testGetElegibilityForClaimingNft() public {
-        uint256 auctionId = openEnglishAuctionHelper();
+        uint256 auctionId = openDutchAuctionHelper();
         assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, USER_1), false);
 
-        // vm.startPrank(USER_1);
-        // ethAndNftRefuseMock.setCanReceiveNft(false);
-        // ethAndNftRefuseMock.placeBid{ value: 1 ether }(auctionId);
-        // vm.stopPrank();
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(false);
+        ethAndNftRefuseMock.placeBid{ value: 1 ether }(auctionId);
+        vm.stopPrank();
 
-        // vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime);
-    
-        // vm.prank(keeperMock);
-        // yoyoAuction.performUpkeep(abi.encode(auctionId, yoyoAuction.getAuctionFromAuctionId(auctionId).endTime));
-
-        // assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
     }
 }

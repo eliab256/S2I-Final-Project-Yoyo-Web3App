@@ -14,18 +14,32 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
     YoyoAuction public yoyoAuctionFailMint;
     YoyoNftFailingMintMock public yoyoNftFailMint;
     uint256 public auctionIdFailMint;
+    string public failureReason = 'Mint failed for testing';
 
-    modifier NftContractFailingMintMock() {
+    ////// helpers /////
+    function setNftContractFailingMintMock(bool _shouldFail, bool _throwPanicError) public {
         //Set new contracts that fails on mint
         vm.startPrank(deployer);
         yoyoAuctionFailMint = new YoyoAuction(keeperMock);
         yoyoNftFailMint = new YoyoNftFailingMintMock(helperConfig.getConstructorParams(address(yoyoAuctionFailMint)));
         yoyoAuctionFailMint.setNftContract(address(yoyoNftFailMint));
+
+        yoyoNftFailMint.setShouldFailMint(_shouldFail, failureReason);
+        yoyoNftFailMint.setShouldPanic(_throwPanicError);
+
         //open New Dutch Auction
         auctionIdFailMint = yoyoAuctionFailMint.openNewAuction(VALID_TOKEN_ID, DUTCH_TYPE);
         vm.stopPrank();
-        _;
     }
+
+    function placeBid(address _user) public {
+        vm.startPrank(_user);
+        uint256 newBidPlaced = yoyoAuctionFailMint.getCurrentAuctionPrice();
+        yoyoAuctionFailMint.placeBidOnAuction{ value: newBidPlaced }(auctionIdFailMint);
+        vm.stopPrank();
+    }
+
+    ////// close Auction //////
     function testCloseAuctionWorksWithDutchAuctionAndMintNft() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
@@ -95,7 +109,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction));
     }
 
-    function testWhenFailingMintUpdatesMapping() public {
+    function testCloseAuctionFailingMintToUserAndUpdatesMapping() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
 
@@ -122,7 +136,28 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
     }
 
-    function testWhenFailingMintToUserWithReasonAndEmitEvents() public {
+    function testCloseAuctionAndFailingMintOnAuctionContractEmitEvent() public {
+        setNftContractFailingMintMock(true, false);
+
+        vm.startPrank(USER_1);
+        uint256 newBidPlaced = yoyoAuctionFailMint.getCurrentAuctionPrice();
+
+        vm.expectEmit(true, true, true, false);
+        emit YoyoAuction__MintFailed(auctionIdFailMint, VALID_TOKEN_ID, USER_1, failureReason);
+        yoyoAuctionFailMint.placeBidOnAuction{ value: newBidPlaced }(auctionIdFailMint);
+        vm.stopPrank();
+
+        AuctionStruct memory currentAuction = yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint);
+
+        assert(currentAuction.state == AuctionState.CLOSED);
+        assertEq(currentAuction.nftOwner, address(0));
+        assertEq(yoyoNftFailMint.balanceOf(address(yoyoAuctionFailMint)), 0);
+        assertEq(yoyoNftFailMint.balanceOf(USER_1), 0);
+        assertEq(yoyoAuctionFailMint.getElegibilityForClaimingNft(auctionIdFailMint, USER_1), true);
+    }
+
+    //fare check
+    function testCloseAuctionFailingMintToUserWithReasonAndEmitEvents() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
 
@@ -150,7 +185,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
         vm.stopPrank();
     }
-
+    //fare check
     function testWhenFailingMintToUserWithPanicErrorAndEmitEvents() public {
         uint256 auctionId = openDutchAuctionHelper();
         uint256 tokenId = yoyoAuction.getAuctionFromAuctionId(auctionId).tokenId;
@@ -182,6 +217,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
     }
 
+    ////// Claim mint for winner //////
     function testClaimNftForWinnerWorksAfterNftMintedToAuctionContract() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
@@ -241,22 +277,78 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         vm.stopPrank();
     }
 
-    function testCloseAuctionAndFailingMintOnAuctionContractEmitEvent() public NftContractFailingMintMock {
-        string memory failureReason = 'Mint failed for testing';
-        yoyoNftFailMint.setShouldFailMint(true, failureReason);
-
-        vm.prank(USER_1);
-        uint256 newBidPlaced = yoyoAuctionFailMint.getCurrentAuctionPrice();
-   
-        vm.expectEmit(true, true, true, false);
-        emit YoyoAuction__MintFailed(auctionIdFailMint, VALID_TOKEN_ID, USER_1, failureReason);
-        yoyoAuctionFailMint.placeBidOnAuction{ value: newBidPlaced }(auctionIdFailMint);
+    function testClaimNftForWinnerRevertsIfNotElegible() public {
+        setNftContractFailingMintMock(true, false);
+        placeBid(USER_1);
 
         AuctionStruct memory currentAuction = yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint);
+
+        assert(currentAuction.state == AuctionState.CLOSED);
+        assertEq(currentAuction.nftOwner, address(0));
+        assertEq(yoyoAuctionFailMint.getElegibilityForClaimingNft(auctionIdFailMint, USER_1), true);
+
+        vm.prank(USER_2);
+        vm.expectRevert(YoyoAuction__NoTokenToClaim.selector);
+        yoyoAuctionFailMint.claimNftForWinner(auctionIdFailMint);
+    }
+
+    function testClaimNftForWinnerMintTheNft() public {
+        setNftContractFailingMintMock(true, false);
+        placeBid(USER_1);
+
+        AuctionStruct memory currentAuction = yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint);
+
         assert(currentAuction.state == AuctionState.CLOSED);
         assertEq(currentAuction.nftOwner, address(0));
         assertEq(yoyoNftFailMint.balanceOf(address(yoyoAuctionFailMint)), 0);
         assertEq(yoyoNftFailMint.balanceOf(USER_1), 0);
         assertEq(yoyoAuctionFailMint.getElegibilityForClaimingNft(auctionIdFailMint, USER_1), true);
+
+        yoyoNftFailMint.setShouldFailMint(false, failureReason);
+        vm.prank(USER_1);
+        yoyoAuctionFailMint.claimNftForWinner(auctionIdFailMint);
+
+        AuctionStruct memory currentAuctionUpdate = yoyoAuctionFailMint.getAuctionFromAuctionId(auctionIdFailMint);
+
+        assertEq(yoyoNftFailMint.balanceOf(USER_1), 1);
+        assertEq(yoyoAuctionFailMint.getElegibilityForClaimingNft(auctionIdFailMint, USER_1), false);
+        assertEq(yoyoNftFailMint.ownerOf(VALID_TOKEN_ID), USER_1);
+        assertEq(currentAuctionUpdate.nftOwner, USER_1);
+        assert(currentAuctionUpdate.state == AuctionState.FINALIZED);
     }
+
+    function testClaimNftFromWinnerTransferTheNftFromAuctionContractToUser() public {
+        uint256 auctionId = openDutchAuctionHelper();
+        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
+
+        //Set the YoyoNft contract to refuse the mint
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(false);
+        ethAndNftRefuseMock.setThrowPanicError(false);
+
+        //Place a bid on the auction
+        ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
+        vm.stopPrank();
+
+        vm.roll(block.number + 1);
+
+        AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
+        assertTrue(currentAuction.state == AuctionState.CLOSED);
+        assertEq(currentAuction.nftOwner, address(yoyoAuction));
+        assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(yoyoAuction));
+        assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 0);
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
+
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(true);
+        ethAndNftRefuseMock.claimNftFromAuction(auctionId);
+        vm.stopPrank();
+
+        assertEq(yoyoNft.ownerOf(currentAuction.tokenId), address(ethAndNftRefuseMock));
+        assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 1);
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), false);
+        assert(yoyoAuction.getAuctionFromAuctionId(auctionId).state == AuctionState.FINALIZED);
+    }
+
+    //testClaimNftForWinnerMintTheNft e provare che cattura l' errore se revert ancora
 }

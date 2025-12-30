@@ -561,7 +561,6 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             auction.tokenId,
             auction.higherBid
         );
-        console2.log("claimAmount:", s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId]);
         if (success) {
             auction.state = AuctionState.CLOSED;
             auction.nftOwner = address(this);
@@ -865,4 +864,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
         eligible = s_unclaimedTokensFromWinner[_claimer][tokenId] != 0;
     }
+
+    // function debugMsgSender() public view returns (address) {
+    //     return msg.sender;
+    // }
 }

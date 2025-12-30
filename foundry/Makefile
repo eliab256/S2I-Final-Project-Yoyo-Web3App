@@ -21,6 +21,13 @@ test-library :; forge test --match-path test/YoyoAuctionTest/YoyoDutchAuctionLib
 
 test-deploy :; forge test --match-path test/DeployYoyoAuctionAndYoyoNft.t.sol -vv
 
+# Test with fork on Sepolia 
+test-fork-sepolia:
+	forge test --fork-url $(ETHEREUM_SEPOLIA_RPC_URL)
+
+# Test with fork on Mainnet 
+test-fork-mainnet:
+	forge test --fork-url $(ETHEREUM_MAINNET_RPC_URL)
 
 # Coverage
 coverage :; forge coverage
@@ -50,4 +57,4 @@ coverage-uncovered :; forge coverage --report debug \
 gas-report :; forge test --gas-report
 
 deploy-sepolia :
-	@forge script script/DeployYoyoAuctionAndYoyoNft.s.sol:DeployYoyoAuctionAndYoyoNft --rpc-url $(SEPOLIA_RPC_URL) --private-key $(SEPOLIA_PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY)  -vvvv	
+	@forge script script/DeployYoyoAuctionAndYoyoNft.s.sol:DeployYoyoAuctionAndYoyoNft --rpc-url $(ETHEREUM_SEPOLIA_RPC_URL) --private-key $(SEPOLIA_PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY)  -vvvv	

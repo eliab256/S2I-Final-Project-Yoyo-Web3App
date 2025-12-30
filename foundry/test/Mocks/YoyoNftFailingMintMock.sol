@@ -123,7 +123,6 @@ contract YoyoNftFailingMintMock is ERC721, Ownable {
     function setShouldFailMint(bool _shouldFail, string memory _reason) external {
         shouldFailMint = _shouldFail;
         failureReason = _reason;
-        shouldPanic = false; // Reset panic mode
     }
 
     /**
@@ -131,7 +130,6 @@ contract YoyoNftFailingMintMock is ERC721, Ownable {
      */
     function setShouldPanic(bool _shouldPanic) external {
         shouldPanic = _shouldPanic;
-        shouldFailMint = false; // Reset failure mode
     }
 
     /**
