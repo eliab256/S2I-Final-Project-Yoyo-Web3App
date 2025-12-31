@@ -100,25 +100,28 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      */
     uint256 private constant DUTCH_AUCTION_START_PRICE_MULTIPLIER = 13;
 
-    /** 
-    @dev Mapping used to retrieve any necessary information about an auction starting from its auctionId.
-    */
+    /**
+     * @dev Mapping used to retrieve any necessary information about an auction starting from its auctionId.
+     */
     mapping(uint256 => AuctionStruct) internal s_auctionsFromAuctionId;
 
     /**
-     * @notice This mapping handles 3 different scenarios:
-     * 1. The address has no token to claim, therefore returns 0
-     * 2. The address has a token to claim and it was minted by this contract,
-     *    therefore returns uint256.max which indicates no payment is required
-     *    because the mint was already paid at auction close by this contract
-     * 3. The address returns a value different from 0 and uint256.max.
-     *    This means the address is entitled to claim a token that must be minted
-     *    and therefore must be paid for
      * @dev Mapping used to track the unsuccessful token claim to the winners.
      * @dev In case the mint to the winner fails, the winner can claim the token later.
-     * @dev winner --> tokenId --> mintPrice
+     * @dev winner --> tokenId
      */
-    mapping(address => mapping(uint256 => uint256)) internal s_unclaimedTokensFromWinner;
+    mapping(address => uint256) internal s_unclaimedTokensFromWinner;
+
+    /**
+     * @dev Mapping used to track tokens that need to be minted to winners.
+     * @dev In case both the mint to the winner and this contract fails, the token needs to be minted later.
+     * @dev It is used to ensure that no new auctions are opened for tokenIds that have already been assigned
+     * to a winner but whose minting failed, both when minting to the winner and when minting to this contract.
+     * @dev This mapping is used as an additional filter inside getIfTokenIdIsMintable within the openNewAuction
+     * function.
+     * @dev tokenId --> bool (true if the token needs to be minted to the winner)
+     */
+    mapping(uint256 => bool) internal s_unmintedTokensNeedToBeMintedToWinners;
 
     /**
      * @dev Mapping used to track unsuccessful refunds to previous bidders.
@@ -288,7 +291,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         uint256 _tokenId,
         AuctionType _auctionType
     ) public onlyOwner nftContractSet returns (uint256 auctionId) {
-        if (yoyoNftContract.getIfTokenIdIsMintable(_tokenId) == false) {
+        if (
+            (yoyoNftContract.getIfTokenIdIsMintable(_tokenId) == false ||
+                s_unmintedTokensNeedToBeMintedToWinners[_tokenId]) == true
+        ) {
             revert YoyoAuction__InvalidTokenId();
         }
 
@@ -411,6 +417,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         if (auction.state != AuctionState.OPEN) {
             revert YoyoAuction__AuctionNotOpen();
         }
+        if (block.timestamp >= auction.endTime) {
+            revert YoyoAuction__AuctionAlreadyEnded();
+        }
+        if (s_unclaimedTokensFromWinner[msg.sender] != 0) {
+            revert YoyoAuction__WinnerHasUnclaimedToken();
+        }
         if (auction.auctionType == AuctionType.DUTCH) {
             _placeBidOnDutchAuction(_auctionId);
         } else if (auction.auctionType == AuctionType.ENGLISH) {
@@ -513,7 +525,6 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      * @dev Changes auction state to CLOSED and attempts NFT minting
      * @dev If minting to the winner succeeds, finalizes the auction; if it fails, logs the error and mint to this contract
      * @dev Force to mint to this contract if minting to winner fails to allow open new auction and avoid confilct with mintPrice if it changes
-     * @dev s_unclaimedTokensFromWinner is updated accordingly for manual claiming later
      * @param _auctionId ID of the auction to close
      */
     function _closeAuction(uint256 _auctionId) private {
@@ -542,8 +553,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             auction.nftOwner = auction.higherBidder;
             emit YoyoAuction__AuctionFinalized(auction.auctionId, auction.tokenId, auction.higherBidder);
         } catch Error(string memory reason) {
+            s_unclaimedTokensFromWinner[auction.higherBidder] = auction.tokenId;
             _handleFallbackMint(auction, reason);
         } catch (bytes memory) {
+            s_unclaimedTokensFromWinner[auction.higherBidder] = auction.tokenId;
             _handleFallbackMint(auction, 'Low-level mint failure');
         }
     }
@@ -556,44 +569,26 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      * @param reason The error message or reason for the initial mint failure to the winner.
      */
     function _handleFallbackMint(AuctionStruct storage auction, string memory reason) internal {
-        (bool success, string memory fallbackReason) = _tryFallbackMintToThisContract(
-            auction.higherBidder,
-            auction.tokenId,
-            auction.higherBid
-        );
-        if (success) {
+        try yoyoNftContract.mintNft{ value: auction.higherBid }(address(this), auction.tokenId) {
+            // Minting to this contract succeeded
             auction.state = AuctionState.CLOSED;
             auction.nftOwner = address(this);
             emit YoyoAuction__MintToWinnerFailed(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
-        } else {
+        } catch Error(string memory fallbackReason) {
+            // Minting to this contract failed with error message
+            console2.log('tokenOwnerFromAuction must be 0. ', auction.nftOwner);
+            s_unmintedTokensNeedToBeMintedToWinners[auction.tokenId] = true;
             emit YoyoAuction__MintFailed(auction.auctionId, auction.tokenId, auction.higherBidder, fallbackReason);
-        }
-    }
-
-    /**
-     * @notice Attempts to mint the NFT to this contract as a fallback if minting to the winner fails.
-     * @dev If minting to this contract succeeds, updates the unclaimed tokens mapping for the winner.
-     *      If it fails, stores the mint price for manual claim and returns the failure reason.
-     * @param _finalClaimer The address of the original auction winner entitled to claim the NFT.
-     * @param _tokenId The ID of the NFT to mint.
-     * @param _mintPrice The price to pay for minting the NFT.
-     * @return success True if minting to this contract succeeded, false otherwise.
-     * @return reason The error message or reason for the mint failure, if any.
-     */
-    function _tryFallbackMintToThisContract(
-        address _finalClaimer,
-        uint256 _tokenId,
-        uint256 _mintPrice
-    ) internal returns (bool, string memory) {
-        try yoyoNftContract.mintNft{ value: _mintPrice }(address(this), _tokenId) {
-            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = type(uint256).max;
-            return (true, '');
-        } catch Error(string memory reason) {
-            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = _mintPrice;
-            return (false, reason);
         } catch {
-            s_unclaimedTokensFromWinner[_finalClaimer][_tokenId] = _mintPrice;
-            return (false, 'Low-level mint failure');
+            // Minting to this contract failed without error message
+            console2.log('tokenOwnerFromAuction must be 0. ', auction.nftOwner);
+            s_unmintedTokensNeedToBeMintedToWinners[auction.tokenId] = true;
+            emit YoyoAuction__MintFailed(
+                auction.auctionId,
+                auction.tokenId,
+                auction.higherBidder,
+                'Low-level mint failure'
+            );
         }
     }
 
@@ -607,11 +602,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         bool eligible = getElegibilityForClaimingNft(_auctionId, msg.sender);
 
         if (eligible) {
-            uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
-
-            if (s_unclaimedTokensFromWinner[msg.sender][tokenId] == type(uint256).max) {
+            if (s_auctionsFromAuctionId[_auctionId].nftOwner == address(this)) {
                 _claimNftForWinner(_auctionId);
             } else {
+                //check on nftOwner == address(0) not needed, because of getElegibilityForClaimingNft
                 _mintNftForWinner(_auctionId);
             }
         } else {
@@ -627,13 +621,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
     function _claimNftForWinner(uint256 _auctionId) internal {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
-        if (auction.nftOwner != address(this)) {
-            revert YoyoAuction__NftNotHeldByContract();
-        }
-
         auction.state = AuctionState.FINALIZED;
         auction.nftOwner = auction.higherBidder;
-        delete s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
+        delete s_unclaimedTokensFromWinner[auction.higherBidder];
 
         yoyoNftContract.transferNft(msg.sender, auction.tokenId);
 
@@ -648,12 +638,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
     function _mintNftForWinner(uint256 _auctionId) internal {
         AuctionStruct storage auction = s_auctionsFromAuctionId[_auctionId];
 
-        if (auction.nftOwner != address(0)) {
-            revert YoyoAuction__NftAlreadyMinted();
-        }
-
-        uint256 paidAmount = s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
-        delete s_unclaimedTokensFromWinner[auction.higherBidder][auction.tokenId];
+        uint256 paidAmount = auction.higherBid;
+        delete s_unclaimedTokensFromWinner[auction.higherBidder];
+        delete s_unmintedTokensNeedToBeMintedToWinners[auction.tokenId];
 
         auction.state = AuctionState.FINALIZED;
         auction.nftOwner = auction.higherBidder;
@@ -862,7 +849,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      */
     function getElegibilityForClaimingNft(uint256 _auctionId, address _claimer) public view returns (bool eligible) {
         uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
-        eligible = s_unclaimedTokensFromWinner[_claimer][tokenId] != 0;
+        eligible = s_unclaimedTokensFromWinner[_claimer] == tokenId;
     }
 
     // function debugMsgSender() public view returns (address) {

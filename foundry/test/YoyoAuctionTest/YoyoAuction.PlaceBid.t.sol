@@ -33,6 +33,50 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
         vm.stopPrank();
     }
 
+    function testUserCannotPlaceBidAfterAuctionEnded() public {
+        uint256 auctionId = openEnglishAuctionHelper();
+        uint256 endTime = yoyoAuction.getAuctionFromAuctionId(auctionId).endTime;
+
+        //Warp time to after auction end
+        vm.warp(endTime + 1);
+
+        vm.startPrank(USER_1);
+        vm.expectRevert(YoyoAuction__AuctionAlreadyEnded.selector);
+        yoyoAuction.placeBidOnAuction{ value: 1 ether }(auctionId);
+        vm.stopPrank();
+    }
+
+    function testUserCannotPlaceBidIfHasUnclaimedToken() public {
+        uint256 auctionId = openEnglishAuctionHelper();
+        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice() + yoyoAuction.getMinimumBidChangeAmount();
+
+        //Place a bid on the auction
+        vm.startPrank(USER_1);
+        ethAndNftRefuseMock.setCanReceiveNft(false);
+        ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
+        vm.stopPrank();
+
+        //Warp time to after auction end
+        uint256 endTime = yoyoAuction.getAuctionFromAuctionId(auctionId).endTime;
+        vm.warp(endTime + 1);
+
+        //Finalize the auction to set unclaimed token for USER_1
+        vm.prank(keeperMock);
+        bytes memory performData = abi.encode(auctionId, endTime);
+        yoyoAuction.performUpkeep(performData);
+
+        assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
+
+        vm.startPrank(deployer);
+        uint256 auctionId2 = yoyoAuction.openNewAuction(VALID_TOKEN_ID + 1, DUTCH_TYPE);
+        vm.stopPrank();
+        uint256 newBidPlaced2 = yoyoAuction.getCurrentAuctionPrice() + yoyoAuction.getMinimumBidChangeAmount();
+        vm.startPrank(USER_1);
+        vm.expectRevert(YoyoAuction__WinnerHasUnclaimedToken.selector);
+        ethAndNftRefuseMock.placeBid{ value: newBidPlaced2 }(auctionId2);
+        vm.stopPrank();
+    }
+
     function testIfPlaceBidOnAuctionPlaceBidOnEnglishAuctionWorks() public {
         uint256 auctionId = openEnglishAuctionHelper();
         uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice() + yoyoAuction.getMinimumBidChangeAmount();

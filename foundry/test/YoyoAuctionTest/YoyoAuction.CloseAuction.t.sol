@@ -218,6 +218,26 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
     }
 
     ////// Claim mint for winner //////
+    function testClaimNftRevertsIfNotEligible() public {
+        uint256 auctionId = openDutchAuctionHelper();
+        AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
+
+        vm.roll(block.number + 1);
+        vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime - 4 hours);
+        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
+
+        //Place a bid on the auction
+        placeBidHelper(auctionId, USER_1, newBidPlaced);
+
+        vm.roll(block.number + 1);
+
+        //Try to claim the NFT from an address not eligible
+        vm.startPrank(USER_2);
+        vm.expectRevert(YoyoAuction__NoTokenToClaim.selector);
+        yoyoAuction.claimNftForWinner(auctionId);
+        vm.stopPrank();
+    }
+
     function testClaimNftForWinnerWorksAfterNftMintedToAuctionContract() public {
         uint256 auctionId = openDutchAuctionHelper();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
@@ -255,26 +275,6 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         assertEq(yoyoNft.balanceOf(address(ethAndNftRefuseMock)), 1);
         assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), false);
         assert(yoyoAuction.getAuctionFromAuctionId(auctionId).state == AuctionState.FINALIZED);
-    }
-
-    function testClaimNftRevertsIfNotEligible() public {
-        uint256 auctionId = openDutchAuctionHelper();
-        AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);
-
-        vm.roll(block.number + 1);
-        vm.warp(yoyoAuction.getAuctionFromAuctionId(auctionId).endTime - 4 hours);
-        uint256 newBidPlaced = yoyoAuction.getCurrentAuctionPrice();
-
-        //Place a bid on the auction
-        placeBidHelper(auctionId, USER_1, newBidPlaced);
-
-        vm.roll(block.number + 1);
-
-        //Try to claim the NFT from an address not eligible
-        vm.startPrank(USER_2);
-        vm.expectRevert(YoyoAuction__NoTokenToClaim.selector);
-        yoyoAuction.claimNftForWinner(auctionId);
-        vm.stopPrank();
     }
 
     function testClaimNftForWinnerRevertsIfNotElegible() public {
