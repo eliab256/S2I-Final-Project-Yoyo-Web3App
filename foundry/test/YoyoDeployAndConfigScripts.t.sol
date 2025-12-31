@@ -142,6 +142,22 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         assert(bytes(anvilConfig.baseUri).length > 0);
     }
 
+    function testGetConfigByChainId() public {
+        helperConfig = new HelperConfig();
+
+        HelperConfig.NetworkConfig memory anvilConfig = helperConfig.getConfigByChainId(ANVIL_CHAIN_ID);
+        assertEq(anvilConfig.basicMintPrice, ANVIL_BASIC_MINT_PRICE);
+
+        HelperConfig.NetworkConfig memory sepoliaConfig = helperConfig.getConfigByChainId(SEPOLIA_CHAIN_ID);
+        assertEq(sepoliaConfig.basicMintPrice, SEPOLIA_BASIC_MINT_PRICE);
+
+        HelperConfig.NetworkConfig memory mainnetConfig = helperConfig.getConfigByChainId(MAINNET_CHAIN_ID);
+        assertEq(mainnetConfig.basicMintPrice, MAINNET_BASIC_MINT_PRICE);
+
+        vm.expectRevert(HelperConfig.HelperConfig__InvalidChainId.selector);
+        helperConfig.getConfigByChainId(9999);
+    }
+
     function testGetConstructorParamsByChainId() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
         // Test Anvil config
@@ -194,5 +210,28 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         (yoyoAuction, yoyoNft, deployer, helperConfig) = deployerScript.run();
         address deployerFromHelper = helperConfig.getDeployerAccount();
         assertEq(deployerFromHelper, deployer);
+    }
+    function testConstructorMainnet() public {
+        vm.chainId(MAINNET_CHAIN_ID);
+        HelperConfig config = new HelperConfig();
+        assertEq(config.getDeployerAccount(), MAINNET_DEPLOYER_ADDRESS);
+        assertEq(config.getBasicMintPrice(), MAINNET_BASIC_MINT_PRICE);
+        assertEq(config.getKeepersRegistry(), MAINNET_KEEPERS_REGISTRY);
+    }
+
+    function testConstructorSepolia() public {
+        vm.chainId(SEPOLIA_CHAIN_ID);
+        HelperConfig config = new HelperConfig();
+        assertEq(config.getDeployerAccount(), SEPOLIA_DEPLOYER_ADDRESS);
+        assertEq(config.getBasicMintPrice(), SEPOLIA_BASIC_MINT_PRICE);
+        assertEq(config.getKeepersRegistry(), SEPOLIA_KEEPERS_REGISTRY);
+    }
+
+    function testConstructorAnvil() public {
+        vm.chainId(ANVIL_CHAIN_ID);
+        HelperConfig config = new HelperConfig();
+        assertEq(config.getDeployerAccount(), ANVIL_DEPLOYER_ADDRESS);
+        assertEq(config.getBasicMintPrice(), ANVIL_BASIC_MINT_PRICE);
+        assertEq(config.getKeepersRegistry(), makeAddr('keeperMock'));
     }
 }
