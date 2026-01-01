@@ -39,7 +39,7 @@ contract YoyoAuctionBaseTest is Test {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
         (yoyoAuction, yoyoNft, deployer, helperConfig) = deployerScript.run();
 
-        ethAndNftRefuseMock = new EthAndNftRefuseMock(address(yoyoAuction));
+        ethAndNftRefuseMock = new EthAndNftRefuseMock(address(yoyoAuction), address(yoyoNft));
 
         // Get keeperMock from YoyoAuction contract
         keeperMock = address(yoyoAuction.i_registry());

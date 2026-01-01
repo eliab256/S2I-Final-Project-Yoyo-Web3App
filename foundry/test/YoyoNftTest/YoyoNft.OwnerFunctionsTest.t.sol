@@ -5,7 +5,7 @@ import { YoyoNftBaseTest } from '../YoyoNftTest/YoyoNft.Base.t.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import { YoyoNft } from '../../src/YoyoNft/YoyoNft.sol';
 import { ConstructorParams } from '../../src/YoyoTypes.sol';
-import { RevertOnReceiverMock } from '../Mocks/RevertOnReceiverMock.sol';
+
 import '../../src/YoyoNft/YoyoNftErrors.sol';
 import '../../src/YoyoNft/YoyoNftEvents.sol';
 
@@ -113,16 +113,14 @@ contract YoyoNftOwnerFunctionsTest is YoyoNftBaseTest {
     }
 
     function testIfWithdrawRevertsDueToFailedTransfer() public {
-        RevertOnReceiverMock revertOnReceiverMock = new RevertOnReceiverMock(params);
+        vm.prank(deployer);
+        yoyoNft.transferOwnership(address(ethAndNftRefuseMock));
+        //call deposit from YoyoNft contract
+        ethAndNftRefuseMock.depositOnNftContract{ value: 0.1 ether }();
 
-        YoyoNft newYoyoNft = revertOnReceiverMock.getNftContract();
-
-        vm.deal(address(revertOnReceiverMock), 0.1 ether);
-        vm.deal(address(newYoyoNft), 0.1 ether);
-
-        vm.prank(address(revertOnReceiverMock));
         vm.expectRevert(YoyoNft__WithdrawFailed.selector);
-        newYoyoNft.withdraw();
+        //call withdraw from YoyoNft contract
+        ethAndNftRefuseMock.withdrawFromNftContract();
     }
 
     /*//////////////////////////////////////////////////////////////

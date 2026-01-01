@@ -4,15 +4,16 @@ pragma solidity ^0.8.0;
 import { Test, console2 } from 'forge-std/Test.sol';
 import { YoyoNft } from '../../src/YoyoNft/YoyoNft.sol';
 import { ConstructorParams } from '../../src/YoyoTypes.sol';
+import { EthAndNftRefuseMock } from '../Mocks/EthAndNftRefuseMock.sol';
 
 contract YoyoNftBaseTest is Test {
     YoyoNft public yoyoNft;
-
+    EthAndNftRefuseMock public ethAndNftRefuseMock;
     string public constant BASE_URI_EXAMPLE = 'https://example.com/api/metadata/';
     uint256 public constant BASIC_MINT_PRICE = 0.01 ether;
 
     //Test Partecipants
-    address public deployer;
+    address public deployer = makeAddr('Deployer');
     address public AUCTION_CONTRACT = makeAddr('AuctionContract');
     address public USER_1 = makeAddr('User1');
     address public USER_2 = makeAddr('User2');
@@ -36,10 +37,9 @@ contract YoyoNftBaseTest is Test {
         });
 
     function setUp() public {
-        deployer = msg.sender;
-
         vm.startPrank(deployer);
         yoyoNft = new YoyoNft(params);
+        ethAndNftRefuseMock = new EthAndNftRefuseMock(address(0), address(yoyoNft));
 
         //Set up balances for each address
         vm.deal(deployer, STARTING_BALANCE_DEPLOYER);

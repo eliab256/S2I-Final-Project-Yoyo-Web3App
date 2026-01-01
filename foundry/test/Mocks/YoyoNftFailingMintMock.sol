@@ -10,11 +10,15 @@ import '../../src/YoyoNft/YoyoNftErrors.sol';
 import '../../src/YoyoNft/YoyoNftEvents.sol';
 
 /**
- * @title A Yoga NFT collection
+ * @title YoyoNft Mock Contract for Testing Mint Failures
  * @author Elia Bordoni
- * @notice This contract manages a limited collection of yoga-themed NFTs with auction integration
- * @dev Extends ERC721 with custom minting logic, auction contract integration, and owner-only functions
- * @dev The contract communicates with the YoyoAuction via a custom interface that only implements
+ * @notice Mock contract that simulates different mint failure scenarios for testing purposes
+ * @dev Extends YoyoNft functionality with configurable failure modes:
+ *      - Standard revert with custom error message (via setShouldFailMint)
+ *      - Panic errors using invalid opcode (via setShouldPanic)
+ * @dev Use setShouldFailMint(true, "reason") to make mintNft revert with a specific message
+ * @dev Use setShouldPanic(true) to make mintNft trigger a panic error (caught by generic catch block)
+ * @dev Reset failure modes by setting flags to false before testing successful mints
  */
 
 contract YoyoNftFailingMintMock is ERC721, Ownable {
