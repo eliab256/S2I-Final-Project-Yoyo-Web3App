@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { yoyoNftAbi, chainsToContractAddress } from '../data/smartContractsData';
+import { chainsToContractAddress } from '../contracts/addresses';
+import { yoyoNftAbi } from '../contracts/yoyoNftAbi';
 import { useChainId, useAccount, useReadContract } from 'wagmi';
 import { useNftMetadata } from '../hooks/useNftMetadata';
 
