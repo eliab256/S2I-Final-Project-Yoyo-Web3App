@@ -744,6 +744,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         return s_minimumBidChangeAmount;
     }
 
+    /**
+     * @notice Returns the percentage used to calculate the minimum bid increment
+     * @dev Returns MINIMUM_BID_INCREMENT_PERCENTAGE constant (25 per-mille = 2.5%)
+     * @dev This percentage is applied to the basic mint price to determine s_minimumBidChangeAmount
+     * @return uint256 Minimum bid increment percentage in per-mille (25 = 2.5%)
+     */
     function getMinimumBidChangePercentage() external pure returns (uint256) {
         return MINIMUM_BID_INCREMENT_PERCENTAGE;
     }
@@ -758,18 +764,38 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         return DUTCH_AUCTION_START_PRICE_MULTIPLIER;
     }
 
+    /**
+     * @notice Returns the denominator used for percentage calculations
+     * @dev Returns PERCENTAGE_DENOMINATOR constant (1000 = 100%)
+     * @return uint256 Percentage denominator (1000)
+     */
     function getPercentageDenominator() external pure returns (uint256) {
         return PERCENTAGE_DENOMINATOR;
     }
 
+    /**
+     * @notice Returns the minimum allowed mint price for NFTs
+     * @dev Returns MINIMUM_POSSIBLE_MINT_PRICE constant
+     * @return uint256 Minimum possible mint price in wei (40 wei with current constants)
+     */
     function getMinimumPossibleMintPrice() external pure returns (uint256) {
         return MINIMUM_POSSIBLE_MINT_PRICE;
     }
 
+    /**
+     * @notice Returns the number of price drop intervals in Dutch auctions
+     * @dev Returns DUTCH_AUCTION_DROP_NUMBER_OF_INTERVALS constant (48)
+     * @return uint256 Number of price drop intervals (48)
+     */
     function getDutchAuctionNumberOfIntervals() external pure returns (uint256) {
         return DUTCH_AUCTION_DROP_NUMBER_OF_INTERVALS;
     }
 
+    /**
+     * @notice Returns the grace period duration for manual auction closure
+     * @dev Returns GRACE_PERIOD constant (6 hours = 21600 seconds)
+     * @return uint256 Grace period duration in seconds (21600)
+     */
     function getGracePeriod() external pure returns (uint256) {
         return GRACE_PERIOD;
     }
@@ -851,8 +877,4 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         uint256 tokenId = s_auctionsFromAuctionId[_auctionId].tokenId;
         eligible = s_unclaimedTokensFromWinner[_claimer] == tokenId;
     }
-
-    // function debugMsgSender() public view returns (address) {
-    //     return msg.sender;
-    // }
 }

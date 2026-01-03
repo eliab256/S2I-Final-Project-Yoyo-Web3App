@@ -20,21 +20,15 @@ interface IYoyoNft {
 
     function getTotalMinted() external view returns (uint256);
 
-    function getOwnerFromTokenId(
-        uint256 tokenId
-    ) external view returns (address);
+    function getOwnerFromTokenId(uint256 tokenId) external view returns (address);
 
-    function getAccountBalance(
-        address _account
-    ) external view returns (uint256);
-
-    function getContractOwner() external view returns (address);
+    function getAccountBalance(address _account) external view returns (uint256);
 
     function getAuctionContract() external view returns (address);
 
     function getBasicMintPrice() external view returns (uint256);
 
-    function getIfTokenIdIsMintable(
-        uint256 _tokenId
-    ) external view returns (bool);
+    function getIfTokenIdIsMintable(uint256 _tokenId) external view returns (bool);
+
+    function getTotalSupply() external view returns (uint256);
 }

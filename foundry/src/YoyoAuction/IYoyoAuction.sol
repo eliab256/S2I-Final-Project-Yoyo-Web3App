@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import { AuctionStruct, AuctionState, AuctionType } from '../YoyoTypes.sol';
+import { IERC721Receiver } from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol';
 
 /**
  * @title IYoyoAuction
@@ -18,8 +20,6 @@ interface IYoyoAuction {
      * @param _yoyoNftAddress The address of the NFT collection smart contract
      */
     function setNftContract(address _yoyoNftAddress) external;
-
-    /* ========== CHAINLINK AUTOMATION FUNCTIONS ========== */
 
     /**
      * @notice Checks if upkeep is needed for Chainlink Automation
@@ -45,7 +45,7 @@ interface IYoyoAuction {
      * @param _tokenId The ID of the NFT to be auctioned
      * @param _auctionType The type of auction (ENGLISH or DUTCH)
      */
-    function openNewAuction(uint256 _tokenId, AuctionType _auctionType) external;
+    function openNewAuction(uint256 _tokenId, AuctionType _auctionType) external returns (uint256);
 
     /**
      * @notice Allows users to place bids on active auctions
@@ -108,10 +108,56 @@ interface IYoyoAuction {
     function getMinimumBidChangeAmount() external view returns (uint256);
 
     /**
+     * @notice Returns the percentage used to calculate the minimum bid increment
+     * @dev Returns MINIMUM_BID_INCREMENT_PERCENTAGE constant (25 per-mille = 2.5%)
+     * @dev This percentage is applied to the basic mint price to determine s_minimumBidChangeAmount
+     * @return uint256 Minimum bid increment percentage in per-mille (25 = 2.5%)
+     */
+    function getMinimumBidChangePercentage() external pure returns (uint256);
+
+    /**
      * @notice Returns the multiplier used to calculate Dutch auction starting price
+     * @dev Starting price = basic mint price * multiplier.
+     * @dev Used in `openNewDutchAuction` and `restartAuction` to determine starting price for Dutch auctions.
      * @return uint256 Dutch auction start price multiplier
      */
     function getDutchAuctionStartPriceMultiplier() external pure returns (uint256);
+
+    /**
+     * @notice Returns the denominator used for percentage calculations
+     * @dev Returns PERCENTAGE_DENOMINATOR constant (1000 = 100%)
+     * @dev Using 1000 instead of 100 provides better precision for decimal percentages
+     * @dev Used to calculate minimum bid increments and other percentage-based values
+     * @return uint256 Percentage denominator (1000)
+     */
+    function getPercentageDenominator() external pure returns (uint256);
+
+    /**
+     * @notice Returns the minimum allowed mint price for NFTs
+     * @dev Returns MINIMUM_POSSIBLE_MINT_PRICE constant
+     * @dev Calculated as PERCENTAGE_DENOMINATOR / MINIMUM_BID_INCREMENT_PERCENTAGE
+     * @dev Ensures mint price is large enough to avoid rounding issues in percentage calculations
+     * @return uint256 Minimum possible mint price in wei (40 wei with current constants)
+     */
+    function getMinimumPossibleMintPrice() external pure returns (uint256);
+
+    /**
+     * @notice Returns the number of price drop intervals in Dutch auctions
+     * @dev Returns DUTCH_AUCTION_DROP_NUMBER_OF_INTERVALS constant (48)
+     * @dev Price drops occur at regular intervals throughout the auction duration
+     * @dev With 24-hour auctions, this means a price drop every 30 minutes (24h / 48 = 0.5h)
+     * @return uint256 Number of price drop intervals (48)
+     */
+    function getDutchAuctionNumberOfIntervals() external pure returns (uint256);
+
+    /**
+     * @notice Returns the grace period duration for manual auction closure
+     * @dev Returns GRACE_PERIOD constant (6 hours = 21600 seconds)
+     * @dev After auction end time + grace period, any user can manually close/restart auctions
+     * @dev Provides resilience against Chainlink Automation downtime or failures
+     * @return uint256 Grace period duration in seconds (21600)
+     */
+    function getGracePeriod() external pure returns (uint256);
 
     /**
      * @notice Returns all information about a specific auction by its ID
@@ -146,5 +192,6 @@ interface IYoyoAuction {
      * @param _tokenId ID of the NFT token to check eligibility for
      * @return bool True if the caller is eligible to claim the token
      */
-    function getElegibiltyToClaimToken(uint256 _tokenId) external view returns (bool);
+    function getElegibiltyForClaimToken(uint256 _tokenId) external view returns (bool);
+
 }
