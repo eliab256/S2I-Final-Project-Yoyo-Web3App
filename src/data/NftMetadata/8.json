@@ -1,0 +1,43 @@
+{
+    "name": "The Sound of Silence: Yoga Nidra",
+    "description": "Deep meditation accessible to everyone. Requires no physical movement, only mindful listening.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/8.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Yoga Nidra"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 12
+        },
+        {
+            "trait_type": "Duration",
+            "value": "40 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Deep Meditation and Rest"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Mindfulness",
+        "course_type": "Yoga Nidra",
+        "accessibility_level": "Universal Access",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Spiritual"
+    }
+}

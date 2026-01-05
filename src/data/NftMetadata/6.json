@@ -1,0 +1,43 @@
+{
+    "name": "Free Wrists: Hands-Free Flow",
+    "description": "A dynamic Vinyasa practice that never requires placing hands on the floor. Perfect for carpal tunnel or upper limb prosthetics.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/6.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Vinyasa Flow"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Intermediate"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 10
+        },
+        {
+            "trait_type": "Duration",
+            "value": "50 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Wrist-Injury Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Legs and Core Strength"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 3
+        }
+    ],
+    "properties": {
+        "category": "Yoga",
+        "course_type": "Vinyasa Flow",
+        "accessibility_level": "Wrist-Injury Friendly",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Modern"
+    }
+}

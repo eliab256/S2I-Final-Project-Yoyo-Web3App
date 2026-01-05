@@ -1,0 +1,43 @@
+{
+    "name": "Neuro-Yoga: Focus & Parkinson's",
+    "description": "Specific exercises to improve coordination and tremors, based on neuroscience studies applied to yoga.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/14.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Hatha Therapy"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Intermediate"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 10
+        },
+        {
+            "trait_type": "Duration",
+            "value": "40 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Neurological Support"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Coordination and Tremor Control"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 2
+        }
+    ],
+    "properties": {
+        "category": "Medical Yoga",
+        "course_type": "Hatha Therapy",
+        "accessibility_level": "Neurological Support",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Technical"
+    }
+}

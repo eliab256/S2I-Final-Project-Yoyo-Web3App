@@ -1,0 +1,43 @@
+{
+    "name": "The Soul of Movement (YoYo Philosophy)",
+    "description": "Theoretical-practical masterclass on the philosophy of YoYo: why physical limits are not spiritual limits.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/16.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Raja Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 6
+        },
+        {
+            "trait_type": "Duration",
+            "value": "60 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Philosophy and Mindfulness"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 2
+        }
+    ],
+    "properties": {
+        "category": "Education",
+        "course_type": "Raja Yoga",
+        "accessibility_level": "Universal Access",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Spiritual"
+    }
+}

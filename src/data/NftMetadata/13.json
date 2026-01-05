@@ -1,0 +1,43 @@
+{
+    "name": "Desk Detox Yoga: Inclusive Office",
+    "description": "10-minute mini sessions for people who spend long hours seated (office or wheelchair) to prevent neck and shoulder pain.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/13.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Chair Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 20
+        },
+        {
+            "trait_type": "Duration",
+            "value": "10 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Neck and Shoulder Relief"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Corporate",
+        "course_type": "Chair Yoga",
+        "accessibility_level": "All levels",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Minimalist"
+    }
+}

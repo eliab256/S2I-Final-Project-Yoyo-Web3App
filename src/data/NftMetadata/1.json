@@ -1,0 +1,43 @@
+{
+    "name": "Bionic Balance: Yoga & Prosthetics",
+    "description": "A unique journey to integrate prosthetic use into practice, working on weight balance and proprioception.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/1.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Adaptive Hatha"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Intermediate"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 8
+        },
+        {
+            "trait_type": "Duration",
+            "value": "40 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Prosthetic Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Balance and Proprioception"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 2
+        }
+    ],
+    "properties": {
+        "category": "Specialized Yoga",
+        "course_type": "Adaptive Hatha",
+        "accessibility_level": "Prosthetic Friendly",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Technical"
+    }
+}

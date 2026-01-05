@@ -1,7 +1,7 @@
 export interface NftMetadata {
     name: string;
     description: string;
-    image: string; // CID of video MP4 "ipfs://..."
+    image: string; // CID of png image "ipfs://..."
     attributes: Array<{
         trait_type: string;
         value: string | number;
@@ -17,14 +17,7 @@ export interface NftMetadata {
 }
 
 export interface NftData {
-    tokenId: number;
-    tokenURI: string;
     metadata: NftMetadata;
-    videoUrl: string;
-    owner?: string;
-}
-
-export interface NftMetadataWithVideo {
-    nftMetadata: NftMetadata;
-    videoUrl: string;
+    tokenId: number;
+    image: string;
 }

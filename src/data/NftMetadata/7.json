@@ -1,0 +1,43 @@
+{
+    "name": "Iron Core (Physio-Yoga)",
+    "description": "Focus on trunk stability to support the spine and improve independence in daily movement.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/7.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Power Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Advanced"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 8
+        },
+        {
+            "trait_type": "Duration",
+            "value": "55 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Moderate"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Core and Spinal Stability"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 4
+        }
+    ],
+    "properties": {
+        "category": "Performance",
+        "course_type": "Power Yoga",
+        "accessibility_level": "Intermediate",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Technical"
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "name": "Hip Opening: Freedom of the Pelvis",
+    "description": "Adapted sequence for opening the hips, essential for those who spend much time seated due to mobility needs.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/17.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Adaptive Yin"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Intermediate"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 10
+        },
+        {
+            "trait_type": "Duration",
+            "value": "45 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Seated and Floor Options"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Hip Flexibility and Release"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 2
+        }
+    ],
+    "properties": {
+        "category": "Yoga",
+        "course_type": "Adaptive Yin",
+        "accessibility_level": "Seated/Floor Options",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Inclusive"
+    }
+}

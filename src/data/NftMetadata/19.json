@@ -1,0 +1,43 @@
+{
+    "name": "YoYo Consultation: Personalized Yoga",
+    "description": "Access to a private 1-to-1 session with a physiotherapist and a yoga teacher to map your YoYo profile.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/19.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Personal Consultation"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 1
+        },
+        {
+            "trait_type": "Duration",
+            "value": "90 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Personalized Assessment"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Services",
+        "course_type": "Consulting",
+        "accessibility_level": "Universal Access",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Professional"
+    }
+}

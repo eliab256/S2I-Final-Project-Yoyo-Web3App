@@ -1,13 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { currentPageReducer } from './pagesSlice';
 import { selectedNftReducer } from './selectedNftSlice';
-import { nftLoadingDataReducer } from './nftLoadingDataSlice';
 
 const store = configureStore({
     reducer: {
         currentPage: currentPageReducer,
         selectedNft: selectedNftReducer,
-        nftLoadingData: nftLoadingDataReducer,
     },
 });
 

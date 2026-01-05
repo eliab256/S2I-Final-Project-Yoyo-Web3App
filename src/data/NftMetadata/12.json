@@ -1,0 +1,43 @@
+{
+    "name": "Chronic Pain: Mindful Yin",
+    "description": "Yin Yoga sessions using extensive blocks, bolsters and blankets for those suffering from fibromyalgia or chronic fatigue.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/12.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Yin Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 12
+        },
+        {
+            "trait_type": "Duration",
+            "value": "50 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Chronic Pain Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Pain Relief and Relaxation"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Wellness",
+        "course_type": "Yin Yoga",
+        "accessibility_level": "Chronic Pain Friendly",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Peaceful"
+    }
+}

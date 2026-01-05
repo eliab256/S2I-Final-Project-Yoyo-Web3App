@@ -1,0 +1,43 @@
+{
+    "name": "Post-Surgery Yoga: Recovery Flow",
+    "description": "Developed with surgeons and physiotherapists to restore mobility after surgery. Medical approval required.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/10.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Physio-Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 10
+        },
+        {
+            "trait_type": "Duration",
+            "value": "30 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Post-Surgery Recovery"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Mobility Restoration"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Medical Yoga",
+        "course_type": "Physio-Yoga",
+        "accessibility_level": "Post-Surgery Recovery",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Technical"
+    }
+}

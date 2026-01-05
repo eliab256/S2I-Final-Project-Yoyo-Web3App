@@ -1,0 +1,43 @@
+{
+    "name": "Golden Joints: Senior Yoga",
+    "description": "A program dedicated to seniors with gentle movements to counter arthritis and improve joint flexibility.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/9.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Hatha Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 14
+        },
+        {
+            "trait_type": "Duration",
+            "value": "35 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Senior Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Joint Mobility and Flexibility"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Wellness",
+        "course_type": "Hatha Yoga",
+        "accessibility_level": "Beginner",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Soft"
+    }
+}

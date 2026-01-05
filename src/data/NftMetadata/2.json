@@ -1,0 +1,43 @@
+{
+    "name": "Inclusive Maternity: Prenatal Yoga",
+    "description": "Gentle practice supporting bodily changes, with specific variations for those with pre-existing mobility challenges.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/2.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Prenatal Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 12
+        },
+        {
+            "trait_type": "Duration",
+            "value": "35 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Pregnancy Safe"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Gentle Movement and Breathing"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Wellness",
+        "course_type": "Prenatal Yoga",
+        "accessibility_level": "Pregnancy Safe",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Soft"
+    }
+}

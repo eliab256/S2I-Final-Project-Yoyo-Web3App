@@ -1,0 +1,43 @@
+{
+    "name": "Seated Symphony: Adaptive Chair Yoga",
+    "description": "Developed with physiotherapists for wheelchair users. Focus on spinal mobility and chest opening without load on the lower limbs.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/0.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Chair Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 6
+        },
+        {
+            "trait_type": "Duration",
+            "value": "25 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Wheelchair Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Spinal Mobility and Breathing"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Adaptive Yoga",
+        "course_type": "Physio-Flow",
+        "accessibility_level": "High Mobility Support",
+        "redeemable": true,
+        "instructor_certified": true,
+        "style": "Inclusive"
+    }
+}

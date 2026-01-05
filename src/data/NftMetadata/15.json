@@ -1,0 +1,43 @@
+{
+    "name": "Warrior of the Ground: Floor Yoga",
+    "description": "All the power of Warrior poses practiced exclusively on the floor. For those who cannot stand but want an intense practice.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/15.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Adaptive Power"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Advanced"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 8
+        },
+        {
+            "trait_type": "Duration",
+            "value": "50 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "No-Standing Required"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Upper Body and Core Strength"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 4
+        }
+    ],
+    "properties": {
+        "category": "Yoga",
+        "course_type": "Adaptive Power",
+        "accessibility_level": "No-Standing Required",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Modern"
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "name": "Mudra & Mantra: Yoga of the Hands",
+    "description": "Practice focused on hands and voice. Perfect for those with minimal or no bodily mobility.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/18.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Mantra Yoga"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 8
+        },
+        {
+            "trait_type": "Duration",
+            "value": "30 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Hand Gestures and Chanting"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Spiritual",
+        "course_type": "Mantra Yoga",
+        "accessibility_level": "Universal Access",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Mystical"
+    }
+}

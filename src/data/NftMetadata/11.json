@@ -1,0 +1,43 @@
+{
+    "name": "Visual Balance: Yoga for the Blind",
+    "description": "A practice entirely based on precise audio guidance and spatial awareness, for those who experience yoga through touch and sound.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/11.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Guided Flow"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 8
+        },
+        {
+            "trait_type": "Duration",
+            "value": "45 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Visually Impaired Friendly"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Audio Guidance and Proprioception"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 2
+        }
+    ],
+    "properties": {
+        "category": "Specialized Yoga",
+        "course_type": "Guided Flow",
+        "accessibility_level": "Visually Impaired Friendly",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Inclusive"
+    }
+}

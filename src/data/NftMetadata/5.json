@@ -1,0 +1,43 @@
+{
+    "name": "Breath Without Borders: Pranayama",
+    "description": "Breathing techniques to increase lung capacity, essential for those with physical movement limitations.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/5.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Pranayama"
+        },
+        {
+            "trait_type": "Level",
+            "value": "Beginner"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 15
+        },
+        {
+            "trait_type": "Duration",
+            "value": "20 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Full"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Breathing and Nervous System"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 1
+        }
+    ],
+    "properties": {
+        "category": "Wellness",
+        "course_type": "Pranayama",
+        "accessibility_level": "All levels",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Mystical"
+    }
+}

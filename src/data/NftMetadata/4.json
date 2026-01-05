@@ -1,0 +1,43 @@
+{
+    "name": "YoYo Challenge: Collective Strength",
+    "description": "Live simultaneous challenge! An inclusive sequence where each asana has 3 variations (chair, floor, standing). Let's climb the leaderboard together.",
+    "image": "ipfs://bafybeiffwtwsqnqazxcft47ario5cizp5jnq6iimrihyjws23kwhf3v52e/4.png",
+    "attributes": [
+        {
+            "trait_type": "Style",
+            "value": "Interactive Challenge"
+        },
+        {
+            "trait_type": "Level",
+            "value": "All Levels"
+        },
+        {
+            "trait_type": "Lessons",
+            "value": 4
+        },
+        {
+            "trait_type": "Duration",
+            "value": "60 minutes"
+        },
+        {
+            "trait_type": "Accessibility",
+            "value": "Universal Access"
+        },
+        {
+            "trait_type": "Focus",
+            "value": "Community and Strength"
+        },
+        {
+            "trait_type": "Difficulty",
+            "value": 3
+        }
+    ],
+    "properties": {
+        "category": "Community",
+        "course_type": "Interactive Session",
+        "accessibility_level": "Universal Access",
+        "redeemable": false,
+        "instructor_certified": true,
+        "style": "Social"
+    }
+}
