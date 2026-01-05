@@ -3,27 +3,44 @@ project_type: no-code
 config: {}
 timestamps: null
 networks:
-- name: sepolia
-  chain_id: 11155111
-  rpc: https://sepolia.gateway.tenderly.co
-- name: anvil
-  chain_id: 31337
-  rpc: http://127.0.0.1:8545
+    - name: sepolia
+      chain_id: 11155111
+      rpc: ${ETHEREUM_SEPOLIA_RPC_URL}
+      compute_units_per_second: 200
 storage:
-  postgres:
-    enabled: true
+    postgres:
+        enabled: true
 native_transfers:
-  enabled: false
+    enabled: false
 contracts:
-- name: RocketPoolETH
-  details:
-  - network: ethereum
-    address: 0xae78736cd615f374d3085123a210448e74fc6393
-    start_block: '18900000'
-    end_block: '19000000'
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-  - name: Transfer
-  - name: Approval
+    - name: YoyoAuction
+      details:
+          - network: sepolia
+            address: 0x51eaAa1a6b1cF652B58da67cB32a0f7999263619
+            start_block: '9984515'
+      abi: ./abis/YoyoAuction.abi.json
+      include_events:
+          - name: YoyoAuction__BidPlaced
+          - name: YoyoAuction__BidderRefunded
+          - name: YoyoAuction__BidderRefundFailed
+          - name: YoyoAuction__AuctionOpened
+          - name: YoyoAuction__AuctionRestarted
+          - name: YoyoAuction__AuctionClosed
+          - name: YoyoAuction__AuctionFinalized
+          - name: YoyoAuction__MintToWinnerFailed
+          - name: YoyoAuction__MintFailed
+          - name: YoyoAuction__ManualUpkeepExecuted
+    - name: YoyoNft
+      details:
+          - network: sepolia
+            address: 0x81a9B713128A4DF3349D9Bc363CEE1D77accDCA3
+            start_block: '9984515'
+      abi: ./abis/YoyoNft.abi.json
+      include_events:
+          - name: YoyoNft__WithdrawCompleted
+          - name: YoyoNft__DepositCompleted
+          - name: YoyoNft__MintPriceUpdated
+          - name: YoyoNft__NftMinted
+          - name: Transfer
 global:
-  health_port: 0
+    health_port: 0

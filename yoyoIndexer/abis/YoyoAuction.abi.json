@@ -1,0 +1,407 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [{ "name": "_registry", "type": "address", "internalType": "address" }],
+        "stateMutability": "nonpayable"
+    },
+    { "type": "fallback", "stateMutability": "payable" },
+    { "type": "receive", "stateMutability": "payable" },
+    {
+        "type": "function",
+        "name": "changeMintPrice",
+        "inputs": [{ "name": "_newPrice", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "checkUpkeep",
+        "inputs": [{ "name": "", "type": "bytes", "internalType": "bytes" }],
+        "outputs": [
+            { "name": "upkeepNeeded", "type": "bool", "internalType": "bool" },
+            { "name": "performData", "type": "bytes", "internalType": "bytes" }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "claimFailedRefunds",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "claimNftForWinner",
+        "inputs": [{ "name": "_auctionId", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getAuctionCounter",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getAuctionDuration",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getAuctionFromAuctionId",
+        "inputs": [{ "name": "_auctionId", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [
+            {
+                "name": "",
+                "type": "tuple",
+                "internalType": "struct AuctionStruct",
+                "components": [
+                    { "name": "auctionId", "type": "uint256", "internalType": "uint256" },
+                    { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+                    { "name": "nftOwner", "type": "address", "internalType": "address" },
+                    { "name": "state", "type": "uint8", "internalType": "enum AuctionState" },
+                    { "name": "auctionType", "type": "uint8", "internalType": "enum AuctionType" },
+                    { "name": "startPrice", "type": "uint256", "internalType": "uint256" },
+                    { "name": "startTime", "type": "uint256", "internalType": "uint256" },
+                    { "name": "endTime", "type": "uint256", "internalType": "uint256" },
+                    { "name": "higherBidder", "type": "address", "internalType": "address" },
+                    { "name": "higherBid", "type": "uint256", "internalType": "uint256" },
+                    { "name": "minimumBidChangeAmount", "type": "uint256", "internalType": "uint256" }
+                ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getCurrentAuction",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "tuple",
+                "internalType": "struct AuctionStruct",
+                "components": [
+                    { "name": "auctionId", "type": "uint256", "internalType": "uint256" },
+                    { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+                    { "name": "nftOwner", "type": "address", "internalType": "address" },
+                    { "name": "state", "type": "uint8", "internalType": "enum AuctionState" },
+                    { "name": "auctionType", "type": "uint8", "internalType": "enum AuctionType" },
+                    { "name": "startPrice", "type": "uint256", "internalType": "uint256" },
+                    { "name": "startTime", "type": "uint256", "internalType": "uint256" },
+                    { "name": "endTime", "type": "uint256", "internalType": "uint256" },
+                    { "name": "higherBidder", "type": "address", "internalType": "address" },
+                    { "name": "higherBid", "type": "uint256", "internalType": "uint256" },
+                    { "name": "minimumBidChangeAmount", "type": "uint256", "internalType": "uint256" }
+                ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getCurrentAuctionPrice",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getDutchAuctionNumberOfIntervals",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getDutchAuctionStartPriceMultiplier",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getElegibilityForClaimingNft",
+        "inputs": [
+            { "name": "_auctionId", "type": "uint256", "internalType": "uint256" },
+            { "name": "_claimer", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "eligible", "type": "bool", "internalType": "bool" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getFailedRefundAmount",
+        "inputs": [{ "name": "_bidder", "type": "address", "internalType": "address" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getGracePeriod",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getMinimumBidChangeAmount",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getMinimumBidChangePercentage",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getMinimumPossibleMintPrice",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getNftContract",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getPercentageDenominator",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "i_registry",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address", "internalType": "contract IAutomationRegistryConsumer" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "onERC721Received",
+        "inputs": [
+            { "name": "operator", "type": "address", "internalType": "address" },
+            { "name": "from", "type": "address", "internalType": "address" },
+            { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+            { "name": "data", "type": "bytes", "internalType": "bytes" }
+        ],
+        "outputs": [{ "name": "", "type": "bytes4", "internalType": "bytes4" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "openNewAuction",
+        "inputs": [
+            { "name": "_tokenId", "type": "uint256", "internalType": "uint256" },
+            { "name": "_auctionType", "type": "uint8", "internalType": "enum AuctionType" }
+        ],
+        "outputs": [{ "name": "auctionId", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "performUpkeep",
+        "inputs": [{ "name": "performData", "type": "bytes", "internalType": "bytes" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "placeBidOnAuction",
+        "inputs": [{ "name": "_auctionId", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "renounceOwnership",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setNftContract",
+        "inputs": [{ "name": "_yoyoNftAddress", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "transferOwnership",
+        "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "inputs": [
+            { "name": "previousOwner", "type": "address", "indexed": true, "internalType": "address" },
+            { "name": "newOwner", "type": "address", "indexed": true, "internalType": "address" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__AuctionClosed",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "startPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "startTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "endTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "winner", "type": "address", "indexed": false, "internalType": "address" },
+            { "name": "higherBid", "type": "uint256", "indexed": true, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__AuctionFinalized",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "nftOwner", "type": "address", "indexed": true, "internalType": "address" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__AuctionOpened",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "auctionType", "type": "uint8", "indexed": false, "internalType": "enum AuctionType" },
+            { "name": "startPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "startTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "endTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "minimumBidIncrement", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__AuctionRestarted",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "newStartTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "newStartPrice", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "newEndTime", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "minimumBidIncrement", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__BidPlaced",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "bidder", "type": "address", "indexed": true, "internalType": "address" },
+            { "name": "bidAmount", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "auctionType", "type": "uint8", "indexed": false, "internalType": "enum AuctionType" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__BidderRefundFailed",
+        "inputs": [
+            { "name": "prevBidderAddress", "type": "address", "indexed": true, "internalType": "address" },
+            { "name": "bidAmount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__BidderRefunded",
+        "inputs": [
+            { "name": "prevBidderAddress", "type": "address", "indexed": true, "internalType": "address" },
+            { "name": "bidAmount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__ManualUpkeepExecuted",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "executor", "type": "address", "indexed": true, "internalType": "address" },
+            { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__MintFailed",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "bidder", "type": "address", "indexed": false, "internalType": "address" },
+            { "name": "reason", "type": "string", "indexed": false, "internalType": "string" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "YoyoAuction__MintToWinnerFailed",
+        "inputs": [
+            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "tokenId", "type": "uint256", "indexed": false, "internalType": "uint256" },
+            { "name": "bidder", "type": "address", "indexed": false, "internalType": "address" },
+            { "name": "reason", "type": "string", "indexed": false, "internalType": "string" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "error",
+        "name": "OwnableInvalidOwner",
+        "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
+    },
+    {
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount",
+        "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+    },
+    { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__AuctionAlreadyEnded", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__AuctionDoesNotExist", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__AuctionNotOpen", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__AuctionStillOpen", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__BidTooLow", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__CallValidFunctionToInteractWithContract", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__CannotChangeMintPriceDuringOpenAuction", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__InvalidTokenId", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__InvalidValue", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__NftContractAlreadySet", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__NftContractNotSet", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__NoFailedRefundsToClaim", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__NoTokenToClaim", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__OnlyChainlinkAutomationOrOwner", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__PreviousBidderRefundFailed", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__ThisContractDoesntAcceptDeposit", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__UpkeepNotNeeded", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__WinnerHasUnclaimedToken", "inputs": [] }
+]
