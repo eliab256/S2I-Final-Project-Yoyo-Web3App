@@ -106,4 +106,8 @@ contract YoyoNftGettersTest is YoyoNftBaseTest {
         //Assert token five is not mintable
         assertEq(yoyoNft.getIfTokenIdIsMintable(invalidTokenId), false);
     }
+
+    function testGetTotalSupply() public {
+        assertEq(yoyoNft.getTotalSupply(), 20);
+    }
 }

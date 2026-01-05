@@ -110,11 +110,11 @@ Both contracts provide comprehensive view functions to query state:
 
 ### YoyoAuction Contract
 
-**Address**: `[TO BE DEPLOYED]`
+**Address**: `0x51eaAa1a6b1cF652B58da67cB32a0f7999263619`
 
 ### YoyoNft Contract
 
-**Address**: `[TO BE DEPLOYED]`
+**Address**: `0x81a9B713128A4DF3349D9Bc363CEE1D77accDCA3`
 
 ### How to Interact with the Contracts
 

@@ -1,0 +1,29 @@
+name: yoyoIndexer
+project_type: no-code
+config: {}
+timestamps: null
+networks:
+- name: sepolia
+  chain_id: 11155111
+  rpc: https://sepolia.gateway.tenderly.co
+- name: anvil
+  chain_id: 31337
+  rpc: http://127.0.0.1:8545
+storage:
+  postgres:
+    enabled: true
+native_transfers:
+  enabled: false
+contracts:
+- name: RocketPoolETH
+  details:
+  - network: ethereum
+    address: 0xae78736cd615f374d3085123a210448e74fc6393
+    start_block: '18900000'
+    end_block: '19000000'
+  abi: ./abis/RocketTokenRETH.abi.json
+  include_events:
+  - name: Transfer
+  - name: Approval
+global:
+  health_port: 0

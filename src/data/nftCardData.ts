@@ -3,7 +3,7 @@ import images from './nftCardImgs';
 import nftMetadata from './nftCardMetadata';
 
 const nftData: NftData[] = nftMetadata.map((nft, index) => ({
-    ...nft,
+    metadata: nft,
     tokenId: index,
     image: images[index],
 }));
