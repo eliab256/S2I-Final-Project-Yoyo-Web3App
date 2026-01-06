@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import type { NftEventsCombined } from '../types/nftTypes';
 
-export function useUserNFTIds() {
+function useUserNFTIds() {
     const { address } = useAccount();
     const queryClient = useQueryClient();
 
@@ -39,3 +39,5 @@ export function useUserNFTIds() {
 
     return { tokenIds, isLoading, error };
 }
+
+export default useUserNFTIds;
