@@ -3,12 +3,16 @@ import NftCard from './NftCard';
 import { formatEther } from 'viem';
 import { useMemo, useState, useEffect } from 'react';
 import useEthereumPrice from '../hooks/useEthereumPrice';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsOpen, selectConfirmPlaceBid } from '../redux/confirmPlaceBidSlice';
+import { formatStartDate, formatTime } from '../utils/timeUtils';
 
 const CurrentAuction: React.FC = () => {
+    const dispatch = useDispatch();
+    const confirmBidState = useSelector(selectConfirmPlaceBid);
     const { auction, isLoading } = useCurrentAuction();
     const { price: ethPriceUSD } = useEthereumPrice();
     const [bidValue, setBidValue] = useState<string>('');
-    const [nftDetails, setNftDetails] = useState<boolean>(false);
     const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
     const getUsdPrice = useMemo(() => {
@@ -66,46 +70,21 @@ const CurrentAuction: React.FC = () => {
         return () => clearInterval(interval);
     }, [endTime]);
 
-    // Formatta il tempo rimanente
-    const formatTime = (seconds: number) => {
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-
-        if (days > 0) {
-            return `${days}d ${hours}h ${minutes}m ${secs}s`;
-        } else if (hours > 0) {
-            return `${hours}h ${minutes}m ${secs}s`;
-        } else if (minutes > 0) {
-            return `${minutes}m ${secs}s`;
-        } else {
-            return `${secs}s`;
-        }
-    };
-
-    // Formatta la data di inizio
-    const formatStartDate = (timestamp: bigint | undefined) => {
-        if (!timestamp) return '';
-        const date = new Date(Number(timestamp) * 1000);
-        return date.toLocaleString();
-    };
-
     return (
         <div className="w-full px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
-            <h1>Current Auction</h1>
+            <h1 className="text-center">Current Auction</h1>
             {isLoading ? (
                 <div className="flex items-center justify-center min-h-[50vh]">
                     <div className="text-xl">Loading current auction...</div>
                 </div>
             ) : tokenId !== undefined ? (
                 <>
-                    <h2>Auction ID: {auctionId}</h2>
-                    <div className="flex flex-col lg:flex-row gap-6 items-start justify-center mt-6">
+                    <h2 className="text-center">Auction ID: {auctionId}</h2>
+                    <div className="flex flex-col lg:flex-row gap-4 items-start justify-center mt-3">
                         <NftCard tokenId={Number(tokenId)} />
-                        <div className="max-w-md w-full p-6 bg-white rounded-xl shadow-lg">
-                            <h2 className="text-2xl font-bold text-center mb-4">Place Your Bid Here</h2>
-                            <p className="text-lg text-center mb-6 w-full">
+                        <div className="max-w-md w-full p-4 bg-white rounded-xl shadow-lg">
+                            <h2 className="text-2xl font-bold text-center mb-2">Place Your Bid Here</h2>
+                            <p className="text-lg text-center mb-3 w-full">
                                 This is {auctionType === 0 ? 'an English' : 'a Dutch'} auction
                             </p>
 
@@ -164,7 +143,10 @@ const CurrentAuction: React.FC = () => {
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                     <p className="text-sm text-gray-500 mt-1">≈ ${userBidUsd} USD</p>
-                                    <button className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200">
+                                    <button
+                                        className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200"
+                                        onClick={() => dispatch(setIsOpen())}
+                                    >
                                         Enter the Auction
                                     </button>
                                 </div>
@@ -173,11 +155,13 @@ const CurrentAuction: React.FC = () => {
                     </div>
 
                     {/* Timer Section */}
-                    <div className="max-w-2xl mx-auto mt-8 p-6 bg-[linear-gradient(to_left,rgb(147,112,186)_10%,rgb(106,170,142)_90%)] rounded-xl shadow-lg text-white">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="max-w-2xl mx-auto mt-3 p-4 bg-[linear-gradient(to_left,rgb(147,112,186)_10%,rgb(106,170,142)_90%)] rounded-xl shadow-lg text-white">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Auction Started */}
                             <div className="text-center">
-                                <p className="text-sm uppercase tracking-wide opacity-90 mb-2">Auction Started</p>
+                                <p className="text-xl uppercase font-bold tracking-wide opacity-90 mb-2">
+                                    Auction Started
+                                </p>
                                 <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
                                     <p className="text-lg font-mono">{formatStartDate(startTime)}</p>
                                 </div>
@@ -185,11 +169,17 @@ const CurrentAuction: React.FC = () => {
 
                             {/* Time Remaining */}
                             <div className="text-center">
-                                <p className="text-sm uppercase tracking-wide opacity-90 mb-2">Time Remaining</p>
+                                <p className="text-xl uppercase font-bold tracking-wide opacity-90 mb-2">
+                                    Time Remaining
+                                </p>
                                 <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
                                     <p
                                         className={`text-2xl font-mono font-bold ${
-                                            timeRemaining < 3600 ? 'text-red-300' : ''
+                                            timeRemaining === 0
+                                                ? 'text-red-600 animate-pulse'
+                                                : timeRemaining < 3600
+                                                ? 'text-red-300'
+                                                : ''
                                         }`}
                                     >
                                         {timeRemaining > 0 ? formatTime(timeRemaining) : 'ENDED'}

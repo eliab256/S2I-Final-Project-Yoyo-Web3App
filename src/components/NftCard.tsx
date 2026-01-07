@@ -18,8 +18,8 @@ const NftCard: React.FC<NftCardProps> = ({ tokenId }) => {
 
             {/* Nome e Token ID */}
             <div className="p-2 text-center">
-                <h3 className="text-3xl font-semibold text-gray-800 mb-2">{metadata?.name || 'Unknown NFT'}</h3>
-                <p className="text-2xl text-gray-500">Token ID: {tokenId}</p>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-1">{metadata?.name || 'Unknown NFT'}</h3>
+                <p className="text-lg text-gray-500">Token ID: {tokenId}</p>
             </div>
         </div>
     );
