@@ -24,7 +24,7 @@ function useCurrentAuction() {
         functionName: 'getAuctionFromAuctionId',
         args: currentAuctionId !== undefined ? [currentAuctionId] : undefined,
         query: {
-            enabled: currentAuctionId !== undefined, // ✅ Parte solo se ha l'ID
+            enabled: currentAuctionId !== undefined, 
             refetchInterval: 10000, // 🔄 Aggiorna ogni 10 secondi
         },
     });

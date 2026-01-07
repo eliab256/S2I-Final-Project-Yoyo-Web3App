@@ -1,6 +1,6 @@
 import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
-import  useUserNFTIds  from '../hooks/useUserNFTIds';
+import useUserNFTIds from '../hooks/useUserNFTIds';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
@@ -42,9 +42,7 @@ const MyNfts: React.FC = () => {
                     <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse">
                         <div className="border-red-500 border-2 bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
                             <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">Error loading NFTs</h2>
-                            <p className="text-red-600">
-                                Failed to fetch your NFTs. Please try again later.
-                            </p>
+                            <p className="text-red-600">Failed to fetch your NFTs. Please try again later.</p>
                         </div>
                     </div>
                 )}
@@ -64,9 +62,9 @@ const MyNfts: React.FC = () => {
                 {/* wallet is connected and the user has bought products */}
                 {isConnected && hasNfts && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
-                        {tokenIds.map(tokenId => (
+                        {/* {tokenIds.map(tokenId => (
                             <NftCard key={tokenId} tokenId={tokenId} />
-                        ))}
+                        ))} */}
                     </div>
                 )}
             </div>
