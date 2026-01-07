@@ -3,44 +3,35 @@ import { yoyoAuctionABI } from '../contracts/yoyoAuctionAbi';
 import { chainsToContractAddress } from '../contracts/addresses';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import type { AuctionStruct } from '../types/contractsTypes';
 
 function useCurrentAuction() {
     const queryClient = useQueryClient();
     const chainId = useChainId();
     const yoyoAuctionAddress = chainsToContractAddress[chainId]?.yoyoAuctionAddress;
 
-    const { data: currentAuctionId, isLoading: isLoadingId } = useReadContract({
+    const { data: auctionData, isLoading } = useReadContract({
         address: yoyoAuctionAddress,
         abi: yoyoAuctionABI,
-        functionName: 'getCurrentAuctionId',
+        functionName: 'getCurrentAuction',
         query: {
-            refetchInterval: 30000, //DA CAMBIARE CON LETTURA NUOVO EVENTO AUCTIONOPEN
+            refetchInterval: 10000, // 🔄 Aggiorna ogni 10 secondi - DA CAMBIARE CON LETTURA NUOVO EVENTO AUCTIONOPEN
         },
-    });
+    }) as { data: AuctionStruct | undefined; isLoading: boolean };
 
-    const { data: auctionData, isLoading: isLoadingAuction } = useReadContract({
-        address: yoyoAuctionAddress,
-        abi: yoyoAuctionABI,
-        functionName: 'getAuctionFromAuctionId',
-        args: currentAuctionId !== undefined ? [currentAuctionId] : undefined,
-        query: {
-            enabled: currentAuctionId !== undefined, 
-            refetchInterval: 10000, // 🔄 Aggiorna ogni 10 secondi
-        },
-    });
+    const auctionId = auctionData?.auctionId;
 
     useEffect(() => {
-        if (currentAuctionId !== undefined) {
+        if (auctionId !== undefined) {
             queryClient.invalidateQueries({
-                queryKey: ['auctionBids', currentAuctionId],
+                queryKey: ['auctionBids', auctionId],
             });
         }
-    }, [currentAuctionId, queryClient]);
+    }, [auctionId, queryClient]);
 
     return {
-        auctionId: currentAuctionId,
-        auction: auctionData,
-        isLoading: isLoadingId || isLoadingAuction,
+        auction: auctionData, // return the entire AuctionStruct
+        isLoading,
     };
 }
 

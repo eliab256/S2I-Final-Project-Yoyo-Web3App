@@ -9,7 +9,7 @@ const cache = {
 
 const CACHE_DURATION = 600000; // 10 minutes in milliseconds
 
-export const useEthereumPrice = () => {
+const useEthereumPrice = () => {
     const [price, setPrice] = useState<number>(cache.price || 0);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(cache.error);
@@ -73,3 +73,5 @@ export const useEthereumPrice = () => {
         isCached: cache.price !== null && Date.now() - cache.timestamp < CACHE_DURATION,
     };
 };
+
+export default useEthereumPrice;
