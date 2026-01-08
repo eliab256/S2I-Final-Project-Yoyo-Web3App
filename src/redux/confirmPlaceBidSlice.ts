@@ -4,14 +4,14 @@ import type { RootState } from './store';
 interface ConfirmPlaceBidState {
     isConfirmBidPanelOpen: boolean;
     alreadyHigherBidder: boolean;
-    enoughBalance: boolean;
+    insufficientBalance: boolean;
     hasUnclaimedTokens: boolean;
 }
 
 const initialState: ConfirmPlaceBidState = {
     isConfirmBidPanelOpen: false,
     alreadyHigherBidder: false,
-    enoughBalance: false,
+    insufficientBalance: false,
     hasUnclaimedTokens: false,
 };
 
@@ -25,8 +25,8 @@ export const confirmPlaceBidSlice = createSlice({
         setAlreadyHigherBidder: state => {
             state.alreadyHigherBidder = true;
         },
-        setEnoughBalance: state => {
-            state.enoughBalance = true;
+        setInsufficientBalance: state => {
+            state.insufficientBalance = true;
         },
         setHasUnclaimedTokens: state => {
             state.hasUnclaimedTokens = true;
@@ -34,13 +34,13 @@ export const confirmPlaceBidSlice = createSlice({
         resetConfirmPlaceBid: state => {
             state.isConfirmBidPanelOpen = false;
             state.alreadyHigherBidder = false;
-            state.enoughBalance = false;
+            state.insufficientBalance = false;
             state.hasUnclaimedTokens = false;
         },
     },
 });
 
-export const { setIsConfirmBidPanelOpen, setAlreadyHigherBidder, setEnoughBalance, setHasUnclaimedTokens, resetConfirmPlaceBid } =
+export const { setIsConfirmBidPanelOpen, setAlreadyHigherBidder, setInsufficientBalance, setHasUnclaimedTokens, resetConfirmPlaceBid } =
     confirmPlaceBidSlice.actions;
 
 export const selectConfirmPlaceBid = (state: RootState) => state.confirmPlaceBid;

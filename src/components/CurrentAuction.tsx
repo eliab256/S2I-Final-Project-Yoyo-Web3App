@@ -7,9 +7,10 @@ import { useMemo, useState } from 'react';
 import useEthereumPrice from '../hooks/useEthereumPrice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
+import { useAccount } from 'wagmi';
 
 const CurrentAuction: React.FC = () => {
-    //const [openConfirmPanel, setOpenConfirmPanel] = useState(false);
+    const {  isConnected } = useAccount();
     const { auction, isLoading } = useCurrentAuction();
     const { price: ethPriceUSD } = useEthereumPrice();
     const [bidValue, setBidValue] = useState<string>('');
@@ -68,7 +69,6 @@ const CurrentAuction: React.FC = () => {
         return numericBid >= minimumRequiredBid;
     }, [bidValue, minimumRequiredBid, auction?.endTime]);
 
-    // Decostruzione della struct auction
     const {
         auctionId,
         tokenId,
@@ -164,7 +164,7 @@ const CurrentAuction: React.FC = () => {
                                     <button
                                         className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
                                         onClick={() => dispatch(setIsConfirmBidPanelOpen())}
-                                        disabled={!isBidValid}
+                                        disabled={!isBidValid || !isConnected}
                                     >
                                         Enter the Auction
                                     </button>
@@ -173,7 +173,7 @@ const CurrentAuction: React.FC = () => {
                         </div>
                     </div>
                     <CountDown startTime={startTime} endTime={endTime} />
-                    {openConfirmPanel && <BidResume bidder={higherBidder} bidAmount={higherBid} />}
+                    {openConfirmPanel && <BidResume bidAmount={bidValue} />}
                 </>
             ) : (
                 <div className="flex items-center justify-center min-h-[50vh]">
