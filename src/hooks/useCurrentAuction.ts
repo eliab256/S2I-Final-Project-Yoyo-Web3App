@@ -18,7 +18,7 @@ function useCurrentAuction() {
             refetchInterval: 10000, // 🔄 Aggiorna ogni 10 secondi - DA CAMBIARE CON LETTURA NUOVO EVENTO AUCTIONOPEN
         },
     }) as { data: AuctionStruct | undefined; isLoading: boolean };
-
+  
     const auctionId = auctionData?.auctionId;
 
     useEffect(() => {
@@ -30,7 +30,7 @@ function useCurrentAuction() {
     }, [auctionId, queryClient]);
 
     return {
-        auction: auctionData, // return the entire AuctionStruct
+        auction: auctionData as AuctionStruct, // return the entire AuctionStruct
         isLoading,
     };
 }

@@ -1,19 +1,22 @@
 import useCurrentAuction from '../hooks/useCurrentAuction';
 import NftCard from './NftCard';
+import CountDown from './CountDown';
+import BidResume from './BidResume';
 import { formatEther } from 'viem';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import useEthereumPrice from '../hooks/useEthereumPrice';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsOpen, selectConfirmPlaceBid } from '../redux/confirmPlaceBidSlice';
-import { formatStartDate, formatTime } from '../utils/timeUtils';
+import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
 
 const CurrentAuction: React.FC = () => {
-    const dispatch = useDispatch();
-    const confirmBidState = useSelector(selectConfirmPlaceBid);
+    //const [openConfirmPanel, setOpenConfirmPanel] = useState(false);
     const { auction, isLoading } = useCurrentAuction();
     const { price: ethPriceUSD } = useEthereumPrice();
     const [bidValue, setBidValue] = useState<string>('');
-    const [timeRemaining, setTimeRemaining] = useState<number>(0);
+    const openConfirmPanel = useSelector(
+        (state: { confirmPlaceBid: { isConfirmBidPanelOpen: boolean } }) => state.confirmPlaceBid.isConfirmBidPanelOpen
+    );
+    const dispatch = useDispatch();
 
     const getUsdPrice = useMemo(() => {
         return (ethAmount: bigint | undefined) => {
@@ -39,6 +42,32 @@ const CurrentAuction: React.FC = () => {
         }
     }, [bidValue, ethPriceUSD]);
 
+    // Calcola il bid minimo richiesto
+    const minimumRequiredBid = useMemo(() => {
+        if (!auction) return 0;
+
+        if (auction.auctionType === 0) {
+            // English auction: higher bid + minimum increment
+            return auction.higherBid && auction.minimumBidChangeAmount
+                ? parseFloat(formatEther(auction.higherBid + auction.minimumBidChangeAmount))
+                : 0;
+        } else {
+            // Dutch auction: current price
+            return auction.higherBid ? parseFloat(formatEther(auction.higherBid)) : 0;
+        }
+    }, [auction]);
+
+    // Verifica se il bid inserito è valido
+    const isBidValid = useMemo(() => {
+        if (!bidValue) return false;
+        const numericBid = parseFloat(bidValue);
+        if (isNaN(numericBid)) return false;
+        if (!auction?.endTime) return false;
+        const now = Math.floor(Date.now() / 1000);
+        if (Number(auction.endTime) <= now) return false;
+        return numericBid >= minimumRequiredBid;
+    }, [bidValue, minimumRequiredBid, auction?.endTime]);
+
     // Decostruzione della struct auction
     const {
         auctionId,
@@ -53,22 +82,6 @@ const CurrentAuction: React.FC = () => {
         higherBid,
         minimumBidChangeAmount,
     } = auction || {};
-
-    // Countdown timer
-    useEffect(() => {
-        if (!endTime) return;
-
-        const updateTimer = () => {
-            const now = Math.floor(Date.now() / 1000);
-            const remaining = Number(endTime) - now;
-            setTimeRemaining(remaining > 0 ? remaining : 0);
-        };
-
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
-
-        return () => clearInterval(interval);
-    }, [endTime]);
 
     return (
         <div className="w-full px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
@@ -131,6 +144,11 @@ const CurrentAuction: React.FC = () => {
                                         step="0.001"
                                         value={bidValue}
                                         onChange={e => setBidValue(e.target.value)}
+                                        onClick={() => {
+                                            if (!bidValue) {
+                                                setBidValue(minimumRequiredBid.toString());
+                                            }
+                                        }}
                                         placeholder={
                                             auctionType === 0
                                                 ? higherBid && minimumBidChangeAmount
@@ -140,12 +158,13 @@ const CurrentAuction: React.FC = () => {
                                                 ? `${formatEther(higherBid)} ETH`
                                                 : '0 ETH'
                                         }
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                     />
                                     <p className="text-sm text-gray-500 mt-1">≈ ${userBidUsd} USD</p>
                                     <button
-                                        className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200"
-                                        onClick={() => dispatch(setIsOpen())}
+                                        className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                                        onClick={() => dispatch(setIsConfirmBidPanelOpen())}
+                                        disabled={!isBidValid}
                                     >
                                         Enter the Auction
                                     </button>
@@ -153,41 +172,8 @@ const CurrentAuction: React.FC = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Timer Section */}
-                    <div className="max-w-2xl mx-auto mt-3 p-4 bg-[linear-gradient(to_left,rgb(147,112,186)_10%,rgb(106,170,142)_90%)] rounded-xl shadow-lg text-white">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Auction Started */}
-                            <div className="text-center">
-                                <p className="text-xl uppercase font-bold tracking-wide opacity-90 mb-2">
-                                    Auction Started
-                                </p>
-                                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
-                                    <p className="text-lg font-mono">{formatStartDate(startTime)}</p>
-                                </div>
-                            </div>
-
-                            {/* Time Remaining */}
-                            <div className="text-center">
-                                <p className="text-xl uppercase font-bold tracking-wide opacity-90 mb-2">
-                                    Time Remaining
-                                </p>
-                                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
-                                    <p
-                                        className={`text-2xl font-mono font-bold ${
-                                            timeRemaining === 0
-                                                ? 'text-red-600 animate-pulse'
-                                                : timeRemaining < 3600
-                                                ? 'text-red-300'
-                                                : ''
-                                        }`}
-                                    >
-                                        {timeRemaining > 0 ? formatTime(timeRemaining) : 'ENDED'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <CountDown startTime={startTime} endTime={endTime} />
+                    {openConfirmPanel && <BidResume bidder={higherBidder} bidAmount={higherBid} />}
                 </>
             ) : (
                 <div className="flex items-center justify-center min-h-[50vh]">

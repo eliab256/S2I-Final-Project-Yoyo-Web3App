@@ -2,14 +2,14 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { RootState } from './store';
 
 interface ConfirmPlaceBidState {
-    isOpen: boolean;
+    isConfirmBidPanelOpen: boolean;
     alreadyHigherBidder: boolean;
     enoughBalance: boolean;
     hasUnclaimedTokens: boolean;
 }
 
 const initialState: ConfirmPlaceBidState = {
-    isOpen: false,
+    isConfirmBidPanelOpen: false,
     alreadyHigherBidder: false,
     enoughBalance: false,
     hasUnclaimedTokens: false,
@@ -19,8 +19,8 @@ export const confirmPlaceBidSlice = createSlice({
     name: 'confirmPlaceBid',
     initialState,
     reducers: {
-        setIsOpen: state => {
-            state.isOpen = true;
+        setIsConfirmBidPanelOpen: state => {
+            state.isConfirmBidPanelOpen = true;
         },
         setAlreadyHigherBidder: state => {
             state.alreadyHigherBidder = true;
@@ -32,7 +32,7 @@ export const confirmPlaceBidSlice = createSlice({
             state.hasUnclaimedTokens = true;
         },
         resetConfirmPlaceBid: state => {
-            state.isOpen = false;
+            state.isConfirmBidPanelOpen = false;
             state.alreadyHigherBidder = false;
             state.enoughBalance = false;
             state.hasUnclaimedTokens = false;
@@ -40,7 +40,7 @@ export const confirmPlaceBidSlice = createSlice({
     },
 });
 
-export const { setIsOpen, setAlreadyHigherBidder, setEnoughBalance, setHasUnclaimedTokens, resetConfirmPlaceBid } =
+export const { setIsConfirmBidPanelOpen, setAlreadyHigherBidder, setEnoughBalance, setHasUnclaimedTokens, resetConfirmPlaceBid } =
     confirmPlaceBidSlice.actions;
 
 export const selectConfirmPlaceBid = (state: RootState) => state.confirmPlaceBid;
