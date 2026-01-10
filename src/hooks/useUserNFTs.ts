@@ -17,10 +17,18 @@ function useUserNFTs(customAddress?: Address) {
 
             const [received, sent] = await Promise.all([getReceivedNFTs(targetAddress), getSentNFTs(targetAddress)]);
 
-            return getOwnedNFTs(received, sent);
+            console.log('Received NFTs:', received);
+            console.log('Sent NFTs:', sent);
+
+            const owned = getOwnedNFTs(received, sent);
+            console.log('Owned NFTs:', owned);
+
+            return owned;
         },
         enabled: !!targetAddress, // Esegui solo se address esiste
-        staleTime: 1000 * 60, // Cache per 1 minuto
+        gcTime: 1000 * 60 * 5, // 5 minutes cache
+        staleTime: 1000 * 60 * 60, // 6 minutes stale time
+        refetchOnWindowFocus: true, // refetch when window gets focus
     });
 }
 

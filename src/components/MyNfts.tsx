@@ -1,12 +1,14 @@
 import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
-import useUserNFTIds from '../hooks/useUserNFTs';
+import useUserNFTs from '../hooks/useUserNFTs';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
-    const { tokenIds, isLoading, error } = useUserNFTIds();
+    const { data: nfts, isLoading, error, refetch } = useUserNFTs();
 
-    const hasNfts = tokenIds && tokenIds.length > 0;
+    // Extract tokenIds from nfts
+    const tokenIds = nfts?.map(nft => nft.tokenId) ?? [];
+    const hasNfts = tokenIds.length > 0;
 
     return (
         <div className="w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
@@ -61,11 +63,16 @@ const MyNfts: React.FC = () => {
                 )}
                 {/* wallet is connected and the user has bought products */}
                 {isConnected && hasNfts && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
-                        {/* {tokenIds.map(tokenId => (
-                            <NftCard key={tokenId} tokenId={tokenId} />
-                        ))} */}
-                    </div>
+                    <>
+                        <button onClick={() => refetch()} className="px-4 py-2 bg-blue-500 text-white rounded">
+                            🔄 Aggiorna
+                        </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
+                            {tokenIds.map(tokenId => (
+                                <NftCard key={tokenId} tokenId={Number(tokenId)} />
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
         </div>

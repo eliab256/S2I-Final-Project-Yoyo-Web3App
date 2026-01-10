@@ -2,7 +2,7 @@ import type { Address } from 'viem';
 import type { Transfer, TransfersResponse } from '../types/queriesTypes';
 import { GET_RECEIVED_NFTS, GET_SENT_NFTS } from './queries';
 
-const GRAPHQL_ENDPOINT = 'http://localhost:3001/playground';
+const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
 
 async function fetchGraphQL(query: string, variables: Record<string, any> = {}) {
     const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -26,11 +26,13 @@ async function fetchGraphQL(query: string, variables: Record<string, any> = {}) 
 }
 
 export async function getReceivedNFTs(ownerAddress: Address): Promise<Transfer[]> {
-    const data = (await fetchGraphQL(GET_RECEIVED_NFTS, { ownerAddress })) as TransfersResponse;
+    const data = (await fetchGraphQL(GET_RECEIVED_NFTS, {
+        ownerAddress: ownerAddress.toLowerCase(),
+    })) as TransfersResponse;
     return data.allTransfers.nodes;
 }
 
 export async function getSentNFTs(ownerAddress: Address): Promise<Transfer[]> {
-    const data = (await fetchGraphQL(GET_SENT_NFTS, { ownerAddress })) as TransfersResponse;
+    const data = (await fetchGraphQL(GET_SENT_NFTS, { ownerAddress: ownerAddress.toLowerCase() })) as TransfersResponse;
     return data.allTransfers.nodes;
 }
