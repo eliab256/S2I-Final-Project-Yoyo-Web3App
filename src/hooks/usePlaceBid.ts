@@ -4,11 +4,6 @@ import { yoyoAuctionABI } from '../contracts/yoyoAuctionAbi';
 import { chainsToContractAddress } from '../contracts/addresses';
 import { useChainId } from 'wagmi';
 
-interface UsePlaceBidParams {
-    bidAmount: string; // in ETH
-    auctionId: bigint;
-}
-
 function usePlaceBid() {
     const chainId = useChainId();
     const yoyoAuctionAddress = chainsToContractAddress[chainId].yoyoAuctionAddress;

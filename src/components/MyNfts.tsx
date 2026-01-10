@@ -1,6 +1,6 @@
 import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
-import useUserNFTIds from '../hooks/useUserNFTIds';
+import useUserNFTIds from '../hooks/useUserNFTs';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
