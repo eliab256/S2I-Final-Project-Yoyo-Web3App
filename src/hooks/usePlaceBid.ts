@@ -22,11 +22,13 @@ function usePlaceBid() {
         writeContract({
             address: yoyoAuctionAddress,
             abi: yoyoAuctionABI,
-            functionName: 'placeBid',
+            functionName: 'placeBidOnAuction',
             args: [auctionId],
             value: bidAmountInWei,
         });
+
     };
+
 
     return {
         placeBid,

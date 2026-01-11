@@ -50,24 +50,39 @@ export interface BidsResponse {
 
 // Auctions lifecycle queries types
 export interface AuctionOpened {
-  auctionId: string;
-  blockTimestamp: string;
-  blockNumber: string;
-  endTime: string;
+    auctionId: string;
+    blockTimestamp: string;
+    blockNumber: string;
+    endTime: string;
 }
 
 export interface AuctionClosed {
-  auctionId: string;
-  blockTimestamp: string;
-  blockNumber: string;
+    auctionId: string;
+    blockTimestamp: string;
+    blockNumber: string;
 }
 
 // query GetAuctionsLifecycle response type
 export interface AuctionsLifecycleResponse {
-  allYoyoAuctionAuctionOpeneds: {
-    nodes: AuctionOpened[];
-  };
-  allYoyoAuctionAuctionCloseds: {
-    nodes: AuctionClosed[];
-  };
+    allYoyoAuctionAuctionOpeneds: {
+        nodes: AuctionOpened[];
+    };
+    allYoyoAuctionAuctionCloseds: {
+        nodes: AuctionClosed[];
+    };
+}
+
+// Previous bidder refunds queries types
+export interface BidderRefund {
+    previousBidder: Address;
+    bidAmount: string;
+    blocknumber: string;
+    blockTimestamp: string;
+    txHash: Hash;
+}
+
+export interface BidderRefundsResponse {
+    allYoyoAuctionBidderRefundeds: {
+        nodes: BidderRefund[];
+    };
 }

@@ -1,6 +1,20 @@
 import type { Address } from 'viem';
-import type { TransferEvent, TransfersResponse, BidsResponse, BidPlaced, AuctionsLifecycleResponse } from '../types/queriesTypes';
-import { GET_RECEIVED_NFTS, GET_SENT_NFTS, GET_BID_HYSTORY_FROM_AUCTION_ID, GET_AUCTIONS_LIFECYCLE } from './queries';
+import type {
+    TransferEvent,
+    TransfersResponse,
+    BidsResponse,
+    BidPlaced,
+    AuctionsLifecycleResponse,
+    BidderRefundsResponse,
+    BidderRefund,
+} from '../types/queriesTypes';
+import {
+    GET_RECEIVED_NFTS,
+    GET_SENT_NFTS,
+    GET_BID_HYSTORY_FROM_AUCTION_ID,
+    GET_AUCTIONS_LIFECYCLE,
+    GET_BIDDER_REFUNDS,
+} from './queries';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
 
@@ -45,4 +59,11 @@ export async function getBidHistoryFromAuctionId(auctionId: string): Promise<Bid
 export async function getAuctionsLifecycle(): Promise<AuctionsLifecycleResponse> {
     const data = (await fetchGraphQL(GET_AUCTIONS_LIFECYCLE)) as AuctionsLifecycleResponse;
     return data;
+}
+
+export async function getBidderRefundsByAddress(address: Address): Promise<BidderRefund[]> {
+    const data = (await fetchGraphQL(GET_BIDDER_REFUNDS, {
+        bidderAddress: address.toLowerCase(),
+    })) as BidderRefundsResponse;
+    return data.allYoyoAuctionBidderRefundeds.nodes;
 }

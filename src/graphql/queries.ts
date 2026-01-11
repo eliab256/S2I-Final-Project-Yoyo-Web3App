@@ -71,3 +71,19 @@ export const GET_AUCTIONS_LIFECYCLE = `
     }
   }
 `;
+
+export const GET_BIDDER_REFUNDS = `
+  query GetAuctionsLifecycle($addr: String!) {
+    allYoyoAuctionBidderRefundeds(
+      filter: { prevBidderAddress: { equalTo: $addr } }
+    ) {
+      nodes {
+        prevBidderAddress
+        bidAmount
+        blockNumber
+        blockTimestamp
+        txHash
+      }
+    }
+  }
+`;
