@@ -4,7 +4,7 @@ import useUserNFTs from '../hooks/useUserNFTs';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
-    const { data: nfts, isLoading, error, refetch } = useUserNFTs();
+    const { data: nfts, isLoading, error } = useUserNFTs();
 
     // Extract tokenIds from nfts
     const tokenIds = nfts?.map(nft => nft.tokenId) ?? [];
@@ -63,16 +63,11 @@ const MyNfts: React.FC = () => {
                 )}
                 {/* wallet is connected and the user has bought products */}
                 {isConnected && hasNfts && (
-                    <>
-                        <button onClick={() => refetch()} className="px-4 py-2 bg-blue-500 text-white rounded">
-                            🔄 Aggiorna
-                        </button>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
-                            {tokenIds.map(tokenId => (
-                                <NftCard key={tokenId} tokenId={Number(tokenId)} />
-                            ))}
-                        </div>
-                    </>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
+                        {tokenIds.map(tokenId => (
+                            <NftCard key={tokenId} tokenId={Number(tokenId)} />
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

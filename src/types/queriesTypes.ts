@@ -1,12 +1,14 @@
 import type { Address, Hash } from 'viem';
+import type { AuctionType } from './contractsTypes';
 
+// Ownership of an NFT queries types
 export interface OwnedNFT {
     tokenId: string;
     mintedAt: string;
     mintTxHash: Hash;
 }
 
-export interface Transfer {
+export interface TransferEvent {
     from: Address;
     to: Address;
     tokenId: string;
@@ -17,6 +19,55 @@ export interface Transfer {
 
 export interface TransfersResponse {
     allTransfers: {
-        nodes: Transfer[];
+        nodes: TransferEvent[];
     };
+}
+
+// Bid history queries types
+export interface BidPlaced {
+    auctionId: string;
+    bidder: Address;
+    bidAmount: string;
+    blockTimestamp: string;
+    blockNumber: string;
+    txHash: Hash;
+}
+
+export interface PlaceBidEvent {
+    auctionId: string;
+    bidder: Address;
+    bidAmount: string;
+    auctionType: AuctionType;
+    txHash: Hash;
+    blockTimestamp: string;
+}
+
+export interface BidsResponse {
+    allYoyoAuctionBidPlaceds: {
+        nodes: BidPlaced[];
+    };
+}
+
+// Auctions lifecycle queries types
+export interface AuctionOpened {
+  auctionId: string;
+  blockTimestamp: string;
+  blockNumber: string;
+  endTime: string;
+}
+
+export interface AuctionClosed {
+  auctionId: string;
+  blockTimestamp: string;
+  blockNumber: string;
+}
+
+// query GetAuctionsLifecycle response type
+export interface AuctionsLifecycleResponse {
+  allYoyoAuctionAuctionOpeneds: {
+    nodes: AuctionOpened[];
+  };
+  allYoyoAuctionAuctionCloseds: {
+    nodes: AuctionClosed[];
+  };
 }

@@ -1,10 +1,7 @@
-import type { Transfer } from '../types/queriesTypes';
-
+import type { TransferEvent } from '../types/queriesTypes';
 import type {OwnedNFT} from "../types/queriesTypes";
 
-
-
-function getOwnedNFTs(received: Transfer[], sent: Transfer[]): OwnedNFT[] {
+function getOwnedNFTs(received: TransferEvent[], sent: TransferEvent[]): OwnedNFT[] {
     return received
         .filter(
             r =>
