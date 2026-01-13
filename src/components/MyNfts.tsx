@@ -1,6 +1,7 @@
 import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
 import useUserNFTs from '../hooks/useUserNFTs';
+import WarningBox from './WarningBox';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
@@ -41,25 +42,17 @@ const MyNfts: React.FC = () => {
                 )}
                 {/* error state */}
                 {isConnected && error && !isLoading && (
-                    <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse">
-                        <div className="border-red-500 border-2 bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                            <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">Error loading NFTs</h2>
-                            <p className="text-red-600">Failed to fetch your NFTs. Please try again later.</p>
-                        </div>
-                    </div>
+                    <WarningBox
+                        title="Error loading NFTs"
+                        message={`${error}. Please try again later.`}
+                    />
                 )}
                 {/* wallet is connected but the user hasn't never bought a product */}
                 {isConnected && address && !hasNfts && !isLoading && !error && (
-                    <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse ">
-                        <div className="border-red-500 border-2 bg-white  rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                            <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">
-                                You don't hold any NFTs yet
-                            </h2>
-                            <p className="text-red-600">
-                                Go to the auction page and place a bid to win your first NFT.
-                            </p>
-                        </div>
-                    </div>
+                    <WarningBox
+                        title="You don't hold any NFTs yet"
+                        message="Go to the auction page and place a bid to win your first NFT."
+                    />
                 )}
                 {/* wallet is connected and the user has bought products */}
                 {isConnected && hasNfts && (

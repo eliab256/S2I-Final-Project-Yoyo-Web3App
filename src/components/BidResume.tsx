@@ -18,7 +18,6 @@ interface BidResumeProps {
     bidAmount: string;
 }
 //serve recuperare se ha nft da claimare
-//il valore in eth deve essere convertito in wei
 
 const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     const dispatch = useDispatch();
@@ -150,11 +149,16 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                             >
-                                {isWritePending
-                                    ? 'Waiting for wallet...'
-                                    : isConfirming
-                                    ? 'Confirming...'
-                                    : 'Confirm Bid'}
+                                {isWritePending ? (
+                                    'Waiting for wallet...'
+                                ) : isConfirming ? (
+                                    <span className="flex items-center gap-2">
+                                        <span className="inline-block w-4 h-4 border-2 border-[#825FAA] border-t-transparent rounded-full animate-spin"></span>
+                                        Confirming...
+                                    </span>
+                                ) : (
+                                    'Confirm Bid'
+                                )}
                             </button>
                         </div>
                     </>

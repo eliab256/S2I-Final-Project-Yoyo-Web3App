@@ -10,7 +10,10 @@ const NftCard: React.FC<NftCardProps> = ({ tokenId }) => {
     const { image, metadata } = nft || {};
 
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 max-w-sm mx-auto">
+        <div
+            className="bg-white rounded-xl overflow-hidden transition-shadow duration-300 max-w-sm mx-auto"
+            style={{ boxShadow: '0 10px 25px -5px rgba(130, 95, 170, 0.5), 0 8px 10px -6px rgba(130, 95, 170, 0.3)' }}
+        >
             {/* Immagine NFT */}
             <div className="relative aspect-square">
                 <img src={image} alt={metadata?.name || `NFT #${tokenId}`} className="w-full h-full object-cover" />

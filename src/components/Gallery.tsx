@@ -15,11 +15,15 @@ const Gallery: React.FC = () => {
     //const { nfts, loading, error, progress, refetch, totalMinted, maxSupply } = useNftCollection();
 
     return (
-        <div className="flex flex-col items-center text-center w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
-            <div className="m-0 p-0 px-2 sm:px-4">
-                <h1 className="h-full">Get your pass to the future of inner peace and mindful movement</h1>
+        <div className="flex flex-col items-center text-center w-full">
+            <div className="flex items-center justify-center min-h-screen w-full px-2 sm:px-4 ">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold">
+                    Get your pass to the future of inner
+                    <br></br>peace and mindful movement
+                </h1>
             </div>
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
+
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4 pb-8 ">
                 {nftData.map(nft => (
                     <NftCard key={nft.tokenId} {...nft} />
                 ))}

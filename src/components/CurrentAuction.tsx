@@ -8,9 +8,11 @@ import useEthereumPrice from '../hooks/useEthereumPrice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
+import type { AuctionState } from '../types/contractsTypes';
+import WarningBox from './WarningBox';
 
 const CurrentAuction: React.FC = () => {
-    const {  isConnected } = useAccount();
+    const { isConnected } = useAccount();
     const { auction, isLoading } = useCurrentAuction();
     const { price: ethPriceUSD } = useEthereumPrice();
     const [bidValue, setBidValue] = useState<string>('');
@@ -72,33 +74,41 @@ const CurrentAuction: React.FC = () => {
     const {
         auctionId,
         tokenId,
-        nftOwner,
+        //nftOwner,
         auctionState,
         auctionType,
         startPrice,
         startTime,
         endTime,
-        higherBidder,
+        //higherBidder,
         higherBid,
         minimumBidChangeAmount,
     } = auction || {};
 
     return (
-        <div className="w-full px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+        <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
             <h1 className="text-center">Current Auction</h1>
             {isLoading ? (
                 <div className="flex items-center justify-center min-h-[50vh]">
                     <div className="text-xl">Loading current auction...</div>
                 </div>
-            ) : tokenId !== undefined ? (
+            ) : auctionState == 1 ? (
                 <>
                     <h2 className="text-center">Auction ID: {auctionId}</h2>
-                    <div className="flex flex-col lg:flex-row gap-4 items-start justify-center mt-3">
+                    <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
                         <NftCard tokenId={Number(tokenId)} />
-                        <div className="max-w-md w-full p-4 bg-white rounded-xl shadow-lg">
+                        <div
+                            className="max-w-md w-full p-4 bg-white rounded-xl"
+                            style={{
+                                boxShadow:
+                                    '0 10px 25px -5px rgba(130, 95, 170, 0.5), 0 8px 10px -6px rgba(130, 95, 170, 0.3)',
+                            }}
+                        >
                             <h2 className="text-2xl font-bold text-center mb-2">Place Your Bid Here</h2>
                             <p className="text-lg text-center mb-3 w-full">
                                 This is {auctionType === 0 ? 'an English' : 'a Dutch'} auction
+                                <br></br>
+                                In a Dutch auction the price drops over time, the first bidder wins. Don’t wait.
                             </p>
 
                             <div className="space-y-3">
@@ -176,9 +186,10 @@ const CurrentAuction: React.FC = () => {
                     {openConfirmPanel && <BidResume bidAmount={bidValue} />}
                 </>
             ) : (
-                <div className="flex items-center justify-center min-h-[50vh]">
-                    <div className="text-xl text-gray-600">No active auctions at the moment</div>
-                </div>
+                <WarningBox
+                    title="No Active Auction"
+                    message="There is currently no active auction. Please check back later."
+                />
             )}
         </div>
     );

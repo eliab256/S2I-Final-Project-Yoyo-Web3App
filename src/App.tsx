@@ -26,7 +26,7 @@ function App() {
     return (
         <>
             <Header />
-            <main className="relative">
+            <main className="relative w-full">
                 {pageComponents[currentOpenPage]}
                 <RefundNotificationPopup refund={pendingRefund} onDismiss={dismissRefund} />
             </main>
