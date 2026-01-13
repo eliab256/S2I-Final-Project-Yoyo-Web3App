@@ -2,10 +2,18 @@ import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
 import useUserNFTs from '../hooks/useUserNFTs';
 import WarningBox from './WarningBox';
+import { useSelector } from 'react-redux';
+import { type NftTokenId } from '../redux/selectedNftSlice';
+import nftData from '../data/nftCardData';
+import type { NftData } from '../types/nftTypes';
+import NftDetails from './NftDetails';
 
 const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
     const { data: nfts, isLoading, error } = useUserNFTs();
+
+    const currentNftSelected = useSelector((state: { selectedNft: { id: NftTokenId } }) => state.selectedNft.id);
+    const selectedNft: NftData | undefined = nftData.find(nft => nft.tokenId === currentNftSelected);
 
     // Extract tokenIds from nfts
     const tokenIds = nfts?.map(nft => nft.tokenId) ?? [];
@@ -42,10 +50,7 @@ const MyNfts: React.FC = () => {
                 )}
                 {/* error state */}
                 {isConnected && error && !isLoading && (
-                    <WarningBox
-                        title="Error loading NFTs"
-                        message={`${error}. Please try again later.`}
-                    />
+                    <WarningBox title="Error loading NFTs" message={`${error}. Please try again later.`} />
                 )}
                 {/* wallet is connected but the user hasn't never bought a product */}
                 {isConnected && address && !hasNfts && !isLoading && !error && (
@@ -63,6 +68,8 @@ const MyNfts: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {currentNftSelected !== null && <NftDetails {...selectedNft as NftData} />}
         </div>
     );
 };

@@ -19,14 +19,14 @@ function usePlaceBid() {
         error: confirmError,
     } = useWaitForTransactionReceipt({ hash });
 
-    // Refetch quando la transazione è confermata
+    // Refetch when the bid is confirmed
     useEffect(() => {
         if (isConfirmed) {
-            // Invalida la query dell'auction corrente
+            // Invalidate the current auction query
             queryClient.invalidateQueries({
                 queryKey: ['readContract'],
             });
-            // Invalida anche la query degli eventi se usi l'indexer
+            // Invalidate the events query if using the indexer
             queryClient.invalidateQueries({
                 queryKey: ['auctionEvents'],
             });

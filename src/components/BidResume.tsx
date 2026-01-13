@@ -1,4 +1,4 @@
-import type { AuctionStruct } from '../types/contractsTypes';
+//import type { AuctionStruct } from '../types/contractsTypes';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     resetConfirmPlaceBid,
@@ -35,7 +35,7 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     const { higherBidder, higherBid } = auction || {};
 
     useEffect(() => {
-        const bidPlacedInWei: bigint = BigInt(Math.floor(parseFloat(bidAmount) * 1e18)); //verificare che sia giusto
+        const bidPlacedInWei: bigint = BigInt(Math.floor(parseFloat(bidAmount) * 1e18));
         let userBalance: bigint;
         if (balanceData === undefined) {
             userBalance = BigInt(0);

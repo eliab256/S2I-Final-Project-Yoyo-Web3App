@@ -39,7 +39,7 @@ function useCurrentAuction() {
     const chainId = useChainId();
     const yoyoAuctionAddress = chainsToContractAddress[chainId]?.yoyoAuctionAddress;
 
-    // Monitor eventi dall'indexer per sapere quando fare refetch
+    // Monitor events from the indexer to know when to refetch
     const { data: indexedAuction } = useQuery({
         queryKey: ['auctionEvents'],
         queryFn: async () => {
@@ -48,13 +48,13 @@ function useCurrentAuction() {
         },
         refetchInterval: query => {
             const auction = query.state.data;
-            if (!auction) return 30000; // Controlla ogni 30s se non c'è auction
+            if (!auction) return 30000; // Check every 30s if there is no auction
 
             const now = Math.floor(Date.now() / 1000);
             const endTime = parseInt(auction.endTime);
             const timeUntilEnd = endTime - now;
 
-            // Se manca meno di 5 minuti, controlla ogni 10s
+            // If less than 5 minutes remain, check every 10s
             if (timeUntilEnd < 300) return 10000;
             return 60000;
         },
@@ -74,7 +74,7 @@ function useCurrentAuction() {
     const indexedAuctionId = indexedAuction?.auctionId;
     const currentAuctionId = auctionData?.auctionId;
 
-    // Quando cambia l'auctionId negli eventi, invalida la lettura dalla blockchain
+    // When the auctionId changes in the events, it invalidates the reading from the blockchain.
     useEffect(() => {
         if (indexedAuctionId !== undefined && indexedAuctionId !== currentAuctionId?.toString()) {
             queryClient.invalidateQueries({
@@ -83,7 +83,7 @@ function useCurrentAuction() {
         }
     }, [indexedAuctionId, currentAuctionId, queryClient]);
 
-    // Invalida le bids quando cambia l'auction
+    // Invalidate the bids when the auction changes.
     useEffect(() => {
         if (currentAuctionId !== undefined) {
             queryClient.invalidateQueries({

@@ -1,18 +1,24 @@
 import NftCard from './NftCard';
 import nftData from '../data/nftCardData';
-// import { useSelector } from 'react-redux';
-// import { type NftTokenId } from '../redux/selectedNftSlice';
-// import type { FilterType, SortType, SortOrder } from '../types/filterTypes';
-// import { useChainId, useReadContract } from 'wagmi';
-// import { yoyoNftAbi, chainsToContractAddress } from '../data/smartContractsData';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { type NftTokenId } from '../redux/selectedNftSlice';
+import type { NftData } from '../types/nftTypes';
 
 const Gallery: React.FC = () => {
-    // const currentNftSelected = useSelector(
-    //     (state: { selectedExercise: { id: NftTokenId } }) => state.selectedExercise.id
-    // );
-    //const selectedNft = exercisesCardData.find(ex => ex.id === currentNftSelected);
+    const currentNftSelected = useSelector((state: { selectedNft: { id: NftTokenId } }) => state.selectedNft.id);
+    const selectedNft: NftData | undefined = nftData.find(nft => nft.tokenId === currentNftSelected);
 
-    //const { nfts, loading, error, progress, refetch, totalMinted, maxSupply } = useNftCollection();
+    useEffect(() => {
+        if (currentNftSelected !== null) {
+            document.body.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+        };
+    }, [currentNftSelected]);
 
     return (
         <div className="flex flex-col items-center text-center w-full">
@@ -28,6 +34,8 @@ const Gallery: React.FC = () => {
                     <NftCard key={nft.tokenId} {...nft} />
                 ))}
             </div>
+
+            {currentNftSelected !== null && <div className="fixed inset-0 z-50 flex justify-center items-center"></div>}
         </div>
     );
 };
