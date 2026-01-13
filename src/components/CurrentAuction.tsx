@@ -8,7 +8,7 @@ import useEthereumPrice from '../hooks/useEthereumPrice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
-import type { AuctionState } from '../types/contractsTypes';
+//import type { AuctionState } from '../types/contractsTypes';
 import WarningBox from './WarningBox';
 
 const CurrentAuction: React.FC = () => {
@@ -75,7 +75,7 @@ const CurrentAuction: React.FC = () => {
         auctionId,
         tokenId,
         //nftOwner,
-        auctionState,
+        state,
         auctionType,
         startPrice,
         startTime,
@@ -92,7 +92,7 @@ const CurrentAuction: React.FC = () => {
                 <div className="flex items-center justify-center min-h-[50vh]">
                     <div className="text-xl">Loading current auction...</div>
                 </div>
-            ) : auctionState == 1 ? (
+            ) : state == 1 ? (
                 <>
                     <h2 className="text-center">Auction ID: {auctionId}</h2>
                     <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
@@ -108,7 +108,9 @@ const CurrentAuction: React.FC = () => {
                             <p className="text-lg text-center mb-3 w-full">
                                 This is {auctionType === 0 ? 'an English' : 'a Dutch'} auction
                                 <br></br>
-                                In a Dutch auction the price drops over time, the first bidder wins. Don’t wait.
+                                {auctionType === 0
+                                    ? 'In an English auction, bidders compete by placing increasingly higher bids. The highest bidder wins.'
+                                    : "In a Dutch auction the price drops over time, the first bidder wins. Don't wait."}
                             </p>
 
                             <div className="space-y-3">

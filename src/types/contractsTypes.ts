@@ -4,7 +4,7 @@ export interface AuctionStruct {
     auctionId: bigint;
     tokenId: bigint;
     nftOwner: Address | 0;
-    auctionState: AuctionState;
+    state: AuctionState; // ← Cambiato da auctionState a state
     auctionType: AuctionType;
     startPrice: bigint;
     startTime: bigint;

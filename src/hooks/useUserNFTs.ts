@@ -25,9 +25,9 @@ function useUserNFTs(customAddress?: Address) {
 
             return owned;
         },
-        enabled: !!targetAddress, // Esegui solo se address esiste
-        gcTime: 1000 * 60 * 5, // 5 minutes cache
-        staleTime: 1000 * 60 * 60, // 6 minutes stale time
+        enabled: !!targetAddress,
+        gcTime: 1000 * 60 * 5,
+        staleTime: 1000 * 60 * 60,
         refetchOnWindowFocus: true, // refetch when window gets focus
     });
 }

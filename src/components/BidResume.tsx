@@ -12,6 +12,8 @@ import usePlaceBid from '../hooks/usePlaceBid';
 import { useEffect } from 'react';
 import { useBalance, useAccount } from 'wagmi';
 import BidStatusCheck from './BidStatusCheck';
+import WarningBox from './WarningBox';
+import SuccessBox from './SuccessBox';
 //creare l' hook che verifica dai log se l'utente ha degli nft da claimare
 
 interface BidResumeProps {
@@ -28,7 +30,7 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     });
     const { auction, isLoading } = useCurrentAuction();
     const { insufficientBalance, alreadyHigherBidder, hasUnclaimedTokens } = useSelector(selectConfirmPlaceBid);
-    const { placeBid, isWritePending, isConfirming, isConfirmed, error } = usePlaceBid();
+    const { placeBid, isWritePending, isConfirming, isConfirmed, hash, error } = usePlaceBid();
 
     const { higherBidder, higherBid } = auction || {};
 
@@ -57,19 +59,36 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
         }
     }, [bidAmount, dispatch, higherBid, higherBidder]);
 
-    // Chiudi il modal quando la transazione è confermata
-    useEffect(() => {
-        if (isConfirmed) {
-            dispatch(resetConfirmPlaceBid());
-        }
-    }, [isConfirmed, dispatch]);
-
     const handleConfirmBid = () => {
         if (!auction?.auctionId) return;
         placeBid(bidAmount, auction.auctionId);
     };
 
     const canConfirmBid = !insufficientBalance && !alreadyHigherBidder && !hasUnclaimedTokens;
+
+    // Show SuccessBox if transaction is confirmed
+    if (isConfirmed && hash) {
+        return (
+            <SuccessBox
+                title="Bid Placed Successfully!"
+                message="Your bid has been confirmed on the blockchain."
+                txHash={hash}
+                onClose={() => {
+                    dispatch(resetConfirmPlaceBid());
+                }}
+            />
+        );
+    }
+
+    // Show WarningBox if there is an error
+    if (error) {
+        return (
+            <WarningBox
+                title="Transaction Failed"
+                message={error.message || 'An error occurred while placing your bid. Please try again.'}
+            />
+        );
+    }
 
     return (
         <div

@@ -61,11 +61,15 @@ function useCurrentAuction() {
     });
 
     // Read from the blockchain the current auction data
-    const { data: auctionData, isLoading } = useReadContract({
+    const {
+        data: auctionData,
+        isLoading,
+        refetch,
+    } = useReadContract({
         address: yoyoAuctionAddress,
         abi: yoyoAuctionABI,
         functionName: 'getCurrentAuction',
-    }) as { data: AuctionStruct | undefined; isLoading: boolean };
+    }) as { data: AuctionStruct | undefined; isLoading: boolean; refetch: () => void };
 
     const indexedAuctionId = indexedAuction?.auctionId;
     const currentAuctionId = auctionData?.auctionId;
@@ -91,6 +95,7 @@ function useCurrentAuction() {
     return {
         auction: auctionData as AuctionStruct,
         isLoading,
+        refetch,
     };
 }
 
