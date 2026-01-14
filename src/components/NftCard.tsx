@@ -3,14 +3,16 @@ import nftData from '../data/nftCardData';
 
 interface NftCardProps {
     tokenId: number;
+    onClick?: (tokenId: number) => void;
 }
 
-const NftCard: React.FC<NftCardProps> = ({ tokenId }) => {
+const NftCard: React.FC<NftCardProps> = ({ tokenId, onClick }) => {
     const nft = nftData[tokenId];
     const { image, metadata } = nft || {};
 
     return (
         <div
+            onClick={() => onClick?.(tokenId)}
             className="bg-white rounded-xl overflow-hidden transition-shadow duration-300 max-w-sm mx-auto"
             style={{ boxShadow: '0 10px 25px -5px rgba(130, 95, 170, 0.5), 0 8px 10px -6px rgba(130, 95, 170, 0.3)' }}
         >

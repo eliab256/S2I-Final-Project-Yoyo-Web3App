@@ -1,19 +1,32 @@
 import { useAccount } from 'wagmi';
 import NftCard from './NftCard';
-import useUserNFTs from '../hooks/useUserNFTs';
-import WarningBox from './WarningBox';
-import { useSelector } from 'react-redux';
-import { type NftTokenId } from '../redux/selectedNftSlice';
 import nftData from '../data/nftCardData';
 import type { NftData } from '../types/nftTypes';
+import useUserNFTs from '../hooks/useUserNFTs';
+import WarningBox from './WarningBox';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { type NftTokenId, setSelectedNft } from '../redux/selectedNftSlice';
 import NftDetails from './NftDetails';
 
 const MyNfts: React.FC = () => {
+    const dispatch = useDispatch();
     const { isConnected, address } = useAccount();
     const { data: nfts, isLoading, error } = useUserNFTs();
 
     const currentNftSelected = useSelector((state: { selectedNft: { id: NftTokenId } }) => state.selectedNft.id);
     const selectedNft: NftData | undefined = nftData.find(nft => nft.tokenId === currentNftSelected);
+
+    useEffect(() => {
+        if (currentNftSelected !== null) {
+            document.body.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+        };
+    }, [currentNftSelected]);
 
     // Extract tokenIds from nfts
     const tokenIds = nfts?.map(nft => nft.tokenId) ?? [];
@@ -62,14 +75,25 @@ const MyNfts: React.FC = () => {
                 {/* wallet is connected and the user has bought products */}
                 {isConnected && hasNfts && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 py-8">
-                        {tokenIds.map(tokenId => (
-                            <NftCard key={tokenId} tokenId={Number(tokenId)} />
-                        ))}
+                        {tokenIds.map(tokenId => {
+                            const nftCardData = nftData.find(nft => nft.tokenId === Number(tokenId));
+                            return nftCardData ? (
+                                <NftCard
+                                    key={tokenId}
+                                    {...nftCardData}
+                                    onClick={tokenId => dispatch(setSelectedNft(tokenId))}
+                                />
+                            ) : null;
+                        })}
                     </div>
                 )}
             </div>
 
-            {currentNftSelected !== null && <NftDetails {...selectedNft as NftData} />}
+            {currentNftSelected !== null && selectedNft && (
+                <div className="fixed inset-0 z-50 flex justify-center items-center">
+                    <NftDetails {...selectedNft} />
+                </div>
+            )}
         </div>
     );
 };
