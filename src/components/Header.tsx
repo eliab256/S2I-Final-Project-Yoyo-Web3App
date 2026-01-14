@@ -3,9 +3,12 @@ import { useDispatch } from 'react-redux';
 import { setCurrentPage } from '../redux/pagesSlice';
 import logoImage from '../assets/images/Yoyo-Logo-Scritta-Scura.png';
 import { useState } from 'react';
+import ClaimFailedRefundButton from './ClaimFailedRefundButton';
+import { useAccount } from "wagmi";
 
 const Header: React.FC = () => {
     const dispatch = useDispatch();
+    const { isConnected } = useAccount();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleLogoClick = () => {
@@ -84,6 +87,8 @@ const Header: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {isConnected && <ClaimFailedRefundButton />}
 
             <div className="flex items-center justify-center">
                 <ConnectButton

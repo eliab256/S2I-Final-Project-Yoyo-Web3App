@@ -87,3 +87,22 @@ export const GET_BIDDER_REFUNDS = `
     }
   }
 `;
+
+export const GET_BIDDER_FAILED_REFUNDS = `
+  query GetFailedRefunds($addr: String!) {
+    allYoyoAuctionBidderRefundFaileds(
+      condition:  {
+        prevBidderAddress: $addr
+      }
+      orderBy: BLOCK_TIMESTAMP_DESC
+    ) {
+      nodes {
+        prevBidderAddress
+        bidAmount
+        blockNumber
+        blockTimestamp
+        txHash
+      }
+    }
+  }
+`;

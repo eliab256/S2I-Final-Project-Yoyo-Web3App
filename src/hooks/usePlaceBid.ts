@@ -6,7 +6,7 @@ import { useChainId } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-function usePlaceBid() {
+const usePlaceBid = () => {
     const chainId = useChainId();
     const yoyoAuctionAddress = chainsToContractAddress[chainId].yoyoAuctionAddress;
     const queryClient = useQueryClient();

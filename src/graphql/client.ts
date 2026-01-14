@@ -7,6 +7,7 @@ import type {
     AuctionsLifecycleResponse,
     BidderRefundsResponse,
     BidderRefund,
+    BidderFailedRefundRensponse
 } from '../types/queriesTypes';
 import {
     GET_RECEIVED_NFTS,
@@ -14,6 +15,7 @@ import {
     GET_BID_HYSTORY_FROM_AUCTION_ID,
     GET_AUCTIONS_LIFECYCLE,
     GET_BIDDER_REFUNDS,
+    GET_BIDDER_FAILED_REFUNDS
 } from './queries';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
@@ -66,4 +68,11 @@ export async function getBidderRefundsByAddress(address: Address): Promise<Bidde
         bidderAddress: address.toLowerCase(),
     })) as BidderRefundsResponse;
     return data.allYoyoAuctionBidderRefundeds.nodes;
+}
+
+export async function getBidderFailedRefundsByAddress(address: Address): Promise<BidderRefund[]> {
+    const data = (await fetchGraphQL(GET_BIDDER_FAILED_REFUNDS, {
+        addr: address.toLowerCase(),
+    })) as BidderFailedRefundRensponse;
+    return data.allYoyoAuctionBidderRefundFaileds.nodes;
 }
