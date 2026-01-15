@@ -2,14 +2,19 @@ interface SuccessBoxProps {
     title: string;
     message: string;
     txHash: string;
-    onClose: () => void;
+    onClose?: () => void;
 }
 
 const SuccessBox: React.FC<SuccessBoxProps> = ({ title, message, txHash, onClose }) => {
+        const handleBackdropClick = () => {
+        if (onClose) {
+            onClose();
+        }
+    };
     const etherscanLink = txHash ? `https://sepolia.etherscan.io/tx/${txHash}` : null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleBackdropClick}>
             <div className="absolute inset-0 bg-black/50"></div>
             <div
                 className="relative border-green-500 border-2 bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center"

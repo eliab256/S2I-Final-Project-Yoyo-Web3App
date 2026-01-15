@@ -4,6 +4,7 @@ import { setCurrentPage } from '../redux/pagesSlice';
 import logoImage from '../assets/images/Yoyo-Logo-Scritta-Scura.png';
 import { useState } from 'react';
 import ClaimFailedRefundButton from './ClaimFailedRefundButton';
+import ClaimNftButton from './ClaimNftButton';
 import { useAccount } from "wagmi";
 
 const Header: React.FC = () => {
@@ -89,6 +90,7 @@ const Header: React.FC = () => {
             </div>
 
             {isConnected && <ClaimFailedRefundButton />}
+            {isConnected && <ClaimNftButton />}
 
             <div className="flex items-center justify-center">
                 <ConnectButton
