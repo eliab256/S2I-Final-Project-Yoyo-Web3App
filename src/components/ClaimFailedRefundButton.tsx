@@ -1,31 +1,36 @@
 import useClaimRefund from '../hooks/useClaimRefund';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setTxConfirmed, setError } from '../redux/confirmAndErrorManagerSlice';
-
+import { setConfirmedTxManager } from '../redux/confirmedTxManagerSlice';
+import { setError } from '../redux/errorManagerSlice';
 
 const ClaimFailedRefundButton: React.FC = () => {
     const dispatch = useDispatch();
     const { claimRefund, isWritePending, isConfirming, isConfirmed, hash, error, hasUnclaimedRefund } =
         useClaimRefund();
 
-         // When the transaction is confirmed, send the confirmation to Redux
+    // When the transaction is confirmed, send the confirmation to Redux
     useEffect(() => {
         if (isConfirmed && hash) {
-            dispatch(setTxConfirmed({ 
-                title: 'Refund Claimed Successfully!',
-                hash: hash 
-            }));
+            dispatch(
+                setConfirmedTxManager({
+                    title: 'Refund Claimed Successfully!',
+                    message: 'Your refund has been successfully claimed on the blockchain. ',
+                    hash: hash,
+                })
+            );
         }
     }, [isConfirmed, hash, dispatch]);
 
     // When there is an error, send the error message to Redux
     useEffect(() => {
         if (error) {
-            dispatch(setError({ 
-                title: 'Claim Refund Failed',
-                error: error.message 
-            }));
+            dispatch(
+                setError({
+                    title: 'Claim Refund Failed',
+                    error: error.message,
+                })
+            );
         }
     }, [error, dispatch]);
 
@@ -51,8 +56,6 @@ const ClaimFailedRefundButton: React.FC = () => {
             )}
         </button>
     );
-
-   
 };
 
 export default ClaimFailedRefundButton;

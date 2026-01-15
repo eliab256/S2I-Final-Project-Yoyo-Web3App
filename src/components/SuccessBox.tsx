@@ -1,7 +1,7 @@
 interface SuccessBoxProps {
     title: string;
     message: string;
-    txHash?: string;
+    txHash: string;
     onClose: () => void;
 }
 

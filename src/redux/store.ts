@@ -2,14 +2,16 @@ import { configureStore } from '@reduxjs/toolkit';
 import { currentPageReducer } from './pagesSlice';
 import { selectedNftReducer } from './selectedNftSlice';
 import { confirmPlaceBidReducer } from './confirmPlaceBidSlice';
-import { confirmAndErrorManagerReducer } from './confirmAndErrorManagerSlice';
+import { confirmedTxManagerReducer } from './confirmedTxManagerSlice';
+import { errorManagerReducer } from './errorManagerSlice';
 
 const store = configureStore({
     reducer: {
         currentPage: currentPageReducer,
         selectedNft: selectedNftReducer,
         confirmPlaceBid: confirmPlaceBidReducer,
-        confirmAndErrorManager: confirmAndErrorManagerReducer,
+        confirmedTxManager: confirmedTxManagerReducer,
+        errorManager: errorManagerReducer,
     },
 });
 
