@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
 //import type { AuctionState } from '../types/contractsTypes';
-import WarningBox from './WarningBox';
+import ErrorBox from './ErrorBox';
 
 const CurrentAuction: React.FC = () => {
     const { isConnected } = useAccount();
@@ -188,7 +188,7 @@ const CurrentAuction: React.FC = () => {
                     {openConfirmPanel && <BidResume bidAmount={bidValue} />}
                 </>
             ) : (
-                <WarningBox
+                <ErrorBox
                     title="No Active Auction"
                     message="There is currently no active auction. Please check back later."
                 />

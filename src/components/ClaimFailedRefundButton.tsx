@@ -1,13 +1,12 @@
 import useClaimRefund from '../hooks/useClaimRefund';
 import { useState } from 'react';
 import SuccessBox from './SuccessBox';
-import WarningBox from './WarningBox';
+import ErrorBox from './ErrorBox';
 
 const ClaimFailedRefundButton: React.FC = () => {
     const { claimRefund, isWritePending, isConfirming, isConfirmed, hash, error, hasUnclaimedRefund } =
         useClaimRefund();
     const [showNoClaimPopup, setShowNoClaimPopup] = useState(false);
-
 
     const handleClick = () => {
         if (!hasUnclaimedRefund) {
@@ -39,7 +38,7 @@ const ClaimFailedRefundButton: React.FC = () => {
                 )}
             </button>
 
-                        {/* Success Box when transaction is confirmed */}
+            {/* Success Box when transaction is confirmed */}
             {!isWritePending && !isConfirming && isConfirmed && hash && (
                 <SuccessBox
                     title="Refund Claimed Successfully!"
@@ -51,7 +50,7 @@ const ClaimFailedRefundButton: React.FC = () => {
 
             {/* Warning Box when there is an error */}
             {error && !isWritePending && !isConfirming && (
-                <WarningBox
+                <ErrorBox
                     title="Claim Refund Failed"
                     message={error.message}
                     onClose={() => window.location.reload()}

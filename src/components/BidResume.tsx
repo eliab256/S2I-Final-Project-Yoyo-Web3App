@@ -12,7 +12,7 @@ import usePlaceBid from '../hooks/usePlaceBid';
 import { useEffect } from 'react';
 import { useBalance, useAccount } from 'wagmi';
 import BidStatusCheck from './BidStatusCheck';
-import WarningBox from './WarningBox';
+import ErrorBox from './ErrorBox';
 import SuccessBox from './SuccessBox';
 //creare l' hook che verifica dai log se l'utente ha degli nft da claimare
 
@@ -81,7 +81,7 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     // if there is an error show warning box
     if (error) {
         return (
-            <WarningBox
+            <ErrorBox
                 title="Bid Placement Failed"
                 message={error.message}
                 onClose={() => dispatch(resetConfirmPlaceBid())}

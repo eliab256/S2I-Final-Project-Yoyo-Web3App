@@ -109,16 +109,16 @@ export interface FinalizedAuctionsResponse {
 }
 
 // Mint failed queries types
-export interface MintFailed {
-    auctionid: string;
+export interface FailedMint {
+    auctionId: string;
     to: Address;
     tokenId: string;
     blockNumber: string;
     blockTimestamp: string;
 }
 
-export interface MintFailedResponse {
+export interface FailedMintResponse {
     allYoyoAuctionMintFaileds: {
-        nodes: MintFailed[];
+        nodes: FailedMint[];
     };
 }

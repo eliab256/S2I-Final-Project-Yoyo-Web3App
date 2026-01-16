@@ -3,7 +3,7 @@ import NftCard from './NftCard';
 import nftData from '../data/nftCardData';
 import type { NftData } from '../types/nftTypes';
 import useUserNFTs from '../hooks/useUserNFTs';
-import WarningBox from './WarningBox';
+import ErrorBox from './ErrorBox';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { type NftTokenId, setSelectedNft } from '../redux/selectedNftSlice';
@@ -63,11 +63,11 @@ const MyNfts: React.FC = () => {
                 )}
                 {/* error state */}
                 {isConnected && error && !isLoading && (
-                    <WarningBox title="Error loading NFTs" message={`${error}. Please try again later.`} />
+                    <ErrorBox title="Error loading NFTs" message={`${error}. Please try again later.`} />
                 )}
                 {/* wallet is connected but the user hasn't never bought a product */}
                 {isConnected && address && !hasNfts && !isLoading && !error && (
-                    <WarningBox
+                    <ErrorBox
                         title="You don't hold any NFTs yet"
                         message="Go to the auction page and place a bid to win your first NFT."
                     />

@@ -5,7 +5,7 @@ import getOwnedNFTs from '../utils/nftOwnership';
 import type { OwnedNFT } from '../types/queriesTypes';
 import type { Address } from 'viem';
 
-function useUserNFTs(customAddress?: Address) {
+const useUserNFTs = (customAddress?: Address) => {
     const { address: connectedAddress } = useAccount();
 
     // Use acustomAddress if provided, otherwise use connectedAddress

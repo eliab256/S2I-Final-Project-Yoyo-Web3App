@@ -1,9 +1,10 @@
 import { useWriteContract, useWaitForTransactionReceipt, useChainId, useAccount } from 'wagmi';
 import { yoyoAuctionABI } from '../contracts/yoyoAuctionAbi';
 import { chainsToContractAddress } from '../contracts/addresses';
-import { useQueryClient } from '@tanstack/react-query';
-import { getBidderRefundsByAddress, getBidderFailedRefundsByAddress } from '../graphql/client';
-import getUnclaimedRefund from '../utils/unclaimedRefund';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import type { FailedMint } from '../types/queriesTypes';
+import { getAllMintFailed, getAllFinalizedAuctions } from '../graphql/client';
+import getUnclaimedTokens from '../utils/unclaimedTokens';
 import { useEffect } from 'react';
 
 const useClaimNft = () => {
@@ -18,29 +19,43 @@ const useClaimNft = () => {
         error: confirmError,
     } = useWaitForTransactionReceipt({ hash });
 
-    // Refetch when the bid is confirmed
-    // useEffect(() => {
-    //     if (isConfirmed) {
-    //         // Invalidate the current auction query
-    //         queryClient.invalidateQueries({
-    //             queryKey: ['readContract'],
-    //         });
-    //         // Invalidate the events query if using the indexer
-    //         queryClient.invalidateQueries({
-    //             queryKey: ['auctionEvents'],
-    //         });
-    //     }
-    // }, [isConfirmed, queryClient]);
+    // Refetch when the tx is confirmed
+    useEffect(() => {
+    if (isConfirmed) {
+        queryClient.invalidateQueries({
+            queryKey: ['claimNft', address],
+        });
+    }
+}, [isConfirmed, queryClient, address]);
 
-    // Function to call the claimFailedRefunds contract method
+    const failedMintQuery = useQuery({
+        queryKey: ['claimNft', address],
+        queryFn: async (): Promise<FailedMint | null> => {
+            if (!address) return null;
+
+            const [mintFaileds, finalizedAuctions] = await Promise.all([
+                getAllMintFailed(address),
+                getAllFinalizedAuctions(address),
+            ]);
+
+            const failedMint = getUnclaimedTokens(mintFaileds, finalizedAuctions);
+            return failedMint;
+        },
+        enabled: !!address,
+        refetchOnWindowFocus: true,
+    });
+
+    // Function to call the claimNftForWinner contract method
     const claimNft = () => {
         writeContract({
             address: yoyoAuctionAddress,
             abi: yoyoAuctionABI,
             functionName: 'claimNftForWinner',
-            args: [10], // Placeholder auctionId, to be replaced with actual value
+            args: failedMintQuery.data ? [failedMintQuery.data.auctionId] : [], 
         });
     };
+
+    const unclaimedNftId = failedMintQuery.data?.tokenId ?? null;
 
     return {
         claimNft,
@@ -49,7 +64,7 @@ const useClaimNft = () => {
         isConfirmed,
         hash,
         error: writeError || confirmError,
-        //hasUnclaimedNft,
+        unclaimedNftId,
     };
 };
 

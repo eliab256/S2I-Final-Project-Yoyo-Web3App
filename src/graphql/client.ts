@@ -10,9 +10,8 @@ import type {
     BidderFailedRefundRensponse,
     FinalizedAuction,
     FinalizedAuctionsResponse,
-    MintFailed,
-    MintFailedResponse,
-
+    FailedMint,
+    FailedMintResponse,
 } from '../types/queriesTypes';
 import {
     GET_RECEIVED_NFTS,
@@ -22,7 +21,7 @@ import {
     GET_BIDDER_REFUNDS,
     GET_BIDDER_FAILED_REFUNDS,
     GET_ALL_FINALIZED_AUCTIONS,
-    GET_ALL_MINT_FAILED
+    GET_ALL_MINT_FAILED,
 } from './queries';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
@@ -91,9 +90,9 @@ export async function getAllFinalizedAuctions(address: Address): Promise<Finaliz
     return data.allYoyoAuctionAuctionFinalizeds.nodes;
 }
 
-export async function getAllMintFailed(address: Address): Promise<MintFailed[]> {
+export async function getAllMintFailed(address: Address): Promise<FailedMint[]> {
     const data = (await fetchGraphQL(GET_ALL_MINT_FAILED, {
         addr: address.toLowerCase(),
-    })) as MintFailedResponse;
+    })) as FailedMintResponse;
     return data.allYoyoAuctionMintFaileds.nodes;
 }
