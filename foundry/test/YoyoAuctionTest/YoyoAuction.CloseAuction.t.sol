@@ -181,7 +181,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         );
 
         vm.expectEmit(true, true, true, false);
-        emit YoyoAuction__MintToWinnerFailed(auctionId, currentAuction.tokenId, address(ethAndNftRefuseMock), '');
+        emit YoyoAuction__MintFailed(auctionId, currentAuction.tokenId, address(ethAndNftRefuseMock), '');
         ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
         vm.stopPrank();
     }
@@ -205,7 +205,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
             newBidPlaced
         );
         vm.expectEmit(true, true, true, false);
-        emit YoyoAuction__MintToWinnerFailed(auctionId, tokenId, address(ethAndNftRefuseMock), 'unknown error');
+        emit YoyoAuction__MintFailed(auctionId, tokenId, address(ethAndNftRefuseMock), 'unknown error');
         ethAndNftRefuseMock.placeBid{ value: newBidPlaced }(auctionId);
         vm.stopPrank();
 

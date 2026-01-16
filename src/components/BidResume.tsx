@@ -7,8 +7,6 @@ import {
     setInsufficientBalance,
     selectConfirmPlaceBid,
 } from '../redux/confirmPlaceBidSlice';
-// import { setConfirmedTxManager } from '../redux/confirmedTxManagerSlice';
-// import { setError } from '../redux/errorManagerSlice';
 import useCurrentAuction from '../hooks/useCurrentAuction';
 import usePlaceBid from '../hooks/usePlaceBid';
 import { useEffect } from 'react';

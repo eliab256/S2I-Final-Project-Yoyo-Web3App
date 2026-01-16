@@ -92,3 +92,33 @@ export interface BidderFailedRefundRensponse {
         nodes: BidderRefund[];
     };
 } 
+
+// Finalized auctions queries types
+export interface FinalizedAuction {
+    auctionId: string;
+    nftOwner: Address;
+    tokenId: string;
+    blockNumber: string;
+    blockTimestamp: string;
+}
+
+export interface FinalizedAuctionsResponse {
+    allYoyoAuctionAuctionFinalizeds: {
+        nodes: FinalizedAuction[];
+    };
+}
+
+// Mint failed queries types
+export interface MintFailed {
+    auctionid: string;
+    to: Address;
+    tokenId: string;
+    blockNumber: string;
+    blockTimestamp: string;
+}
+
+export interface MintFailedResponse {
+    allYoyoAuctionMintFaileds: {
+        nodes: MintFailed[];
+    };
+}

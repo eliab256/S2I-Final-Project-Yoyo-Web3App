@@ -1,13 +1,15 @@
 import { useWriteContract, useWaitForTransactionReceipt, useChainId, useAccount } from 'wagmi';
 import { yoyoAuctionABI } from '../contracts/yoyoAuctionAbi';
 import { chainsToContractAddress } from '../contracts/addresses';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { getBidderRefundsByAddress, getBidderFailedRefundsByAddress } from '../graphql/client';
 import getUnclaimedRefund from '../utils/unclaimedRefund';
+import { useEffect } from 'react';
 
 const useClaimNft = () => {
     const chainId = useChainId();
     const { address } = useAccount();
+    const queryClient = useQueryClient();
     const yoyoAuctionAddress = chainsToContractAddress[chainId].yoyoAuctionAddress;
     const { writeContract, data: hash, isPending: isWritePending, error: writeError } = useWriteContract();
     const {
@@ -15,6 +17,20 @@ const useClaimNft = () => {
         isSuccess: isConfirmed,
         error: confirmError,
     } = useWaitForTransactionReceipt({ hash });
+
+    // Refetch when the bid is confirmed
+    // useEffect(() => {
+    //     if (isConfirmed) {
+    //         // Invalidate the current auction query
+    //         queryClient.invalidateQueries({
+    //             queryKey: ['readContract'],
+    //         });
+    //         // Invalidate the events query if using the indexer
+    //         queryClient.invalidateQueries({
+    //             queryKey: ['auctionEvents'],
+    //         });
+    //     }
+    // }, [isConfirmed, queryClient]);
 
     // Function to call the claimFailedRefunds contract method
     const claimNft = () => {
@@ -25,21 +41,6 @@ const useClaimNft = () => {
             args: [10], // Placeholder auctionId, to be replaced with actual value
         });
     };
-
-    // Query to check if the user has unclaimed refunds
-    // const { data: hasUnclaimedRefund } = useQuery({
-    //     queryKey: ['claimRefund', address],
-    //     queryFn: async () => {
-    //         const result = await Promise.all([
-    //             getBidderRefundsByAddress(address!),
-    //             getBidderFailedRefundsByAddress(address!),
-    //         ]);
-    //         const [successfulRefunds, failedRefunds] = result;
-    //         return getUnclaimedRefund(successfulRefunds, failedRefunds);
-    //     },
-    //     enabled: !!address,
-    //     refetchOnWindowFocus: true,
-    // });
 
     return {
         claimNft,

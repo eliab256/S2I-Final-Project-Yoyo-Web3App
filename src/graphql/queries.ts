@@ -106,3 +106,39 @@ export const GET_BIDDER_FAILED_REFUNDS = `
     }
   }
 `;
+
+export const GET_ALL_FINALIZED_AUCTIONS = `
+  query GetAllFinalizedAuctions($addr: String!)  {
+  allYoyoAuctionAuctionFinalizeds (
+    condition: {
+      nftOwner: $addr
+    }
+  ){
+    nodes {
+      auctionId
+      nftOwner
+      tokenId
+      blockNumber
+      blockTimestamp
+    }
+  }
+}
+`;
+
+export const GET_ALL_MINT_FAILED = `
+  query getAllFailedMint($addr: String!)  {
+  allYoyoAuctionMintFaileds (
+    condition:  {
+       bidder: $addr
+    }
+  ){
+    nodes {
+      auctionId
+      tokenId
+      bidder
+      blockTimestamp
+      blockNumber
+    }
+  }
+}
+`;

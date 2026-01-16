@@ -7,7 +7,12 @@ import type {
     AuctionsLifecycleResponse,
     BidderRefundsResponse,
     BidderRefund,
-    BidderFailedRefundRensponse
+    BidderFailedRefundRensponse,
+    FinalizedAuction,
+    FinalizedAuctionsResponse,
+    MintFailed,
+    MintFailedResponse,
+
 } from '../types/queriesTypes';
 import {
     GET_RECEIVED_NFTS,
@@ -15,7 +20,9 @@ import {
     GET_BID_HYSTORY_FROM_AUCTION_ID,
     GET_AUCTIONS_LIFECYCLE,
     GET_BIDDER_REFUNDS,
-    GET_BIDDER_FAILED_REFUNDS
+    GET_BIDDER_FAILED_REFUNDS,
+    GET_ALL_FINALIZED_AUCTIONS,
+    GET_ALL_MINT_FAILED
 } from './queries';
 
 const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
@@ -75,4 +82,18 @@ export async function getBidderFailedRefundsByAddress(address: Address): Promise
         addr: address.toLowerCase(),
     })) as BidderFailedRefundRensponse;
     return data.allYoyoAuctionBidderRefundFaileds.nodes;
+}
+
+export async function getAllFinalizedAuctions(address: Address): Promise<FinalizedAuction[]> {
+    const data = (await fetchGraphQL(GET_ALL_FINALIZED_AUCTIONS, {
+        addr: address.toLowerCase(),
+    })) as FinalizedAuctionsResponse;
+    return data.allYoyoAuctionAuctionFinalizeds.nodes;
+}
+
+export async function getAllMintFailed(address: Address): Promise<MintFailed[]> {
+    const data = (await fetchGraphQL(GET_ALL_MINT_FAILED, {
+        addr: address.toLowerCase(),
+    })) as MintFailedResponse;
+    return data.allYoyoAuctionMintFaileds.nodes;
 }

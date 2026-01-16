@@ -573,7 +573,7 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             // Minting to this contract succeeded
             auction.state = AuctionState.CLOSED;
             auction.nftOwner = address(this);
-            emit YoyoAuction__MintToWinnerFailed(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
+            emit YoyoAuction__MintFailed(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
         } catch Error(string memory fallbackReason) {
             // Minting to this contract failed with error message
             console2.log('tokenOwnerFromAuction must be 0. ', auction.nftOwner);
