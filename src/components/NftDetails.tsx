@@ -1,15 +1,39 @@
 import { clearSelectedNft } from '../redux/selectedNftSlice';
-import { XMarkIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useDispatch } from 'react-redux';
 import type { NftData } from '../types/nftTypes';
+import useTransferNft from '../hooks/useTransferNft';
+import { useState } from 'react';
+import type { Address } from 'viem';
+import { isAddress } from 'viem';
+import { useAccount } from 'wagmi';
+import SuccessBox from './SuccessBox';
+import ErrorBox from './ErrorBox';
 
 const NftDetails: React.FC<NftData> = ({ tokenId, metadata, image }) => {
     const dispatch = useDispatch();
+    const { address: userAddress } = useAccount();
+    const [recipientAddress, setRecipientAddress] = useState<string>('');
+    const [showTransferPopup, setShowTransferPopup] = useState(false);
     // Metadata deconstruction
     const { name, description, attributes, properties } = metadata;
 
     // Properties deconstruction
     const { category, course_type, accessibility_level, redeemable, instructor_certified, style } = properties;
+
+    const { transferNft, isWritePending, isConfirming, isConfirmed, hash, error } = useTransferNft(tokenId);
+
+    const handleTransfer = () => {
+        if (!isAddress(recipientAddress) || recipientAddress === userAddress) {
+            return;
+        }
+        setShowTransferPopup(false);
+        transferNft(recipientAddress as Address);
+    };
+
+    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setRecipientAddress(e.target.value);
+    };
 
     return (
         <div
@@ -111,6 +135,94 @@ const NftDetails: React.FC<NftData> = ({ tokenId, metadata, image }) => {
                     ))}
                 </div>
             </div>
+
+            <button
+                onClick={() => setShowTransferPopup(true)}
+                disabled={isWritePending || isConfirming}
+                className={`px-8 py-3 rounded-lg transition-all duration-200 ${
+                    !isWritePending && !isConfirming
+                        ? 'bg-[#825FAA] text-white hover:bg-[rgb(90,160,130)] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)] cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+                {isWritePending ? (
+                    'Waiting for wallet...'
+                ) : isConfirming ? (
+                    <span className="flex items-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-[#825FAA] border-t-transparent rounded-full animate-spin"></span>
+                        Confirming...
+                    </span>
+                ) : (
+                    'Transfer your NFT'
+                )}
+            </button>
+
+            {/* Transfer Popup */}
+            {showTransferPopup && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+                    onClick={() => setShowTransferPopup(false)}
+                >
+                    <div
+                        className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Transfer NFT</h3>
+                        <p className="text-gray-600 mb-6">Enter the recipient's address to transfer this NFT.</p>
+
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Recipient Address</label>
+                        <input
+                            type="text"
+                            value={recipientAddress}
+                            onChange={handleAddressChange}
+                            placeholder="0x....."
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#825FAA] mb-6"
+                        />
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowTransferPopup(false);
+                                    setRecipientAddress('');
+                                }}
+                                className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleTransfer}
+                                disabled={!isAddress(recipientAddress)}
+                                className={`flex-1 px-6 py-3 rounded-lg transition-all duration-200 ${
+                                    isAddress(recipientAddress)
+                                        ? 'bg-[#825FAA] text-white hover:bg-[rgb(90,160,130)] cursor-pointer'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                            >
+                                Confirm Transfer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Box when transaction is confirmed */}
+            {!isWritePending && !isConfirming && isConfirmed && hash && (
+                <SuccessBox
+                    title="NFT Transferred Successfully!"
+                    message="Your NFT has been successfully transferred on the blockchain."
+                    txHash={hash}
+                    onClose={() => window.location.reload()}
+                />
+            )}
+
+            {/* Warning Box when there is an error */}
+            {error && !isWritePending && !isConfirming && (
+                <ErrorBox
+                    title="Transfer NFT Failed"
+                    message={error.message}
+                    onClose={() => window.location.reload()}
+                />
+            )}
         </div>
     );
 };

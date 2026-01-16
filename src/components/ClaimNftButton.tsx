@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useClaimNft from '../hooks/useClaimNft';
 import SuccessBox from './SuccessBox';
 import ErrorBox from './ErrorBox';
