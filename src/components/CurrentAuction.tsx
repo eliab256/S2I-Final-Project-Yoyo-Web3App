@@ -1,10 +1,11 @@
 import useCurrentAuction from '../hooks/useCurrentAuction';
+import useEthereumPrice from '../hooks/useEthereumPrice';
+import useUserBidStatus from '../hooks/useUserBidStatus';
 import NftCard from './NftCard';
 import CountDown from './CountDown';
 import BidResume from './BidResume';
 import { formatEther } from 'viem';
 import { useMemo, useState } from 'react';
-import useEthereumPrice from '../hooks/useEthereumPrice';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
@@ -12,14 +13,20 @@ import { useAccount } from 'wagmi';
 import ErrorBox from './ErrorBox';
 
 const CurrentAuction: React.FC = () => {
-    const { isConnected } = useAccount();
+    const dispatch = useDispatch();
+    const { isConnected, address } = useAccount();
     const { auction, isLoading } = useCurrentAuction();
     const { price: ethPriceUSD } = useEthereumPrice();
+    const {
+        userHasBid,
+        userIsWinning,
+        isLoading: isUserBidStatusLoading,
+        error: userBidStatusError,
+    } = useUserBidStatus(address, auction?.auctionId.toString());
     const [bidValue, setBidValue] = useState<string>('');
     const openConfirmPanel = useSelector(
         (state: { confirmPlaceBid: { isConfirmBidPanelOpen: boolean } }) => state.confirmPlaceBid.isConfirmBidPanelOpen
     );
-    const dispatch = useDispatch();
 
     const getUsdPrice = useMemo(() => {
         return (ethAmount: bigint | undefined) => {
@@ -33,7 +40,7 @@ const CurrentAuction: React.FC = () => {
         };
     }, [ethPriceUSD]);
 
-    // Calcola USD per il valore inserito dall'utente
+    // Calculate user's bid in USD
     const userBidUsd = useMemo(() => {
         if (!bidValue || !ethPriceUSD) return '0.00';
         try {
@@ -45,7 +52,7 @@ const CurrentAuction: React.FC = () => {
         }
     }, [bidValue, ethPriceUSD]);
 
-    // Calcola il bid minimo richiesto
+    // Calculate minimum required bid based on auction type
     const minimumRequiredBid = useMemo(() => {
         if (!auction) return 0;
 
@@ -60,7 +67,7 @@ const CurrentAuction: React.FC = () => {
         }
     }, [auction]);
 
-    // Verifica se il bid inserito è valido
+    // Check if the entered bid is valid
     const isBidValid = useMemo(() => {
         if (!bidValue) return false;
         const numericBid = parseFloat(bidValue);
@@ -71,6 +78,7 @@ const CurrentAuction: React.FC = () => {
         return numericBid >= minimumRequiredBid;
     }, [bidValue, minimumRequiredBid, auction?.endTime]);
 
+    // Destructure auction details
     const {
         auctionId,
         tokenId,
@@ -85,10 +93,12 @@ const CurrentAuction: React.FC = () => {
         minimumBidChangeAmount,
     } = auction || {};
 
+    console.log('User Bid Status:', userHasBid, userIsWinning, userBidStatusError, address, auction?.auctionId.toString());
+
     return (
         <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
             <h1 className="text-center">Current Auction</h1>
-            {isLoading ? (
+            {isLoading || isUserBidStatusLoading ? (
                 <div className="flex items-center justify-center min-h-[50vh]">
                     <div className="text-xl">Loading current auction...</div>
                 </div>
@@ -97,6 +107,8 @@ const CurrentAuction: React.FC = () => {
                     <h2 className="text-center">Auction ID: {auctionId}</h2>
                     <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
                         <NftCard tokenId={Number(tokenId)} />
+
+                        {/* Bid Placement Section */}
                         <div
                             className="max-w-md w-full p-4 bg-white rounded-xl"
                             style={{
@@ -137,6 +149,32 @@ const CurrentAuction: React.FC = () => {
                                                 {getUsdPrice(higherBid)}
                                             </span>
                                         </div>
+
+                                        {/* User Bid Status Box */}
+                                        {(userHasBid || userIsWinning) && (
+                                            <div
+                                                className={`mt-3 p-3 rounded-lg text-center ${
+                                                    userIsWinning
+                                                        ? 'bg-green-50 border-2 border-green-500'
+                                                        : 'bg-yellow-50 border-2 border-yellow-500'
+                                                }`}
+                                            >
+                                                {userIsWinning ? (
+                                                    <p className="text-green-700 font-semibold animate-pulse">
+                                                        🎉 You are the highest bidder now.
+                                                    </p>
+                                                ) : (
+                                                    <div>
+                                                        <p className="text-yellow-700 font-semibold">
+                                                            ⚠️ Your bid was surpassed.
+                                                        </p>
+                                                        <p className="text-yellow-600 text-sm mt-1">
+                                                            Submit a higher bid to claim the item.
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </>
                                 )}
 

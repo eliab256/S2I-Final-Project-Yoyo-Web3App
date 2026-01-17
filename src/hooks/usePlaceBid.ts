@@ -23,13 +23,13 @@ const usePlaceBid = () => {
     useEffect(() => {
         if (isConfirmed) {
             // Invalidate the current auction query
-            queryClient.invalidateQueries({
-                queryKey: ['readContract'],
-            });
+            queryClient.invalidateQueries({ queryKey: ['readContract'] });
+
             // Invalidate the events query if using the indexer
-            queryClient.invalidateQueries({
-                queryKey: ['auctionEvents'],
-            });
+            queryClient.invalidateQueries({ queryKey: ['auctionEvents'] });
+            
+            // Invalidate the user bid status query
+            queryClient.invalidateQueries({ queryKey: ['bidHistoryDetail'] });
         }
     }, [isConfirmed, queryClient]);
 
@@ -53,6 +53,6 @@ const usePlaceBid = () => {
         hash,
         error: writeError || confirmError,
     };
-}
+};
 
 export default usePlaceBid;

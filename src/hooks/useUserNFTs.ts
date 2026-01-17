@@ -17,11 +17,7 @@ const useUserNFTs = (customAddress?: Address) => {
 
             const [received, sent] = await Promise.all([getReceivedNFTs(targetAddress), getSentNFTs(targetAddress)]);
 
-            console.log('Received NFTs:', received);
-            console.log('Sent NFTs:', sent);
-
             const owned = getOwnedNFTs(received, sent);
-            console.log('Owned NFTs:', owned);
 
             return owned;
         },
