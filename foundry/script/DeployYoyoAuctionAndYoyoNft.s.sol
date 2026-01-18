@@ -7,18 +7,23 @@ import { YoyoNft } from '../src/YoyoNft/YoyoNft.sol';
 import { ConstructorParams } from '../src/YoyoTypes.sol';
 import { HelperConfig, CodeConstants } from './HelperConfig.sol';
 
+
 contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
-    function run() public returns (YoyoAuction, YoyoNft, address deployer, HelperConfig) {
+    function run()
+        public
+        returns (YoyoAuction, YoyoNft, address deployer, HelperConfig, uint256 upkeepId)
+    {
         HelperConfig helperConfig = new HelperConfig();
-        address keepersRegistry = helperConfig.getKeepersRegistry();
-        deployer = helperConfig.getDeployerAccount();
+        HelperConfig.NetworkConfig memory config = helperConfig.getActiveNetworkConfig();
+        deployer = config.deployerAccount;
+
 
         bool isNotAnvil = block.chainid != ANVIL_CHAIN_ID;
 
         vm.startBroadcast(deployer);
 
         // 1. Deploy YoyoAuction contract
-        YoyoAuction yoyoAuction = new YoyoAuction(keepersRegistry);
+        YoyoAuction yoyoAuction = new YoyoAuction();
         if (isNotAnvil) console.log('YoyoAuction deployed at:', address(yoyoAuction));
 
         // 2. Create constructor params
@@ -32,8 +37,16 @@ contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
         yoyoAuction.setNftContract(address(yoyoNft));
         if (isNotAnvil) console.log('YoyoNft contract set in YoyoAuction at:', address(yoyoAuction.getNftContract()));
 
+        // 5. If not Anvil, register the auction contract for Chainlink Automation
+        if (isNotAnvil) {
+            upkeepId = helperConfig.registerAutomation(
+                address(yoyoAuction),
+                'YoyoAuctionAutomation',
+                config
+            );
+        }
         vm.stopBroadcast();
 
-        return (yoyoAuction, yoyoNft, deployer, helperConfig);
+        return (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId);
     }
 }

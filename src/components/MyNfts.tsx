@@ -40,14 +40,19 @@ const MyNfts: React.FC = () => {
             <div>
                 {/* wallet is not connected */}
                 {!isConnected && (
-                    <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse ">
-                        <div className="border-red-500 border-2 bg-white  rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                            <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">
-                                Wallet not connected
-                            </h2>
-                            <p className="text-red-600">Please connect your wallet to view your products.</p>
-                        </div>
-                    </div>
+                    // <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse ">
+                    //     <div className="border-red-500 border-2 bg-white  rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
+                    //         <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">
+                    //             Wallet not connected
+                    //         </h2>
+                    //         <p className="text-red-600">Please connect your wallet to view your products.</p>
+                    //     </div>
+                    // </div>
+
+                    <ErrorBox
+                        title="Wallet not connected"
+                        message="Please connect your wallet to view your products."
+                    />
                 )}
                 {/* loading state */}
                 {isConnected && isLoading && (

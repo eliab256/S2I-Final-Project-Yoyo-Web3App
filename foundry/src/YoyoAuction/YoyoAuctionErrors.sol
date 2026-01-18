@@ -23,5 +23,7 @@ error YoyoAuction__UpkeepNotNeeded();
 error YoyoAuction__NftContractNotSet();
 error YoyoAuction__NftContractAlreadySet();
 error YoyoAuction__OnlyChainlinkAutomationOrOwner();
+error YoyoAuction__ChainlinkForwarderAddressAlreadySet();
+error YoyoAuction__ChainlinkUpkeepIdAlreadySet();
 error YoyoAuction__AuctionAlreadyEnded();
 error YoyoAuction__WinnerHasUnclaimedToken();

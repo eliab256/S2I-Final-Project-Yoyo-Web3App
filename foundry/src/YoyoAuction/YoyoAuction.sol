@@ -31,7 +31,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
     /**
      * @dev Interface for the chainlink automation registry
      */
-    IAutomationRegistryConsumer public immutable i_registry;
+    address public s_chainlinkForwarder;
+
+    /**
+     * @dev Upkeep ID for Chainlink Automation
+     */
+     uint256 public s_upkeepId;
 
     /* Errors */
     /**
@@ -147,12 +152,9 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      * @dev Contract constructor that sets the deployer as the owner
      * @dev Initializes auction counter to 0
      * @dev The NFT contract address must be set separately after deployment
-     * @dev The Chainlink Automation registry address must be set in the constructor
-     * @param _registry Address of the Chainlink Automation registry
      */
-    constructor(address _registry) Ownable(msg.sender) {
+    constructor() Ownable(msg.sender) {
         s_auctionCounter = 0;
-        i_registry = IAutomationRegistryConsumer(_registry);
     }
 
     /*Functions */
@@ -171,6 +173,24 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         s_minimumBidChangeAmount =
             (yoyoNftContract.getBasicMintPrice() * MINIMUM_BID_INCREMENT_PERCENTAGE) /
             PERCENTAGE_DENOMINATOR; // 2,5% of the basic mint price
+    }
+    /**
+     * @notice Sets the Chainlink Automation forwarder address
+     * @dev Can only be set once by the owner
+     * @param _chainlinkForwarder The address of the Chainlink Automation forwarder
+     */
+    function setChainlinkForwarder(address _chainlinkForwarder) external onlyOwner {
+        if (s_chainlinkForwarder != address(0)) {
+            revert YoyoAuction__ChainlinkForwarderAddressAlreadySet();
+        }
+        s_chainlinkForwarder = _chainlinkForwarder;
+    }
+
+    function setUpkeepId(uint256 _upkeepId ) external onlyOwner {
+        if( s_upkeepId != 0) {
+            revert YoyoAuction__ChainlinkUpkeepIdAlreadySet();
+        }
+        s_upkeepId = _upkeepId;
     }
 
     /**
@@ -251,12 +271,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
 
         if (withinGracePeriod) {
             // During grace period: only Chainlink Automation can call
-            if (msg.sender != address(i_registry)) {
+            if (msg.sender != address(s_chainlinkForwarder)) {
                 revert YoyoAuction__OnlyChainlinkAutomationOrOwner();
             }
         } else {
             // After grace period: only Chainlink Automation or owner can call
-            if (msg.sender != address(i_registry) && msg.sender != owner()) {
+            if (msg.sender != address(s_chainlinkForwarder) && msg.sender != owner()) {
                 revert YoyoAuction__OnlyChainlinkAutomationOrOwner();
             }
             emit YoyoAuction__ManualUpkeepExecuted(auctionId, msg.sender, block.timestamp);
