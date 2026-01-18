@@ -18,7 +18,7 @@ contract YoyoAuctionMintPriceAndGettersTest is YoyoAuctionBaseTest {
     }
 
     function testChangeMintPriceRevertsIfContractIsNotSet() public {
-        YoyoAuction notSetYoyoAuction = new YoyoAuction(keeperMock);
+        YoyoAuction notSetYoyoAuction = new YoyoAuction();
 
         vm.expectRevert(YoyoAuction__NftContractNotSet.selector);
         notSetYoyoAuction.changeMintPrice(0.2 ether);

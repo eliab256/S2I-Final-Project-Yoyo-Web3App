@@ -31,12 +31,12 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
     /**
      * @dev Interface for the chainlink automation registry
      */
-    address public s_chainlinkForwarder;
+    address private s_chainlinkForwarder;
 
     /**
      * @dev Upkeep ID for Chainlink Automation
      */
-     uint256 public s_upkeepId;
+    uint256 private s_upkeepId;
 
     /* Errors */
     /**
@@ -186,8 +186,8 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
         s_chainlinkForwarder = _chainlinkForwarder;
     }
 
-    function setUpkeepId(uint256 _upkeepId ) external onlyOwner {
-        if( s_upkeepId != 0) {
+    function setUpkeepId(uint256 _upkeepId) external onlyOwner {
+        if (s_upkeepId != 0) {
             revert YoyoAuction__ChainlinkUpkeepIdAlreadySet();
         }
         s_upkeepId = _upkeepId;
@@ -884,6 +884,22 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
      */
     function getFailedRefundAmount(address _bidder) public view returns (uint256) {
         return s_failedRefundsToPreviousBidders[_bidder];
+    }
+
+    /**
+     * @notice Returns the upkeep ID associated with this contract
+     * @return uint256 The upkeep ID
+     */
+    function getUpkeepId() public view returns (uint256) {
+        return s_upkeepId;
+    }
+
+    /**
+     * @notice Returns the address of the Chainlink Forwarder
+     * @return address The Chainlink Forwarder address
+     */
+    function getChainlinkForwarderAddress() public view returns (address) {
+        return s_chainlinkForwarder;
     }
 
     /**

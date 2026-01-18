@@ -20,7 +20,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
     function setNftContractFailingMintMock(bool _shouldFail, bool _throwPanicError) public {
         //Set new contracts that fails on mint
         vm.startPrank(deployer);
-        yoyoAuctionFailMint = new YoyoAuction(keeperMock);
+        yoyoAuctionFailMint = new YoyoAuction();
         yoyoNftFailMint = new YoyoNftFailingMintMock(helperConfig.getConstructorParams(address(yoyoAuctionFailMint)));
         yoyoAuctionFailMint.setNftContract(address(yoyoNftFailMint));
 

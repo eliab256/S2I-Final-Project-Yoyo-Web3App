@@ -20,7 +20,7 @@ contract YoyoAuctionOpenAuctionTest is YoyoAuctionBaseTest {
 
     function testIfOpenNewAuctionRevertsDueToNftContractNotSet() public {
         vm.startPrank(deployer);
-        YoyoAuction yoyoAuctionWithoutNft = new YoyoAuction(address(0));
+        YoyoAuction yoyoAuctionWithoutNft = new YoyoAuction();
 
         vm.expectRevert(YoyoAuction__NftContractNotSet.selector);
         yoyoAuctionWithoutNft.openNewAuction(VALID_TOKEN_ID, ENGLISH_TYPE);

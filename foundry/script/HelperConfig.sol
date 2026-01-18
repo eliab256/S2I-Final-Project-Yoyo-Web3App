@@ -62,6 +62,7 @@ contract HelperConfig is CodeConstants, Script {
     error HelperConfig__InsufficientLinkBalance(uint256 required, uint256 available);
 
     struct NetworkConfig {
+        address automationRegistry;
         address automationRegistrar;
         address linkToken;
         uint32 gasLimit;
@@ -104,6 +105,7 @@ contract HelperConfig is CodeConstants, Script {
     function getMainnetConfig() public view returns (NetworkConfig memory) {
         return
             NetworkConfig({
+                automationRegistry: MAINNET_KEEPERS_REGISTRY,
                 automationRegistrar: MAINNET_KEEPERS_REGISTRAR,
                 linkToken: MAINNET_LINK_TOKEN,
                 gasLimit: MAINNET_GAS_LIMIT,
@@ -123,6 +125,7 @@ contract HelperConfig is CodeConstants, Script {
     function getSepoliaConfig() public view returns (NetworkConfig memory) {
         return
             NetworkConfig({
+                automationRegistry: SEPOLIA_KEEPERS_REGISTRY,
                 automationRegistrar: SEPOLIA_KEEPERS_REGISTRAR,
                 linkToken: SEPOLIA_LINK_TOKEN,
                 gasLimit: SEPOLIA_GAS_LIMIT,
@@ -144,6 +147,7 @@ contract HelperConfig is CodeConstants, Script {
         if (keeperMock != address(0)) {
             return
                 NetworkConfig({
+                    automationRegistry: address(0),
                     automationRegistrar: keeperMock,
                     linkToken: address(0),
                     gasLimit: 2_000_000,
@@ -158,6 +162,7 @@ contract HelperConfig is CodeConstants, Script {
 
         return
             NetworkConfig({
+                automationRegistry: address(0),
                 automationRegistrar: keeperMock,
                 linkToken: address(0),
                 gasLimit: 2_000_000,
@@ -275,6 +280,15 @@ contract HelperConfig is CodeConstants, Script {
      */
     function getChainlinkRegistrar() public view returns (address) {
         return activeNetworkConfig.automationRegistrar;
+    }
+
+    /**
+     * @notice Returns the Chainlink Automation Registry address for current chain
+     * @dev Returns address(0) for chains without Chainlink Automation support (like Anvil)
+     * @return address Chainlink Automation Registry address
+     */
+    function getAutomationRegistry() public view returns (address) {
+        return activeNetworkConfig.automationRegistry;
     }
 
     /**

@@ -14,6 +14,7 @@ contract YoyoAuctionBaseTest is Test {
     YoyoNft public yoyoNft;
     HelperConfig public helperConfig;
     EthAndNftRefuseMock public ethAndNftRefuseMock;
+    uint256 public upkeepId;
 
     //Test Partecipants
     address public deployer;
@@ -37,12 +38,12 @@ contract YoyoAuctionBaseTest is Test {
 
     function setUp() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
 
         ethAndNftRefuseMock = new EthAndNftRefuseMock(address(yoyoAuction), address(yoyoNft));
 
         // Get keeperMock from YoyoAuction contract
-        keeperMock = address(yoyoAuction.i_registry());
+        keeperMock = address(yoyoAuction.getChainlinkForwarderAddress());
 
         // Initialize invalidTokenId after yoyoNft is set
         invalidTokenId = yoyoNft.MAX_NFT_SUPPLY() + 10;
