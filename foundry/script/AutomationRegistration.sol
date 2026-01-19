@@ -75,7 +75,7 @@ contract AutomationRegistration {
             gasLimit: gasLimit,
             adminAddress: adminAddress,
             triggerType: 0, // 0 = Conditional, 1 = Log trigger
-            checkData: hex'', // empty for your case
+            checkData: hex'', // empty 
             triggerConfig: hex'', // empty
             offchainConfig: hex'', // empty
             amount: fundingAmount

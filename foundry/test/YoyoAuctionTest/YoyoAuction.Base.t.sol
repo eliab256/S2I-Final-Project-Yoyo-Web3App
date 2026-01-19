@@ -18,7 +18,8 @@ contract YoyoAuctionBaseTest is Test {
 
     //Test Partecipants
     address public deployer;
-    address public forwarderMock; // Chainlink Automation mock for tests
+    address public forwarderMock; 
+    address public forwarder;
     address public USER_1 = makeAddr('User1');
     address public USER_2 = makeAddr('User2');
     address public USER_NO_BALANCE = makeAddr('user no balance');
@@ -38,7 +39,7 @@ contract YoyoAuctionBaseTest is Test {
 
     function setUp() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId,  /*forwarder*/) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId,  forwarder) = deployerScript.run();
 
         ethAndNftRefuseMock = new EthAndNftRefuseMock(address(yoyoAuction), address(yoyoNft));
 

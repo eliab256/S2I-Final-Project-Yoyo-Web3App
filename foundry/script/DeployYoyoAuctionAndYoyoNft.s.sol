@@ -80,7 +80,11 @@ contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
      * @param _name Name of the upkeep
      * @return upkeepId ID of the registered upkeep
      */
-    function registerAutomation(address _upkeepContract, string memory _name, HelperConfig.NetworkConfig memory _config) public returns (uint256 upkeepId) {
+    function registerAutomation(
+        address _upkeepContract,
+        string memory _name,
+        HelperConfig.NetworkConfig memory _config
+    ) public returns (uint256 upkeepId) {
         console.log('');
         console.log('==================== Registering Chainlink Automation ====================');
         console.log('Registering Chainlink Automation...');
@@ -104,6 +108,8 @@ contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
         LinkTokenInterface link = LinkTokenInterface(_config.linkToken);
         uint256 linkBalance = link.balanceOf(_config.deployerAccount);
 
+        console.log('Link balance of admin:', linkBalance / 1e18, 'LINK');
+        console.log('Required funding amount:', _config.fundingAmount / 1e18, 'LINK');
         if (linkBalance < _config.fundingAmount) {
             revert InsufficientLinkBalance(_config.fundingAmount, linkBalance);
         }

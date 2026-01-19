@@ -150,4 +150,12 @@ contract YoyoAuctionMintPriceAndGettersTest is YoyoAuctionBaseTest {
 
         assertEq(yoyoAuction.getElegibilityForClaimingNft(auctionId, address(ethAndNftRefuseMock)), true);
     }
+
+    function testGetUpkeepId() public {
+        assertEq(yoyoAuction.getUpkeepId(), upkeepId);
+    }
+
+    function testGetChainlinkForwarderAddress() public {
+        assertEq(yoyoAuction.getChainlinkForwarderAddress(), forwarder);
+    }
 }
