@@ -25,27 +25,24 @@ The **YoyoAuction** contract manages the complete auction lifecycle with support
 
 #### Key Features:
 
--   **Dual Auction Types**:
+- **Dual Auction Types**:
+    - **English Auctions**: Traditional ascending price auctions where bidders compete to place the highest bid
+    - **Dutch Auctions**: Descending price auctions that start high and drop at regular intervals until a bidder accepts the current price
 
-    -   **English Auctions**: Traditional ascending price auctions where bidders compete to place the highest bid
-    -   **Dutch Auctions**: Descending price auctions that start high and drop at regular intervals until a bidder accepts the current price
+- **Automated Lifecycle Management**:
+    - Powered by Chainlink Automation (Keepers) for automatic auction closure and restart
+    - Grace period mechanism to allow manual intervention if Chainlink Automation is down
+    - 24-hour auction duration with configurable parameters
 
--   **Automated Lifecycle Management**:
+- **Robust Error Handling**:
+    - Fallback minting mechanism when direct mint to winner fails
+    - Failed refund tracking for previous bidders
+    - Manual claim functions for both NFTs and refunds
 
-    -   Powered by Chainlink Automation (Keepers) for automatic auction closure and restart
-    -   Grace period mechanism to allow manual intervention if Chainlink Automation is down
-    -   24-hour auction duration with configurable parameters
-
--   **Robust Error Handling**:
-
-    -   Fallback minting mechanism when direct mint to winner fails
-    -   Failed refund tracking for previous bidders
-    -   Manual claim functions for both NFTs and refunds
-
--   **Security Features**:
-    -   ReentrancyGuard protection on all state-changing functions
-    -   Owner-only administrative functions
-    -   Validation of bid amounts and auction states
+- **Security Features**:
+    - ReentrancyGuard protection on all state-changing functions
+    - Owner-only administrative functions
+    - Validation of bid amounts and auction states
 
 #### Auction Flow:
 
@@ -63,27 +60,27 @@ The **YoyoNft** contract manages the ERC-721 NFT collection with auction-specifi
 
 #### Key Features:
 
--   **Limited Supply**: Maximum 20 NFTs in the collection
--   **Auction Integration**: Only the auction contract can mint NFTs
--   **Dynamic Pricing**: Mint price adjustable by auction contract to match auction dynamics
--   **Safe Transfers**: Implements ERC721 safe transfer mechanisms
--   **Metadata Management**: Base URI configuration for token metadata
+- **Limited Supply**: Maximum 20 NFTs in the collection
+- **Auction Integration**: Only the auction contract can mint NFTs
+- **Dynamic Pricing**: Mint price adjustable by auction contract to match auction dynamics
+- **Safe Transfers**: Implements ERC721 safe transfer mechanisms
+- **Metadata Management**: Base URI configuration for token metadata
 
 #### Constructor Parameters:
 
 The constructor uses a `ConstructorParams` struct for modular deployment across different chains:
 
--   `baseURI`: Base URI for token metadata
--   `auctionContract`: Address of the authorized auction contract
--   `basicMintPrice`: Initial mint price in wei
+- `baseURI`: Base URI for token metadata
+- `auctionContract`: Address of the authorized auction contract
+- `basicMintPrice`: Initial mint price in wei
 
 #### Core Functions:
 
--   **mintNft()**: Called by auction contract to mint NFTs to winners
--   **transferNft()**: Allows owners to transfer their NFTs
--   **withdraw()**: Owner-only function to withdraw collected fees
--   **deposit()**: Owner-only function to add funds to contract
--   **setBasicMintPrice()**: Auction-only function to update mint price
+- **mintNft()**: Called by auction contract to mint NFTs to winners
+- **transferNft()**: Allows owners to transfer their NFTs
+- **withdraw()**: Owner-only function to withdraw collected fees
+- **deposit()**: Owner-only function to add funds to contract
+- **setBasicMintPrice()**: Auction-only function to update mint price
 
 ### Read-Only Functions (Getters)
 
@@ -91,20 +88,20 @@ Both contracts provide comprehensive view functions to query state:
 
 **YoyoAuction Getters:**
 
--   `getCurrentAuction()`: Returns complete data of latest auction
--   `getAuctionFromAuctionId(uint256)`: Retrieves auction by ID
--   `getCurrentAuctionPrice()`: Calculates current price for ongoing auction
--   `getElegibilityForClaimingNft(uint256, address)`: Checks if address can claim NFT
--   `getFailedRefundAmount(address)`: Returns unclaimed refund balance
+- `getCurrentAuction()`: Returns complete data of latest auction
+- `getAuctionFromAuctionId(uint256)`: Retrieves auction by ID
+- `getCurrentAuctionPrice()`: Calculates current price for ongoing auction
+- `getElegibilityForClaimingNft(uint256, address)`: Checks if address can claim NFT
+- `getFailedRefundAmount(address)`: Returns unclaimed refund balance
 
 **YoyoNft Getters:**
 
--   `tokenURI(uint256)`: Returns metadata URI for token
--   `getTotalMinted()`: Returns number of minted NFTs
--   `getBasicMintPrice()`: Current mint price
--   `getIfTokenIdIsMintable(uint256)`: Checks if token can be minted
--   `getOwnerFromTokenId(uint256)`: Returns owner of token
--   `getAccountBalance(address)`: Returns NFT balance of address
+- `tokenURI(uint256)`: Returns metadata URI for token
+- `getTotalMinted()`: Returns number of minted NFTs
+- `getBasicMintPrice()`: Current mint price
+- `getIfTokenIdIsMintable(uint256)`: Checks if token can be minted
+- `getOwnerFromTokenId(uint256)`: Returns owner of token
+- `getAccountBalance(address)`: Returns NFT balance of address
 
 ## 2. Contract Address on Sepolia
 
@@ -124,9 +121,9 @@ You can interact with the deployed smart contracts via Etherscan or through the 
 
 **Requirements:**
 
--   A wallet configured for Sepolia testnet (e.g., MetaMask)
--   Some Sepolia ETH
--   The deployed contract addresses
+- A wallet configured for Sepolia testnet (e.g., MetaMask)
+- Some Sepolia ETH
+- The deployed contract addresses
 
 **To participate in an auction:**
 
@@ -152,6 +149,7 @@ You can interact with the deployed smart contracts via Etherscan or through the 
 ```
 foundry/
 ├── script/
+│   ├── AutomationRegistration.sol
 │   ├── DeployYoyoAuctionAndYoyoNft.s.sol
 │   └── HelperConfig.sol
 ├── src/
@@ -190,58 +188,58 @@ foundry/
 
 This script orchestrates the deployment of both contracts. It:
 
--   Deploys the YoyoAuction contract with the Chainlink Automation registry
--   Deploys the YoyoNft contract with auction contract address and configuration
--   Links both contracts by calling `setNftContract()` on the auction
--   Works with `HelperConfig` to adapt deployment across networks
+- Deploys the YoyoAuction contract with the Chainlink Automation registry
+- Deploys the YoyoNft contract with auction contract address and configuration
+- Links both contracts by calling `setNftContract()` on the auction
+- Works with `HelperConfig` to adapt deployment across networks
 
 #### HelperConfig.sol
 
 Network-specific configuration handler that:
 
--   Detects current chain ID (Mainnet, Sepolia, or Anvil)
--   Provides appropriate constructor parameters for each network
--   Manages Chainlink Automation registry addresses
--   Configures base URIs and mint prices per network
--   Creates mock Keepers for local testing
+- Detects current chain ID (Mainnet, Sepolia, or Anvil)
+- Provides appropriate constructor parameters for each network
+- Manages Chainlink Automation registry addresses
+- Configures base URIs and mint prices per network
+- Creates mock Keepers for local testing
 
 #### YoyoAuction.sol
 
 The main auction management contract with:
 
--   Dual auction type support (English and Dutch)
--   Chainlink Automation integration for lifecycle management
--   Comprehensive error handling and fallback mechanisms
--   Secure bid processing with ReentrancyGuard
--   Gas-efficient library usage for Dutch auction calculations
+- Dual auction type support (English and Dutch)
+- Chainlink Automation integration for lifecycle management
+- Comprehensive error handling and fallback mechanisms
+- Secure bid processing with ReentrancyGuard
+- Gas-efficient library usage for Dutch auction calculations
 
 #### YoyoDutchAuctionLibrary.sol
 
 A library providing utility functions for Dutch auction price calculations:
 
--   `currentPriceFromTimeRangeCalculator()`: Computes current price based on elapsed time
--   `dropAmountFromPricesAndIntervalsCalculator()`: Calculates price drop per interval
--   `startPriceFromReserveAndMultiplierCalculator()`: Determines auction start price
+- `currentPriceFromTimeRangeCalculator()`: Computes current price based on elapsed time
+- `dropAmountFromPricesAndIntervalsCalculator()`: Calculates price drop per interval
+- `startPriceFromReserveAndMultiplierCalculator()`: Determines auction start price
 
 #### YoyoNft.sol
 
 The NFT collection contract with:
 
--   ERC-721 standard compliance via OpenZeppelin
--   Auction-only minting restriction
--   Dynamic mint price adjustment
--   Safe transfer mechanisms
--   Comprehensive getter functions
+- ERC-721 standard compliance via OpenZeppelin
+- Auction-only minting restriction
+- Dynamic mint price adjustment
+- Safe transfer mechanisms
+- Comprehensive getter functions
 
 #### Test Contracts
 
--   **Base.t.sol**: Common setup and helper functions for all auction tests
--   **OpenNewAuction.t.sol**: Tests for auction creation and initialization
--   **PlaceBid.t.sol**: Tests for bid placement in both auction types
--   **CloseAuction.t.sol**: Tests for auction closure, minting, and fallback scenarios
--   **PerformUpkeep.t.sol**: Tests for Chainlink Automation integration
--   **YoyoDutchAuctionLibrary.t.sol**: Unit tests for library functions
--   **YoyoNft.t.sol**: Complete NFT contract functionality tests
+- **Base.t.sol**: Common setup and helper functions for all auction tests
+- **OpenNewAuction.t.sol**: Tests for auction creation and initialization
+- **PlaceBid.t.sol**: Tests for bid placement in both auction types
+- **CloseAuction.t.sol**: Tests for auction closure, minting, and fallback scenarios
+- **PerformUpkeep.t.sol**: Tests for Chainlink Automation integration
+- **YoyoDutchAuctionLibrary.t.sol**: Unit tests for library functions
+- **YoyoNft.t.sol**: Complete NFT contract functionality tests
 
 #### Mock Contracts
 
@@ -253,32 +251,28 @@ A comprehensive mock contract designed to simulate various failure modes when re
 
 **Purpose**:
 
--   Tests failed refund scenarios when previous bidders cannot receive ETH
--   Tests failed NFT transfer scenarios when winners cannot receive NFTs
--   Validates that the auction contract properly handles and tracks failures
+- Tests failed refund scenarios when previous bidders cannot receive ETH
+- Tests failed NFT transfer scenarios when winners cannot receive NFTs
+- Validates that the auction contract properly handles and tracks failures
 
 **Key Features**:
 
 1. **Configurable ETH Reception**:
-
     - `setCanReceiveEth(bool)`: Controls whether the contract accepts ETH transfers
     - When set to `false`, both `receive()` and `fallback()` functions revert
     - Used to test the auction's failed refund tracking mechanism
 
 2. **Configurable NFT Reception**:
-
     - `setCanReceiveNft(bool)`: Controls whether the contract accepts NFT transfers
     - When set to `false`, `onERC721Received()` returns invalid selector
     - Used to test fallback minting when direct mint to winner fails
 
 3. **Error Type Simulation**:
-
     - `setThrowPanicError(bool)`: Triggers panic errors (division by zero)
     - `setCauseOutOfGas(bool)`: Enters infinite loop to consume all gas
     - Tests different catch blocks in the auction contract's try-catch logic
 
 4. **Auction Interaction Methods**:
-
     - `placeBid(uint256 auctionId)`: Allows the mock to participate in auctions
     - `claimRefund()`: Tests claiming failed refunds from auction
     - `claimNftFromAuction(uint256)`: Tests claiming NFTs from auction
@@ -310,11 +304,11 @@ bidder.claimRefund();
 
 **Test Coverage**:
 
--   Failed refunds to contracts that reject ETH
--   Failed NFT mints to contracts that reject NFTs
--   Panic errors during NFT reception
--   Out-of-gas scenarios during NFT reception
--   Manual claim mechanisms for both ETH and NFTs
+- Failed refunds to contracts that reject ETH
+- Failed NFT mints to contracts that reject NFTs
+- Panic errors during NFT reception
+- Out-of-gas scenarios during NFT reception
+- Manual claim mechanisms for both ETH and NFTs
 
 ##### YoyoNftFailingMintMock.sol
 
@@ -322,26 +316,23 @@ A specialized mock of the YoyoNft contract that can simulate various mint failur
 
 **Purpose**:
 
--   Tests the auction contract's fallback minting logic
--   Validates error message propagation through try-catch blocks
--   Ensures auction can handle both standard reverts and panic errors during minting
+- Tests the auction contract's fallback minting logic
+- Validates error message propagation through try-catch blocks
+- Ensures auction can handle both standard reverts and panic errors during minting
 
 **Key Features**:
 
 1. **Configurable Revert with Message**:
-
     - `setShouldFailMint(bool, string reason)`: Makes `mintNft()` revert with custom message
     - Caught by `catch Error(string memory reason)` block in auction
     - Used to test error message logging in events
 
 2. **Configurable Panic Error**:
-
     - `setShouldPanic(bool)`: Makes `mintNft()` trigger panic via invalid opcode
     - Caught by generic `catch (bytes memory)` block in auction
     - Used to test low-level error handling
 
 3. **State Variables for Configuration**:
-
     - `bool shouldFailMint`: Flag to enable/disable revert
     - `bool shouldPanic`: Flag to enable/disable panic
     - `string failureReason`: Custom error message for standard reverts
@@ -393,12 +384,12 @@ nftMock.setShouldPanic(false);
 
 **Test Coverage**:
 
--   Standard Error() revert with custom message
--   Panic errors without error messages
--   Fallback minting to auction contract
--   Winner eligibility tracking for manual claims
--   Event emission for different failure types
--   Successful mint after toggling flags off
+- Standard Error() revert with custom message
+- Panic errors without error messages
+- Fallback minting to auction contract
+- Winner eligibility tracking for manual claims
+- Event emission for different failure types
+- Successful mint after toggling flags off
 
 **Implementation Details**:
 
@@ -413,19 +404,16 @@ This allows precise control over which failure mode to test, and ensures that pa
 **Why These Mocks Are Essential**:
 
 1. **Real-World Simulation**: Smart contracts can fail to receive ETH or NFTs for various reasons:
-
     - Contract without receive/fallback functions
     - Contract that explicitly rejects transfers
     - Out-of-gas during transfer
     - Reentrancy guard active
 
 2. **Edge Case Coverage**: These scenarios are rare but critical to handle correctly:
-
     - If not handled, funds or NFTs could be permanently locked
     - The auction must track failures and provide recovery mechanisms
 
 3. **Error Handling Verification**: Tests that the auction contract:
-
     - Properly catches different error types
     - Logs appropriate events for off-chain monitoring
     - Maintains state consistency after failures
@@ -536,15 +524,15 @@ forge verify-contract \
 
 ### Languages
 
--   **Solidity ^0.8.0**: For smart contract development with latest security features and gas optimizations
+- **Solidity ^0.8.0**: For smart contract development with latest security features and gas optimizations
 
 ### Development Tools
 
--   **Foundry**: Blazing fast, portable toolkit for Ethereum development written in Rust
-    -   **Forge**: Testing framework with advanced features (fuzz testing, invariant testing)
-    -   **Cast**: CLI tool for blockchain interactions
-    -   **Anvil**: Local Ethereum node for development
-    -   **Chisel**: Solidity REPL for rapid prototyping
+- **Foundry**: Blazing fast, portable toolkit for Ethereum development written in Rust
+    - **Forge**: Testing framework with advanced features (fuzz testing, invariant testing)
+    - **Cast**: CLI tool for blockchain interactions
+    - **Anvil**: Local Ethereum node for development
+    - **Chisel**: Solidity REPL for rapid prototyping
 
 ### Libraries and Dependencies
 
@@ -552,10 +540,10 @@ forge verify-contract \
 
 Industry-standard, audited smart contract library for:
 
--   **ERC721**: NFT standard implementation in YoyoNft
--   **Ownable**: Access control for administrative functions
--   **ReentrancyGuard**: Protection against reentrancy attacks in auction contract
--   **IERC721Receiver**: Safe NFT transfer interface
+- **ERC721**: NFT standard implementation in YoyoNft
+- **Ownable**: Access control for administrative functions
+- **ReentrancyGuard**: Protection against reentrancy attacks in auction contract
+- **IERC721Receiver**: Safe NFT transfer interface
 
 ```bash
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
@@ -565,11 +553,11 @@ forge install OpenZeppelin/openzeppelin-contracts --no-commit
 
 Decentralized oracle network integration:
 
--   **Chainlink Automation (Keepers)**: Automated auction lifecycle management
-    -   Automatic auction closure when time expires
-    -   Automatic auction restart when no bids placed
-    -   Grace period mechanism for manual intervention
--   **AutomationCompatibleInterface**: Standard interface for Keeper-compatible contracts
+- **Chainlink Automation (Keepers)**: Automated auction lifecycle management
+    - Automatic auction closure when time expires
+    - Automatic auction restart when no bids placed
+    - Grace period mechanism for manual intervention
+- **AutomationCompatibleInterface**: Standard interface for Keeper-compatible contracts
 
 ```bash
 forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
@@ -579,9 +567,9 @@ forge install smartcontractkit/chainlink-brownie-contracts@1.2.0 --no-commit
 
 Automation tools for deployment and contract management:
 
--   Retrieves most recent deployment addresses from broadcast folder
--   Eliminates need for hardcoded addresses in scripts
--   Simplifies multi-chain deployment workflows
+- Retrieves most recent deployment addresses from broadcast folder
+- Eliminates need for hardcoded addresses in scripts
+- Simplifies multi-chain deployment workflows
 
 ```bash
 forge install Cyfrin/foundry-devops --no-commit
@@ -593,14 +581,14 @@ forge install Cyfrin/foundry-devops --no-commit
 
 **Why**: Provides flexibility for different NFT distribution strategies
 
--   **English auctions**: Maximize revenue when demand is uncertain
--   **Dutch auctions**: Guarantee quick sales with price discovery
+- **English auctions**: Maximize revenue when demand is uncertain
+- **Dutch auctions**: Guarantee quick sales with price discovery
 
 **Implementation**:
 
--   Shared base logic with type-specific functions
--   Library-based Dutch auction calculations for gas efficiency
--   Enum-based type identification
+- Shared base logic with type-specific functions
+- Library-based Dutch auction calculations for gas efficiency
+- Enum-based type identification
 
 #### 2. Chainlink Automation Integration
 
@@ -608,9 +596,9 @@ forge install Cyfrin/foundry-devops --no-commit
 
 **Benefits**:
 
--   Auctions close automatically at expiration
--   No reliance on external bots or centralized servers
--   Transparent, verifiable execution
+- Auctions close automatically at expiration
+- No reliance on external bots or centralized servers
+- Transparent, verifiable execution
 
 **Fallback**: Grace period allows manual execution if Chainlink is temporarily down
 
@@ -620,10 +608,10 @@ forge install Cyfrin/foundry-devops --no-commit
 
 **Mechanisms**:
 
--   Failed mint to winner → Mint to contract, allow manual claim
--   Failed refund to bidder → Track in mapping, allow manual claim
--   Clear error messages via custom errors (gas efficient)
--   Event emission for all failure scenarios
+- Failed mint to winner → Mint to contract, allow manual claim
+- Failed refund to bidder → Track in mapping, allow manual claim
+- Clear error messages via custom errors (gas efficient)
+- Event emission for all failure scenarios
 
 #### 4. Modular Contract Design
 
@@ -631,36 +619,36 @@ forge install Cyfrin/foundry-devops --no-commit
 
 **Structure**:
 
--   Separate Events and Errors files for clarity
--   Library for complex calculations (Dutch auctions)
--   Interface for inter-contract communication
--   Shared types in YoyoTypes.sol
+- Separate Events and Errors files for clarity
+- Library for complex calculations (Dutch auctions)
+- Interface for inter-contract communication
+- Shared types in YoyoTypes.sol
 
 #### 5. Gas Optimization Strategies
 
 **Techniques Used**:
 
--   Custom errors instead of require strings
--   Immutable variables for deployment-time constants
--   Unchecked arithmetic where overflow is impossible
--   Library functions for complex calculations
--   Efficient storage packing
+- Custom errors instead of require strings
+- Immutable variables for deployment-time constants
+- Unchecked arithmetic where overflow is impossible
+- Library functions for complex calculations
+- Efficient storage packing
 
 #### 6. Comprehensive Testing
 
 **Test Coverage**:
 
--   Unit tests for individual functions
--   Integration tests for contract interactions
--   Mock contracts for failure scenario testing
--   Fuzz testing for edge cases (TODO: implement)
--   Invariant testing for state consistency (TODO: implement)
+- Unit tests for individual functions
+- Integration tests for contract interactions
+- Mock contracts for failure scenario testing
+- Fuzz testing for edge cases (TODO: implement)
+- Invariant testing for state consistency (TODO: implement)
 
 **Test Structure**:
 
--   Base test contract with common setup
--   Separate test files per contract function group
--   Mock contracts in dedicated directory
+- Base test contract with common setup
+- Separate test files per contract function group
+- Mock contracts in dedicated directory
 
 ### Security Considerations
 
@@ -674,13 +662,13 @@ forge install Cyfrin/foundry-devops --no-commit
 
 Thank you for your interest in contributing to **Yoyo Web3 App**! Every contribution is valuable and helps improve the project. There are various ways you can contribute:
 
--   **Bug Fixes**: If you find a bug, feel free to submit a fix
--   **Adding New Features**: Propose new auction types or NFT features
--   **Documentation**: Help improve code documentation and README
--   **Testing**: Add more test cases, especially fuzz and invariant tests
--   **Gas Optimization**: Suggest and implement gas-saving improvements
--   **Security Audits**: Review code for potential vulnerabilities
--   **Fork**: Adapt this project for other chains or use cases
+- **Bug Fixes**: If you find a bug, feel free to submit a fix
+- **Adding New Features**: Propose new auction types or NFT features
+- **Documentation**: Help improve code documentation and README
+- **Testing**: Add more test cases, especially fuzz and invariant tests
+- **Gas Optimization**: Suggest and implement gas-saving improvements
+- **Security Audits**: Review code for potential vulnerabilities
+- **Fork**: Adapt this project for other chains or use cases
 
 ### How to Submit a Contribution
 
@@ -700,7 +688,6 @@ Thank you for your interest in contributing to **Yoyo Web3 App**! Every contribu
     ```
 
 4. **Make your changes**:
-
     - Write clean, well-documented code
     - Follow existing code style and naming conventions
     - Add tests for new functionality
@@ -733,20 +720,20 @@ Thank you for your interest in contributing to **Yoyo Web3 App**! Every contribu
 
 ### Contribution Guidelines
 
--   **Code Style**: Follow Solidity style guide and existing patterns
--   **Testing**: Ensure all tests pass and add new tests for features
--   **Documentation**: Update NatSpec comments and README as needed
--   **Commit Messages**: Use conventional commits (feat:, fix:, docs:, etc.)
--   **Gas Efficiency**: Consider gas costs in implementation decisions
+- **Code Style**: Follow Solidity style guide and existing patterns
+- **Testing**: Ensure all tests pass and add new tests for features
+- **Documentation**: Update NatSpec comments and README as needed
+- **Commit Messages**: Use conventional commits (feat:, fix:, docs:, etc.)
+- **Gas Efficiency**: Consider gas costs in implementation decisions
 
 ### Areas Needing Contribution
 
--   [ ] Implement invariant tests for contract state consistency
--   [ ] Add fuzz testing for auction pricing edge cases
--   [ ] Add support for additional auction types (e.g., sealed-bid)
--   [ ] Implement pause mechanism for emergency scenarios
--   [ ] Optimize gas usage in high-frequency functions
--   [ ] Add integration with additional price feeds
+- [ ] Implement invariant tests for contract state consistency
+- [ ] Add fuzz testing for auction pricing edge cases
+- [ ] Add support for additional auction types (e.g., sealed-bid)
+- [ ] Implement pause mechanism for emergency scenarios
+- [ ] Optimize gas usage in high-frequency functions
+- [ ] Add integration with additional price feeds
 
 ## 7. License
 
@@ -780,10 +767,10 @@ SOFTWARE.
 
 For more information, questions, or collaboration opportunities, you can reach me:
 
--   **GitHub**: [eliab256](https://github.com/eliab256)
--   **Project Repository**: [S2I-Final-Project-Yoyo-Web3App](https://github.com/eliab256/S2I-Final-Project-Yoyo-Web3App)
--   **Portfolio**: [elia-bordoni-blockchain-security-researcher.vercel.app](https://elia-bordoni-blockchain-security-researcher.vercel.app/)
--   **Email**: bordonielia96@gmail.com
--   **LinkedIn**: [Elia Bordoni](https://www.linkedin.com/in/elia-bordoni/)
+- **GitHub**: [eliab256](https://github.com/eliab256)
+- **Project Repository**: [S2I-Final-Project-Yoyo-Web3App](https://github.com/eliab256/S2I-Final-Project-Yoyo-Web3App)
+- **Portfolio**: [elia-bordoni-blockchain-security-researcher.vercel.app](https://elia-bordoni-blockchain-security-researcher.vercel.app/)
+- **Email**: bordonielia96@gmail.com
+- **LinkedIn**: [Elia Bordoni](https://www.linkedin.com/in/elia-bordoni/)
 
 ---

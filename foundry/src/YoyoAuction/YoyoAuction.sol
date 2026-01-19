@@ -2,27 +2,28 @@
 pragma solidity ^0.8.0;
 
 import { IYoyoNft } from '../YoyoNft/IYoyoNft.sol';
+import { IYoyoAuction } from './IYoyoAuction.sol';
 import { ReentrancyGuard } from '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
-import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol';
 import {
     IAutomationRegistryConsumer
 } from '@chainlink/contracts/src/v0.8/automation/interfaces/IAutomationRegistryConsumer.sol';
-import { IERC721Receiver } from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import { YoyoDutchAuctionLibrary } from './YoyoDutchAuctionLibrary.sol';
 import './YoyoAuctionEvents.sol';
 import './YoyoAuctionErrors.sol';
 import { AuctionStruct, AuctionState, AuctionType } from '../YoyoTypes.sol';
-import { console2 } from 'forge-std/console2.sol';
+//import { IERC721Receiver } from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+//import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol';
 
 /**
  * @title Nft Auction System
  * @author Elia Bordoni
  * @notice This contract manages english and dutch auction for Nft collection
  * @dev Implements automated auction lifecycle with reentrancy protection and Chainlink upkeep integration
+ * @dev IERC721Receiver and AutomationCompatibleInterface are implemented to the IYoyoAuction interface
  */
 
-contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface, IERC721Receiver {
+contract YoyoAuction is ReentrancyGuard, Ownable, IYoyoAuction {
     /**
      * @dev Interface that allows contract to acces the NFT contract
      */
@@ -596,12 +597,10 @@ contract YoyoAuction is ReentrancyGuard, Ownable, AutomationCompatibleInterface,
             emit YoyoAuction__MintFailed(auction.auctionId, auction.tokenId, auction.higherBidder, reason);
         } catch Error(string memory fallbackReason) {
             // Minting to this contract failed with error message
-            console2.log('tokenOwnerFromAuction must be 0. ', auction.nftOwner);
             s_unmintedTokensNeedToBeMintedToWinners[auction.tokenId] = true;
             emit YoyoAuction__MintFailed(auction.auctionId, auction.tokenId, auction.higherBidder, fallbackReason);
         } catch {
             // Minting to this contract failed without error message
-            console2.log('tokenOwnerFromAuction must be 0. ', auction.nftOwner);
             s_unmintedTokensNeedToBeMintedToWinners[auction.tokenId] = true;
             emit YoyoAuction__MintFailed(
                 auction.auctionId,

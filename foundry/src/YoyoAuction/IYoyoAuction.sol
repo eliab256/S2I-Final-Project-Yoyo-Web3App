@@ -11,7 +11,7 @@ import { AutomationCompatibleInterface } from '@chainlink/contracts/src/v0.8/aut
  * @notice Interface for the YoyoAuction NFT auction contract
  * @dev Defines all external and public functions for interacting with the auction system
  */
-interface IYoyoAuction {
+interface IYoyoAuction is AutomationCompatibleInterface, IERC721Receiver {
     /* ========== SETUP FUNCTIONS ========== */
 
     /**
@@ -66,13 +66,6 @@ interface IYoyoAuction {
      * @param _auctionId ID of the auction to manually finalize
      */
     function claimNftForWinner(uint256 _auctionId) external;
-
-    /**
-     * @notice Manual function to mint NFT for auction winner when mint after auction close fails
-     * @dev Only callable by owner as a fallback mechanism
-     * @param _auctionId ID of the auction to manually finalize
-     */
-    function mintNftForWinner(uint256 _auctionId) external;
 
     /**
      * @notice Allows the owner to change the basic mint price for future auctions
@@ -188,10 +181,25 @@ interface IYoyoAuction {
     function getFailedRefundAmount(address _bidder) external view returns (uint256);
 
     /**
-     * @notice Checks if a winner is eligible to claim their unminted NFT
-     * @param _tokenId ID of the NFT token to check eligibility for
-     * @return bool True if the caller is eligible to claim the token
+     * @notice Returns the upkeep ID associated with this contract
+     * @dev Used by Chainlink Automation to identify this contract's upkeep registration
+     * @return uint256 The upkeep ID
      */
-    function getElegibiltyForClaimToken(uint256 _tokenId) external view returns (bool);
+    function getUpkeepId() external view returns (uint256);
 
+    /**
+     * @notice Returns the address of the Chainlink Forwarder
+     * @dev The Chainlink Forwarder is the authorized Automation contract for upkeeps
+     * @return address The Chainlink Forwarder address
+     */
+    function getChainlinkForwarderAddress() external view returns (address);
+
+    /**
+     * @notice Checks if a claimer is eligible to claim their unminted NFT for a specific auction
+     * @dev Returns true if the claimer has an unclaimed NFT for the given auction
+     * @param _auctionId The ID of the auction to check eligibility for
+     * @param _claimer The address of the potential claimer
+     * @return bool True if the claimer can claim the NFT, false otherwise
+     */
+    function getElegibilityForClaimingNft(uint256 _auctionId, address _claimer) external view returns (bool);
 }
