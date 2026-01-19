@@ -51,9 +51,6 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
         linkToken = LinkTokenInterface(SEPOLIA_LINK_TOKEN);
 
-        console.log('YoyoAuction deployed at:', address(yoyoAuction));
-        console.log('YoyoNft deployed at:', address(yoyoNft));
-
         assert(address(yoyoAuction) != address(0));
         assert(address(yoyoNft) != address(0));
 
@@ -64,10 +61,7 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         assertEq(yoyoAuction.getNftContract(), address(yoyoNft));
         assertEq(yoyoNft.getAuctionContract(), address(yoyoAuction));
 
-        assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
+        assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), forwarder);
 
         assertEq(yoyoNft.getBasicMintPrice(), SEPOLIA_BASIC_MINT_PRICE);
     }

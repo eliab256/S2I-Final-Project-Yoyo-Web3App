@@ -56,7 +56,7 @@ contract AutomationRegistration {
         }
 
         // 1. Take LINK from the caller
-        bool transferSuccess = i_link.transferFrom(msg.sender, address(this), fundingAmount);
+        bool transferSuccess = i_link.transferFrom(adminAddress, address(this), fundingAmount);
         if (!transferSuccess) {
             revert AutomationRegistration__LinkTransferFailed();
         }

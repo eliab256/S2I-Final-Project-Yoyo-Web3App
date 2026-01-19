@@ -9,8 +9,11 @@ import { HelperConfig, CodeConstants } from './HelperConfig.sol';
 import {
     IKeeperRegistryMaster
 } from '@chainlink/contracts/src/v0.8/automation/interfaces/v2_1/IKeeperRegistryMaster.sol';
+import { AutomationRegistration } from './AutomationRegistration.sol';
+import { LinkTokenInterface } from '@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol';
 
 contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
+    error InsufficientLinkBalance(uint256 required, uint256 available);
     function run()
         public
         returns (YoyoAuction, YoyoNft, address deployer, HelperConfig, uint256 upkeepId, address forwarder)
@@ -44,7 +47,7 @@ contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
 
         // 5. If not Anvil, register the auction contract for Chainlink Automation
         if (isNotAnvil) {
-            upkeepId = helperConfig.registerAutomation(address(yoyoAuction), 'YoyoAuctionAutomation');
+            upkeepId = registerAutomation(address(yoyoAuction), 'YoyoAuctionAutomation', config);
         }
 
         // 6. Set the upkeep ID in the YoyoAuction contract to retreive forwarder address later
@@ -67,5 +70,59 @@ contract DeployYoyoAuctionAndYoyoNft is Script, CodeConstants {
         vm.stopBroadcast();
 
         return (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder);
+    }
+
+    /**
+     * @notice Register upkeep on Chainlink Automation
+     * @dev Handles the entire registration process
+     * @dev It use the activeNetworkConfig parameters
+     * @param _upkeepContract Address of the contract to automate
+     * @param _name Name of the upkeep
+     * @return upkeepId ID of the registered upkeep
+     */
+    function registerAutomation(address _upkeepContract, string memory _name, HelperConfig.NetworkConfig memory _config) public returns (uint256 upkeepId) {
+        console.log('');
+        console.log('==================== Registering Chainlink Automation ====================');
+        console.log('Registering Chainlink Automation...');
+        console.log('Upkeep Contract:', _upkeepContract);
+        console.log('Admin:', _config.deployerAccount);
+        console.log(
+            'Admin Link Balance: ',
+            LinkTokenInterface(_config.linkToken).balanceOf(_config.deployerAccount) / 1e18,
+            ' LINK'
+        );
+        console.log('Funding Amount:', _config.fundingAmount / 1e18, 'LINK');
+
+        // 1. Deploy AutomationRegistration helper
+        AutomationRegistration registration = new AutomationRegistration(
+            _config.linkToken,
+            _config.automationRegistrar
+        );
+        console.log('AutomationRegistration deployed at:', address(registration));
+
+        // 2. Check LINK balance
+        LinkTokenInterface link = LinkTokenInterface(_config.linkToken);
+        uint256 linkBalance = link.balanceOf(_config.deployerAccount);
+
+        if (linkBalance < _config.fundingAmount) {
+            revert InsufficientLinkBalance(_config.fundingAmount, linkBalance);
+        }
+
+        // 3. Transfer LINK to the registration contract
+        link.approve(address(registration), _config.fundingAmount);
+        console.log('Transferred', _config.fundingAmount / 1e18, 'LINK to registration contract');
+        console.log('==========================================================================');
+        console.log('');
+
+        // 4. Register the upkeep
+        upkeepId = registration.registerAndFundUpkeep(
+            _upkeepContract,
+            _name,
+            _config.gasLimit,
+            _config.deployerAccount,
+            _config.fundingAmount
+        );
+
+        return upkeepId;
     }
 }
