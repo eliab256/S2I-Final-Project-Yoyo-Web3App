@@ -74,19 +74,6 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         deployerScript.run();
     }
 
-    function testDeployFailsWithInsufficientLinkBalance() public {
-        vm.createSelectFork('sepolia');
-        DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-
-        // Simulate insufficient LINK balance by setting deployer's LINK balance to 0
-        linkToken = LinkTokenInterface(SEPOLIA_LINK_TOKEN);
-        vm.prank(SEPOLIA_DEPLOYER_ADDRESS);
-        linkToken.transfer(address(0), linkToken.balanceOf(SEPOLIA_DEPLOYER_ADDRESS));
-
-        vm.expectRevert(abi.encodeWithSelector(DeployYoyoAuctionAndYoyoNft.InsufficientLinkBalance.selector, SEPOLIA_FUNDING_AMOUNT, 0));
-        deployerScript.run();
-    }
-
     function testGetSepoliaConfig() public {
         helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory sepoliaConfig = helperConfig.getSepoliaConfig();

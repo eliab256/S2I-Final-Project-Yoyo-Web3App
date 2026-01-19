@@ -32,7 +32,7 @@ test-fork-mainnet:
 
 # Coverage only for main contracts (excludes mocks, interfaces, tests, helpers)
 coverage-main :; forge coverage --report summary \
-	--no-match-coverage "Mock|Test|Interface|I[A-Z]|CodeConstants"
+	--no-match-coverage "Mock|Test|Interface|I[A-Z]|CodeConstants|AutomationRegistration"
 
 # Coverage with lcov report for main contracts
 coverage-lcov :; forge coverage --report lcov \

@@ -107,13 +107,13 @@ Both contracts provide comprehensive view functions to query state:
 
 ### YoyoAuction Contract
 
-**Address**: `0x51eaAa1a6b1cF652B58da67cB32a0f7999263619`
-**Etherscan Link**: `https://sepolia.etherscan.io/address/0x51eaAa1a6b1cF652B58da67cB32a0f7999263619`
+**Address**: `0xFC188F25EE67D68BC61C74714DAA431d0719D1fe`
+**Etherscan Link**: `https://sepolia.etherscan.io/address/0xFC188F25EE67D68BC61C74714DAA431d0719D1fe`
 
 ### YoyoNft Contract
 
-**Address**: `0x81a9B713128A4DF3349D9Bc363CEE1D77accDCA3`
-**Etherscan Link**: `https://sepolia.etherscan.io/address/0x81a9B713128A4DF3349D9Bc363CEE1D77accDCA3`
+**Address**: `0xbf993f5eE3b657Ce8Def22D14fE2733C9e37Bbd5`
+**Etherscan Link**: `https://sepolia.etherscan.io/address/0xbf993f5eE3b657Ce8Def22D14fE2733C9e37Bbd5`
 
 ### How to Interact with the Contracts
 

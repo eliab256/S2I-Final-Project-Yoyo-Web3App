@@ -295,7 +295,6 @@ contract YoyoNft is ERC721, Ownable {
         return _ownerOf(_tokenId) == address(0) && _tokenId < MAX_NFT_SUPPLY;
     }
 
-
     /**
      * @notice Returns the total nft supply
      * @return uint256 The total NFT supply
