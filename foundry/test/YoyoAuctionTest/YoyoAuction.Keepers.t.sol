@@ -75,9 +75,9 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
 
         vm.revertToState(snapshotId); // Revert to before deployer call to test keeperMock call after grace period
 
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         vm.expectEmit(true, true, false, true);
-        emit YoyoAuction__ManualUpkeepExecuted(auctionId, keeperMock, ownerKeeperCallTimestamp);
+        emit YoyoAuction__ManualUpkeepExecuted(auctionId, forwarderMock, ownerKeeperCallTimestamp);
         yoyoAuction.performUpkeep(performDataTest);
     }
 
@@ -87,7 +87,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
 
         bytes memory performDataTest = abi.encode(auctionId, endTime);
 
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         vm.expectRevert(YoyoAuction__UpkeepNotNeeded.selector);
         yoyoAuction.performUpkeep(performDataTest);
     }
@@ -105,7 +105,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
         vm.roll(block.number + 1);
         vm.warp(currentAuction.endTime);
 
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         vm.expectEmit(true, true, false, false);
         emit YoyoAuction__AuctionClosed(
             auctionId,
@@ -143,7 +143,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
             newEndTime,
             yoyoAuction.getMinimumBidChangeAmount()
         );
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         yoyoAuction.performUpkeep(performDataTest);
 
         assertTrue(yoyoAuction.getAuctionFromAuctionId(auctionId).state == AuctionState.OPEN);
@@ -173,7 +173,7 @@ contract YoyoAuctionKeepersTest is YoyoAuctionBaseTest {
             newEndTime,
             yoyoAuction.getMinimumBidChangeAmount()
         );
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         yoyoAuction.performUpkeep(performDataTest);
 
         assertTrue(yoyoAuction.getAuctionFromAuctionId(auctionId).state == AuctionState.OPEN);

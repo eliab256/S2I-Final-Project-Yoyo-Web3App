@@ -48,7 +48,7 @@ contract YoyoAuctionMintPriceAndGettersTest is YoyoAuctionBaseTest {
         vm.stopPrank();
 
         vm.warp(endTime);
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         yoyoAuction.performUpkeep(abi.encode(auctionId, endTime));
 
         assert(yoyoAuction.getAuctionFromAuctionId(auctionId).state == AuctionState.CLOSED);

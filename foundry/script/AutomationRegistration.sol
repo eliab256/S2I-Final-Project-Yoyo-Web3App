@@ -19,6 +19,10 @@ interface AutomationRegistrarInterface {
     function registerUpkeep(RegistrationParams calldata requestParams) external returns (uint256);
 }
 
+error AutomationRegistration__LinkTransferFailed();
+error AutomationRegistration__UpkeepRegistrationFailed();
+error AutomationRegistration__InvalidParameters();
+
 contract AutomationRegistration {
     LinkTokenInterface public immutable i_link;
     AutomationRegistrarInterface public immutable i_registrar;
@@ -44,10 +48,26 @@ contract AutomationRegistration {
         address adminAddress,
         uint96 fundingAmount
     ) external returns (uint256) {
-        // 1. Approve LINK to the registrar
-        i_link.approve(address(i_registrar), fundingAmount);
+        if (upkeepContract == address(0) || adminAddress == address(0)) {
+            revert AutomationRegistration__InvalidParameters();
+        }
+        if (fundingAmount == 0) {
+            revert AutomationRegistration__InvalidParameters();
+        }
 
-        // 2. Prepare registration parameters
+        // 1. Take LINK from the caller
+        bool transferSuccess = i_link.transferFrom(msg.sender, address(this), fundingAmount);
+        if (!transferSuccess) {
+            revert AutomationRegistration__LinkTransferFailed();
+        }
+
+        // 2. Approve LINK to the registrar
+        bool approveSuccess = i_link.approve(address(i_registrar), fundingAmount);
+        if (!approveSuccess) {
+            revert AutomationRegistration__LinkTransferFailed();
+        }
+
+        // 3. Prepare registration parameters
         RegistrationParams memory params = RegistrationParams({
             name: name,
             encryptedEmail: hex'', // empty
@@ -61,11 +81,11 @@ contract AutomationRegistration {
             amount: fundingAmount
         });
 
-        // 3. Register the upkeep
+        // 4. Register the upkeep
         uint256 upkeepID = i_registrar.registerUpkeep(params);
 
         if (upkeepID == 0) {
-            revert('AutomationRegistration: Upkeep registration failed');
+            revert AutomationRegistration__UpkeepRegistrationFailed();
         } else {
             return upkeepID;
         }

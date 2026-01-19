@@ -7,19 +7,21 @@ import { YoyoAuction } from '../src/YoyoAuction/YoyoAuction.sol';
 import { YoyoNft } from '../src/YoyoNft/YoyoNft.sol';
 import { Test, console, Vm } from 'forge-std/Test.sol';
 import { ConstructorParams } from '../src/YoyoTypes.sol';
+import { LinkTokenInterface } from '@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol';
 
 contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
     YoyoAuction public yoyoAuction;
     YoyoNft public yoyoNft;
     HelperConfig public helperConfig;
+    LinkTokenInterface public linkToken;
 
     address public deployer;
-    address public keeperMock;
+    address public forwarder;
     uint256 public upkeepId;
 
     function testDeployContractsOnLocalEnv() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
 
         console.log('YoyoAuction deployed at:', address(yoyoAuction));
         console.log('YoyoNft deployed at:', address(yoyoNft));
@@ -34,10 +36,11 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         assertEq(yoyoAuction.getNftContract(), address(yoyoNft));
         assertEq(yoyoNft.getAuctionContract(), address(yoyoAuction));
 
-        // assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), helperConfig.getKeepersRegistry());
-        // assert(address(yoyoAuction.getChainlinkForwarderAddress()) != address(0));
-        // assert(address(yoyoAuction.getChainlinkForwarderAddress()) != SEPOLIA_KEEPERS_REGISTRY);
-        // assert(address(yoyoAuction.getChainlinkForwarderAddress()) != MAINNET_KEEPERS_REGISTRY);
+        assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), forwarder);
+        assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), makeAddr('forwarderMock'));
+
+        assertEq(helperConfig.getAutomationRegistry(), makeAddr('registryMock'));
+        assertEq(helperConfig.getAutomationRegistrar(), makeAddr('registrarMock'));
 
         assertEq(yoyoNft.getBasicMintPrice(), ANVIL_BASIC_MINT_PRICE);
     }
@@ -45,7 +48,8 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
     function testDeployContractsOnSepolia() public {
         vm.createSelectFork('sepolia');
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
+        linkToken = LinkTokenInterface(SEPOLIA_LINK_TOKEN);
 
         console.log('YoyoAuction deployed at:', address(yoyoAuction));
         console.log('YoyoNft deployed at:', address(yoyoNft));
@@ -68,48 +72,12 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         assertEq(yoyoNft.getBasicMintPrice(), SEPOLIA_BASIC_MINT_PRICE);
     }
 
-    function testDeployContractsOnMainnet() public {
-        vm.createSelectFork('mainnet');
-        DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
-
-        console.log('YoyoAuction deployed at:', address(yoyoAuction));
-        console.log('YoyoNft deployed at:', address(yoyoNft));
-
-        assert(address(yoyoAuction) != address(0));
-        assert(address(yoyoNft) != address(0));
-
-        assertEq(yoyoAuction.owner(), MAINNET_DEPLOYER_ADDRESS);
-        assertEq(yoyoNft.owner(), MAINNET_DEPLOYER_ADDRESS);
-        assertEq(deployer, MAINNET_DEPLOYER_ADDRESS);
-
-        assertEq(yoyoAuction.getNftContract(), address(yoyoNft));
-        assertEq(yoyoNft.getAuctionContract(), address(yoyoAuction));
-
-        assertEq(address(yoyoAuction.getChainlinkForwarderAddress()), address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
-        assert(address(yoyoAuction.getChainlinkForwarderAddress()) == address(0));
-
-        assertEq(yoyoNft.getBasicMintPrice(), MAINNET_BASIC_MINT_PRICE);
-    }
-
     function testDeployFailsWithInvalidNetwork() public {
         vm.createSelectFork('optimism');
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
 
         vm.expectRevert(HelperConfig.HelperConfig__InvalidChainId.selector);
         deployerScript.run();
-    }
-
-    function testGetMainnetConfig() public {
-        helperConfig = new HelperConfig();
-        HelperConfig.NetworkConfig memory mainnetConfig = helperConfig.getMainnetConfig();
-
-        assertEq(mainnetConfig.deployerAccount, MAINNET_DEPLOYER_ADDRESS);
-        assertEq(mainnetConfig.automationRegistry, MAINNET_KEEPERS_REGISTRY);
-        assertEq(mainnetConfig.basicMintPrice, MAINNET_BASIC_MINT_PRICE);
-        assert(bytes(mainnetConfig.baseUri).length > 0);
     }
 
     function testGetSepoliaConfig() public {
@@ -124,11 +92,11 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
 
     function testGetAnvilConfigWithMockKeeperAlreadySet() public {
         helperConfig = new HelperConfig();
-        address mockKeeper = makeAddr('keeperMock');
+        address registryMockTest = makeAddr('registryMock');
         HelperConfig.NetworkConfig memory anvilConfig = helperConfig.getAnvilConfig();
 
         assertEq(anvilConfig.deployerAccount, ANVIL_DEPLOYER_ADDRESS);
-        assertEq(anvilConfig.automationRegistry, mockKeeper);
+        assertEq(anvilConfig.automationRegistry, registryMockTest);
         assertEq(anvilConfig.basicMintPrice, ANVIL_BASIC_MINT_PRICE);
         assert(bytes(anvilConfig.baseUri).length > 0);
     }
@@ -138,7 +106,7 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         HelperConfig.NetworkConfig memory anvilConfig = helperConfig.getAnvilConfig();
 
         assertEq(anvilConfig.deployerAccount, ANVIL_DEPLOYER_ADDRESS);
-        assertEq(anvilConfig.automationRegistry, makeAddr('keeperMock'));
+        assertEq(anvilConfig.automationRegistry, makeAddr('registryMock'));
         assertEq(anvilConfig.basicMintPrice, ANVIL_BASIC_MINT_PRICE);
         assert(bytes(anvilConfig.baseUri).length > 0);
     }
@@ -152,9 +120,6 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         HelperConfig.NetworkConfig memory sepoliaConfig = helperConfig.getConfigByChainId(SEPOLIA_CHAIN_ID);
         assertEq(sepoliaConfig.basicMintPrice, SEPOLIA_BASIC_MINT_PRICE);
 
-        HelperConfig.NetworkConfig memory mainnetConfig = helperConfig.getConfigByChainId(MAINNET_CHAIN_ID);
-        assertEq(mainnetConfig.basicMintPrice, MAINNET_BASIC_MINT_PRICE);
-
         vm.expectRevert(HelperConfig.HelperConfig__InvalidChainId.selector);
         helperConfig.getConfigByChainId(9999);
     }
@@ -163,42 +128,40 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
         // Test Anvil config
 
-        (yoyoAuction, , , helperConfig,) = deployerScript.run();
+        (yoyoAuction, , , helperConfig, , ) = deployerScript.run();
         ConstructorParams memory anvilParams = helperConfig.getConstructorParamsByChainId(ANVIL_CHAIN_ID, address(0));
         assertEq(anvilParams.basicMintPrice, ANVIL_BASIC_MINT_PRICE);
 
         // Test Sepolia config
         vm.createSelectFork('sepolia');
 
-        (yoyoAuction, , , helperConfig,) = deployerScript.run();
+        (yoyoAuction, , , helperConfig, , ) = deployerScript.run();
         ConstructorParams memory sepoliaParams = helperConfig.getConstructorParamsByChainId(
             SEPOLIA_CHAIN_ID,
             address(0)
         );
         assertEq(sepoliaParams.basicMintPrice, SEPOLIA_BASIC_MINT_PRICE);
-
-        // Test Mainnet config
-        vm.createSelectFork('mainnet');
-
-        (yoyoAuction, , , helperConfig,) = deployerScript.run();
-        ConstructorParams memory mainnetParams = helperConfig.getConstructorParamsByChainId(
-            MAINNET_CHAIN_ID,
-            address(0)
-        );
-        assertEq(mainnetParams.basicMintPrice, MAINNET_BASIC_MINT_PRICE);
     }
 
     function testGetKeeperRegistry() public {
         vm.createSelectFork('sepolia');
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
         address keeperRegistryFromHelper = helperConfig.getAutomationRegistry();
         assertEq(keeperRegistryFromHelper, SEPOLIA_KEEPERS_REGISTRY);
     }
 
+    function testGetKeeperRegistrar() public {
+        vm.createSelectFork('sepolia');
+        DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
+        address keeperRegistrarFromHelper = helperConfig.getAutomationRegistrar();
+        assertEq(keeperRegistrarFromHelper, SEPOLIA_KEEPERS_REGISTRAR);
+    }
+
     function testGetBasicMintPrice() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
         uint256 basicMintPriceFromHelper = helperConfig.getConstructorParams(address(yoyoAuction)).basicMintPrice;
         uint256 basicMintPriceFromNft = yoyoNft.getBasicMintPrice();
         assertEq(basicMintPriceFromHelper, basicMintPriceFromNft);
@@ -206,16 +169,9 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
 
     function testGetDeployerAccount() public {
         DeployYoyoAuctionAndYoyoNft deployerScript = new DeployYoyoAuctionAndYoyoNft();
-        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId) = deployerScript.run();
+        (yoyoAuction, yoyoNft, deployer, helperConfig, upkeepId, forwarder) = deployerScript.run();
         address deployerFromHelper = helperConfig.getDeployerAccount();
         assertEq(deployerFromHelper, deployer);
-    }
-    function testConstructorMainnet() public {
-        vm.chainId(MAINNET_CHAIN_ID);
-        HelperConfig config = new HelperConfig();
-        assertEq(config.getDeployerAccount(), MAINNET_DEPLOYER_ADDRESS);
-        assertEq(config.getBasicMintPrice(), MAINNET_BASIC_MINT_PRICE);
-        assertEq(config.getAutomationRegistry(), MAINNET_KEEPERS_REGISTRY);
     }
 
     function testConstructorSepolia() public {
@@ -231,6 +187,7 @@ contract DeployYoyoAuctionAndYoyoNftTest is Test, CodeConstants {
         HelperConfig config = new HelperConfig();
         assertEq(config.getDeployerAccount(), ANVIL_DEPLOYER_ADDRESS);
         assertEq(config.getBasicMintPrice(), ANVIL_BASIC_MINT_PRICE);
-        assertEq(config.getAutomationRegistry(), makeAddr('keeperMock'));
+        assertEq(config.getAutomationRegistry(), makeAddr('registryMock'));
+        assertEq(config.getAutomationRegistrar(), makeAddr('registrarMock'));
     }
 }

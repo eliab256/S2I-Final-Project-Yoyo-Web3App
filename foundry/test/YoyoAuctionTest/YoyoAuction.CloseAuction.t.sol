@@ -82,7 +82,7 @@ contract YoyoAuctionCloseAuctionTest is YoyoAuctionBaseTest {
         vm.roll(block.number + 1);
         vm.warp(endTime);
         //PerformUpkeep check conditions and call closeAuction function
-        vm.startPrank(keeperMock);
+        vm.startPrank(forwarderMock);
         yoyoAuction.performUpkeep(abi.encode(auctionId, endTime));
         vm.stopPrank();
         AuctionStruct memory currentAuction = yoyoAuction.getAuctionFromAuctionId(auctionId);

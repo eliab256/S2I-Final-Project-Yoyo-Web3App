@@ -61,7 +61,7 @@ contract YoyoAuctionPlaceBidTest is YoyoAuctionBaseTest {
         vm.warp(endTime + 1);
 
         //Finalize the auction to set unclaimed token for USER_1
-        vm.prank(keeperMock);
+        vm.prank(forwarderMock);
         bytes memory performData = abi.encode(auctionId, endTime);
         yoyoAuction.performUpkeep(performData);
 
