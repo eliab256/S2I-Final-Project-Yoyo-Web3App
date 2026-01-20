@@ -149,4 +149,14 @@ In the following sections, the focus will be on the interaction between the smar
 
 # 8. Contacts
 
+For more information, questions, or collaboration opportunities, you can reach me:
+
+- **GitHub**: [eliab256](https://github.com/eliab256)
+- **Project Repository**: [Yoyo-Web3Dapp](https://github.com/eliab256/Yoyo-Web3Dapp)
+- **Portfolio**: [elia-bordoni-blockchain-security-researcher.vercel.app](https://elia-bordoni-blockchain-security-researcher.vercel.app/)
+- **Email**: bordonielia96@gmail.com
+- **LinkedIn**: [Elia Bordoni](https://www.linkedin.com/in/elia-bordoni/)
+
 # 9. Copyright
+
+© 2026 Elia Bordoni. All rights reserved.

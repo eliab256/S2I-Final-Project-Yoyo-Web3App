@@ -24,7 +24,7 @@ import {
     GET_ALL_MINT_FAILED,
 } from './queries';
 
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL || 'http://localhost:3001/graphql';
+const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL_PROD || import.meta.env.VITE_INDEXER_URL_DEV;
 
 async function fetchGraphQL(query: string, variables: Record<string, any> = {}) {
     const response = await fetch(GRAPHQL_ENDPOINT, {
