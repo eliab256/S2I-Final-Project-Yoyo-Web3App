@@ -5,8 +5,8 @@ timestamps: null
 networks:
     - name: sepolia
       chain_id: 11155111
-      rpc: ${ETHEREUM_SEPOLIA_RPC_URL}
-      compute_units_per_second: 200
+      rpc: ${SEPOLIA_ALCHEMY_RPC_URL}
+      compute_units_per_second: 50
 storage:
     postgres:
         enabled: true
@@ -16,8 +16,8 @@ contracts:
     - name: YoyoAuction
       details:
           - network: sepolia
-            address: 0x51eaAa1a6b1cF652B58da67cB32a0f7999263619
-            start_block: '9984515'
+            address: 0xFC188F25EE67D68BC61C74714DAA431d0719D1fe
+            start_block: '10079173'
       abi: ./abis/YoyoAuction.abi.json
       include_events:
           - name: YoyoAuction__BidPlaced
@@ -27,14 +27,13 @@ contracts:
           - name: YoyoAuction__AuctionRestarted
           - name: YoyoAuction__AuctionClosed
           - name: YoyoAuction__AuctionFinalized
-          - name: YoyoAuction__MintToWinnerFailed
           - name: YoyoAuction__MintFailed
           - name: YoyoAuction__ManualUpkeepExecuted
     - name: YoyoNft
       details:
           - network: sepolia
-            address: 0x81a9B713128A4DF3349D9Bc363CEE1D77accDCA3
-            start_block: '9984515'
+            address: 0xbf993f5eE3b657Ce8Def22D14fE2733C9e37Bbd5
+            start_block: '10079173'
       abi: ./abis/YoyoNft.abi.json
       include_events:
           - name: YoyoNft__WithdrawCompleted

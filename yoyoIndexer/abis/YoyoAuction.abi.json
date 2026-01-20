@@ -1,9 +1,5 @@
 [
-    {
-        "type": "constructor",
-        "inputs": [{ "name": "_registry", "type": "address", "internalType": "address" }],
-        "stateMutability": "nonpayable"
-    },
+    { "type": "constructor", "inputs": [], "stateMutability": "nonpayable" },
     { "type": "fallback", "stateMutability": "payable" },
     { "type": "receive", "stateMutability": "payable" },
     {
@@ -75,6 +71,13 @@
                 ]
             }
         ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getChainlinkForwarderAddress",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
         "stateMutability": "view"
     },
     {
@@ -185,9 +188,9 @@
     },
     {
         "type": "function",
-        "name": "i_registry",
+        "name": "getUpkeepId",
         "inputs": [],
-        "outputs": [{ "name": "", "type": "address", "internalType": "contract IAutomationRegistryConsumer" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
         "stateMutability": "view"
     },
     {
@@ -242,8 +245,22 @@
     },
     {
         "type": "function",
+        "name": "setChainlinkForwarder",
+        "inputs": [{ "name": "_chainlinkForwarder", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "setNftContract",
         "inputs": [{ "name": "_yoyoNftAddress", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setUpkeepId",
+        "inputs": [{ "name": "_upkeepId", "type": "uint256", "internalType": "uint256" }],
         "outputs": [],
         "stateMutability": "nonpayable"
     },
@@ -358,19 +375,8 @@
         "name": "YoyoAuction__MintFailed",
         "inputs": [
             { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
-            { "name": "tokenId", "type": "uint256", "indexed": false, "internalType": "uint256" },
-            { "name": "bidder", "type": "address", "indexed": false, "internalType": "address" },
-            { "name": "reason", "type": "string", "indexed": false, "internalType": "string" }
-        ],
-        "anonymous": false
-    },
-    {
-        "type": "event",
-        "name": "YoyoAuction__MintToWinnerFailed",
-        "inputs": [
-            { "name": "auctionId", "type": "uint256", "indexed": true, "internalType": "uint256" },
-            { "name": "tokenId", "type": "uint256", "indexed": false, "internalType": "uint256" },
-            { "name": "bidder", "type": "address", "indexed": false, "internalType": "address" },
+            { "name": "tokenId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "bidder", "type": "address", "indexed": true, "internalType": "address" },
             { "name": "reason", "type": "string", "indexed": false, "internalType": "string" }
         ],
         "anonymous": false
@@ -393,6 +399,8 @@
     { "type": "error", "name": "YoyoAuction__BidTooLow", "inputs": [] },
     { "type": "error", "name": "YoyoAuction__CallValidFunctionToInteractWithContract", "inputs": [] },
     { "type": "error", "name": "YoyoAuction__CannotChangeMintPriceDuringOpenAuction", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__ChainlinkForwarderAddressAlreadySet", "inputs": [] },
+    { "type": "error", "name": "YoyoAuction__ChainlinkUpkeepIdAlreadySet", "inputs": [] },
     { "type": "error", "name": "YoyoAuction__InvalidTokenId", "inputs": [] },
     { "type": "error", "name": "YoyoAuction__InvalidValue", "inputs": [] },
     { "type": "error", "name": "YoyoAuction__NftContractAlreadySet", "inputs": [] },
