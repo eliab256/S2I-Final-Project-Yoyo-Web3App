@@ -1,13 +1,13 @@
 import { useAccount } from 'wagmi';
-import NftCard from './NftCard';
-import nftData from '../data/nftCardData';
-import type { NftData } from '../types/nftTypes';
-import useUserNFTs from '../hooks/useUserNFTs';
-import ErrorBox from './ErrorBox';
+import NftCard from '../nft/NftCard';
+import nftData from '../../data/nftCardData';
+import type { NftData } from '../../types/nftTypes';
+import useUserNFTs from '../../hooks/useUserNFTs';
+import ErrorBox from '../ui/ErrorBox';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { type NftTokenId, setSelectedNft } from '../redux/selectedNftSlice';
-import NftDetails from './NftDetails';
+import { type NftTokenId, setSelectedNft } from '../../redux/selectedNftSlice';
+import NftDetails from '../nft/NftDetails';
 
 const MyNfts: React.FC = () => {
     const dispatch = useDispatch();

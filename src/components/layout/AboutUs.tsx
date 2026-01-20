@@ -1,4 +1,4 @@
-import logoImage from '../assets/images/Yoyo-Logo-Scritta-Scura.png';
+import logoImage from '../../assets/images/Yoyo-Logo-Scritta-Scura.png';
 
 const AboutUs: React.FC = () => {
     return (

@@ -1,21 +1,21 @@
+import useClaimRefund from '../../hooks/useClaimRefund';
 import { useState } from 'react';
-import useClaimNft from '../hooks/useClaimNft';
-import SuccessBox from './SuccessBox';
-import ErrorBox from './ErrorBox';
-import WarningBox from './WarningBox';
+import SuccessBox from '../ui/SuccessBox';
+import ErrorBox from '../ui/ErrorBox';
+import WarningBox from '../ui/WarningBox';
 
-const ClaimNftButton: React.FC = () => {
-    const { claimNft, isWritePending, isConfirming, isConfirmed, hash, error, unclaimedNftId } = useClaimNft();
+const ClaimFailedRefundButton: React.FC = () => {
+    const { claimRefund, isWritePending, isConfirming, isConfirmed, hash, error, hasUnclaimedRefund } =
+        useClaimRefund();
     const [showNoClaimPopup, setShowNoClaimPopup] = useState(false);
 
     const handleClick = () => {
-        if (unclaimedNftId === null) {
+        if (!hasUnclaimedRefund) {
             setShowNoClaimPopup(true);
         } else {
-            claimNft();
+            claimRefund();
         }
     };
-
     return (
         <>
             <button
@@ -35,15 +35,15 @@ const ClaimNftButton: React.FC = () => {
                         Confirming...
                     </span>
                 ) : (
-                    'Claim NFT'
+                    'Claim Refund'
                 )}
             </button>
 
             {/* Success Box when transaction is confirmed */}
             {!isWritePending && !isConfirming && isConfirmed && hash && (
                 <SuccessBox
-                    title="NFT Claimed Successfully!"
-                    message="Your NFT token has been successfully claimed on the blockchain."
+                    title="Refund Claimed Successfully!"
+                    message="Your refund has been successfully claimed on the blockchain."
                     txHash={hash}
                     onClose={() => window.location.reload()}
                 />
@@ -51,20 +51,27 @@ const ClaimNftButton: React.FC = () => {
 
             {/* Warning Box when there is an error */}
             {error && !isWritePending && !isConfirming && (
-                <ErrorBox title="Claim NFT Failed" message={error.message} onClose={() => window.location.reload()} />
+                <ErrorBox
+                    title="Claim Refund Failed"
+                    message={error.message}
+                    onClose={() => window.location.reload()}
+                />
             )}
 
-            {/* Popup for no unclaimed NFTs */}
+            {/* Popup for no unclaimed refunds */}
             {showNoClaimPopup && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center"
                     onClick={() => setShowNoClaimPopup(false)}
                 >
-                    <WarningBox title="No NFTs Available" message="You don't have any unclaimed NFTs at the moment." />
+                    <WarningBox
+                        title="No Refunds Available"
+                        message="You don't have any unclaimed refunds at the moment."
+                    />
                 </div>
             )}
         </>
     );
 };
 
-export default ClaimNftButton;
+export default ClaimFailedRefundButton;

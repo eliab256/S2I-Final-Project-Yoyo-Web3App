@@ -1,5 +1,5 @@
 import React from 'react';
-import nftData from '../data/nftCardData';
+import nftData from '../../data/nftCardData';
 
 interface NftCardProps {
     tokenId: number;

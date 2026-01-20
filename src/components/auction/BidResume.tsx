@@ -6,14 +6,14 @@ import {
     setHasUnclaimedTokens,
     setInsufficientBalance,
     selectConfirmPlaceBid,
-} from '../redux/confirmPlaceBidSlice';
-import useCurrentAuction from '../hooks/useCurrentAuction';
-import usePlaceBid from '../hooks/usePlaceBid';
+} from '../../redux/confirmPlaceBidSlice';
+import useCurrentAuction from '../../hooks/useCurrentAuction';
+import usePlaceBid from '../../hooks/usePlaceBid';
 import { useEffect } from 'react';
 import { useBalance, useAccount } from 'wagmi';
-import BidStatusCheck from './BidStatusCheck';
-import ErrorBox from './ErrorBox';
-import SuccessBox from './SuccessBox';
+import BidStatusCheck from '../auction/BidStatusCheck';
+import ErrorBox from '../ui/ErrorBox';
+import SuccessBox from '../ui/SuccessBox';
 //creare l' hook che verifica dai log se l'utente ha degli nft da claimare
 
 interface BidResumeProps {

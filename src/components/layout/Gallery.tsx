@@ -1,10 +1,10 @@
-import NftCard from './NftCard';
-import nftData from '../data/nftCardData';
-import type { NftData } from '../types/nftTypes';
+import NftCard from '../nft/NftCard';
+import nftData from '../../data/nftCardData';
+import type { NftData } from '../../types/nftTypes';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { type NftTokenId, setSelectedNft } from '../redux/selectedNftSlice';
-import NftDetails from './NftDetails';
+import { type NftTokenId, setSelectedNft } from '../../redux/selectedNftSlice';
+import NftDetails from '../nft/NftDetails';
 
 const Gallery: React.FC = () => {
     const dispatch = useDispatch();

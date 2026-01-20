@@ -1,4 +1,4 @@
-import { formatStartDate, formatTime } from '../utils/timeUtils';
+import { formatStartDate, formatTime } from '../../utils/timeUtils';
 import { useState, useEffect } from 'react';
 
 interface CountDownProps {

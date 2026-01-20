@@ -1,16 +1,16 @@
-import useCurrentAuction from '../hooks/useCurrentAuction';
-import useEthereumPrice from '../hooks/useEthereumPrice';
-import useUserBidStatus from '../hooks/useUserBidStatus';
-import NftCard from './NftCard';
-import CountDown from './CountDown';
-import BidResume from './BidResume';
+import useCurrentAuction from '../../hooks/useCurrentAuction';
+import useEthereumPrice from '../../hooks/useEthereumPrice';
+import useUserBidStatus from '../../hooks/useUserBidStatus';
+import NftCard from '../nft/NftCard';
+import CountDown from '../auction/CountDown';
+import BidResume from '../auction/BidResume';
 import { formatEther } from 'viem';
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsConfirmBidPanelOpen } from '../redux/confirmPlaceBidSlice';
+import { setIsConfirmBidPanelOpen } from '../../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
 //import type { AuctionState } from '../types/contractsTypes';
-import ErrorBox from './ErrorBox';
+import ErrorBox from '../ui/ErrorBox';
 
 const CurrentAuction: React.FC = () => {
     const dispatch = useDispatch();

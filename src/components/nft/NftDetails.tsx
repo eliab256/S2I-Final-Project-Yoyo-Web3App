@@ -1,14 +1,14 @@
-import { clearSelectedNft } from '../redux/selectedNftSlice';
+import { clearSelectedNft } from '../../redux/selectedNftSlice';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useDispatch } from 'react-redux';
-import type { NftData } from '../types/nftTypes';
-import useTransferNft from '../hooks/useTransferNft';
+import type { NftData } from '../../types/nftTypes';
+import useTransferNft from '../../hooks/useTransferNft';
 import { useState } from 'react';
 import type { Address } from 'viem';
 import { isAddress } from 'viem';
 import { useAccount } from 'wagmi';
-import SuccessBox from './SuccessBox';
-import ErrorBox from './ErrorBox';
+import SuccessBox from '../ui/SuccessBox';
+import ErrorBox from '../ui/ErrorBox';
 
 const NftDetails: React.FC<NftData> = ({ tokenId, metadata, image }) => {
     const dispatch = useDispatch();

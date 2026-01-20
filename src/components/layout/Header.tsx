@@ -1,11 +1,11 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useDispatch } from 'react-redux';
-import { setCurrentPage } from '../redux/pagesSlice';
-import logoImage from '../assets/images/Yoyo-Logo-Scritta-Scura.png';
+import { setCurrentPage } from '../../redux/pagesSlice';
+import logoImage from '../../assets/images/Yoyo-Logo-Scritta-Scura.png';
 import { useState } from 'react';
-import ClaimFailedRefundButton from './ClaimFailedRefundButton';
-import ClaimNftButton from './ClaimNftButton';
-import { useAccount } from "wagmi";
+import ClaimFailedRefundButton from '../auction/ClaimFailedRefundButton';
+import ClaimNftButton from '../nft/ClaimNftButton';
+import { useAccount } from 'wagmi';
 
 const Header: React.FC = () => {
     const dispatch = useDispatch();

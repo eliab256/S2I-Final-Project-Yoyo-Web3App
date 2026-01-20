@@ -1,9 +1,9 @@
-import Header from './components/Header';
-import Gallery from './components/Gallery';
-import CurrentAuction from './components/CurrentAuction';
-import MyNfts from './components/MyNfts';
-import AboutUs from './components/AboutUs';
-import Footer from './components/Footer';
+import Header from './components/layout/Header';
+import Gallery from './components/layout/Gallery';
+import CurrentAuction from './components/layout/CurrentAuction';
+import MyNfts from './components/layout/MyNfts';
+import AboutUs from './components/layout/AboutUs';
+import Footer from './components/layout/Footer';
 import { useSelector } from 'react-redux';
 import { type PageState } from './redux/pagesSlice';
 
