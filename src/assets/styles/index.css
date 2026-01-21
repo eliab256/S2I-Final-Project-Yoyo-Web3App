@@ -63,6 +63,15 @@
         @apply text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw];
     }
 
+    h3 {
+        @apply text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw];
+        background: linear-gradient(to left, var(--mainPurple) 40%, var(--mainGreen) 60%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+    }
+
     p {
         @apply cursor-default font-['Dancing_Script',_cursive] text-base sm:text-lg;
     }

@@ -5,12 +5,10 @@ import MyNfts from './components/layout/MyNfts';
 import AboutUs from './components/layout/AboutUs';
 import Footer from './components/layout/Footer';
 import { useSelector } from 'react-redux';
-import { type PageState } from './redux/pagesSlice';
+import { selectCurrentPage } from './redux/pagesSlice';
 
 function App() {
-    const currentOpenPage = useSelector(
-        (state: { currentPage: { currentPage: PageState } }) => state.currentPage.currentPage
-    );
+    const currentOpenPage = useSelector(selectCurrentPage);
 
     const pageComponents = {
         gallery: <Gallery />,

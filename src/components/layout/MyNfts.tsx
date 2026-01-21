@@ -6,7 +6,7 @@ import useUserNFTs from '../../hooks/useUserNFTs';
 import ErrorBox from '../ui/ErrorBox';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { type NftTokenId, setSelectedNft } from '../../redux/selectedNftSlice';
+import { selectSelectedNftId, setSelectedNft } from '../../redux/selectedNftSlice';
 import NftDetails from '../nft/NftDetails';
 
 const MyNfts: React.FC = () => {
@@ -14,7 +14,7 @@ const MyNfts: React.FC = () => {
     const { isConnected, address } = useAccount();
     const { data: nfts, isLoading, error } = useUserNFTs();
 
-    const currentNftSelected = useSelector((state: { selectedNft: { id: NftTokenId } }) => state.selectedNft.id);
+    const currentNftSelected = useSelector(selectSelectedNftId);
     const selectedNft: NftData | undefined = nftData.find(nft => nft.tokenId === currentNftSelected);
 
     useEffect(() => {

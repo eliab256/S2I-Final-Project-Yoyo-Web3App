@@ -1,6 +1,6 @@
 import { clearSelectedNft } from '../../redux/selectedNftSlice';
 import { XMarkIcon } from '@heroicons/react/24/solid';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { NftData } from '../../types/nftTypes';
 import useTransferNft from '../../hooks/useTransferNft';
 import { useState } from 'react';
@@ -9,9 +9,16 @@ import { isAddress } from 'viem';
 import { useAccount } from 'wagmi';
 import SuccessBox from '../ui/SuccessBox';
 import ErrorBox from '../ui/ErrorBox';
+import { selectCurrentPage } from '../../redux/pagesSlice';
+
+/**
+ * Use MyNfts page selector to conditionally render Transfer button, if is not on MyNfts page hide it
+ *
+ */
 
 const NftDetails: React.FC<NftData> = ({ tokenId, metadata, image }) => {
     const dispatch = useDispatch();
+    const currentPage = useSelector(selectCurrentPage);
     const { address: userAddress } = useAccount();
     const [recipientAddress, setRecipientAddress] = useState<string>('');
     const [showTransferPopup, setShowTransferPopup] = useState(false);
@@ -135,27 +142,29 @@ const NftDetails: React.FC<NftData> = ({ tokenId, metadata, image }) => {
                     ))}
                 </div>
             </div>
-
-            <button
-                onClick={() => setShowTransferPopup(true)}
-                disabled={isWritePending || isConfirming}
-                className={`px-8 py-3 rounded-lg transition-all duration-200 ${
-                    !isWritePending && !isConfirming
-                        ? 'bg-[#825FAA] text-white hover:bg-[rgb(90,160,130)] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)] cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-            >
-                {isWritePending ? (
-                    'Waiting for wallet...'
-                ) : isConfirming ? (
-                    <span className="flex items-center gap-2">
-                        <span className="inline-block w-4 h-4 border-2 border-[#825FAA] border-t-transparent rounded-full animate-spin"></span>
-                        Confirming...
-                    </span>
-                ) : (
-                    'Transfer your NFT'
-                )}
-            </button>
+            {/* Transfer Button */}
+            {currentPage === 'myNfts' && (
+                <button
+                    onClick={() => setShowTransferPopup(true)}
+                    disabled={isWritePending || isConfirming}
+                    className={`px-8 py-3 rounded-lg transition-all duration-200 ${
+                        !isWritePending && !isConfirming
+                            ? 'bg-[#825FAA] text-white hover:bg-[rgb(90,160,130)] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.3)] cursor-pointer'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                    {isWritePending ? (
+                        'Waiting for wallet...'
+                    ) : isConfirming ? (
+                        <span className="flex items-center gap-2">
+                            <span className="inline-block w-4 h-4 border-2 border-[#825FAA] border-t-transparent rounded-full animate-spin"></span>
+                            Confirming...
+                        </span>
+                    ) : (
+                        'Transfer your NFT'
+                    )}
+                </button>
+            )}
 
             {/* Transfer Popup */}
             {showTransferPopup && (

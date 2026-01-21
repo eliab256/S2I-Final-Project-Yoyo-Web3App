@@ -7,7 +7,7 @@ import BidResume from '../auction/BidResume';
 import { formatEther } from 'viem';
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsConfirmBidPanelOpen } from '../../redux/confirmPlaceBidSlice';
+import { setIsConfirmBidPanelOpen, selectIsConfirmBidPanelOpen } from '../../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
 import ErrorBox from '../ui/ErrorBox';
 
@@ -23,9 +23,7 @@ const CurrentAuction: React.FC = () => {
         error: userBidStatusError,
     } = useUserBidStatus(address, auction?.auctionId.toString());
     const [bidValue, setBidValue] = useState<string>('');
-    const openConfirmPanel = useSelector(
-        (state: { confirmPlaceBid: { isConfirmBidPanelOpen: boolean } }) => state.confirmPlaceBid.isConfirmBidPanelOpen
-    );
+    const openConfirmPanel = useSelector(selectIsConfirmBidPanelOpen);
 
     const getUsdPrice = useMemo(() => {
         return (ethAmount: bigint | undefined) => {
@@ -212,7 +210,7 @@ const CurrentAuction: React.FC = () => {
                                     <p className="text-sm text-gray-500 mt-1">≈ ${userBidUsd} USD</p>
                                     <button
                                         className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
-                                        onClick={() => dispatch(setIsConfirmBidPanelOpen())}
+                                        onClick={() => dispatch(setIsConfirmBidPanelOpen(true))}
                                         disabled={!isBidValid || !isConnected}
                                     >
                                         Enter the Auction

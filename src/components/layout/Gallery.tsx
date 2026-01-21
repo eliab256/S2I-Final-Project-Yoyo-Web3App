@@ -3,13 +3,13 @@ import nftData from '../../data/nftCardData';
 import type { NftData } from '../../types/nftTypes';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { type NftTokenId, setSelectedNft } from '../../redux/selectedNftSlice';
+import { selectSelectedNftId, setSelectedNft } from '../../redux/selectedNftSlice';
 import NftDetails from '../nft/NftDetails';
 
 
 const Gallery: React.FC = () => {
     const dispatch = useDispatch();
-    const currentNftSelected = useSelector((state: { selectedNft: { id: NftTokenId } }) => state.selectedNft.id);
+    const currentNftSelected = useSelector(selectSelectedNftId);
     const selectedNft: NftData | undefined = nftData.find(nft => nft.tokenId === currentNftSelected);
 
     useEffect(() => {
@@ -32,32 +32,7 @@ const Gallery: React.FC = () => {
                 </h1>
             </div>
 
-            <div>
-                <div></div>
-                <div>
-                    <h3>Practice Yoga, Your Way</h3>
-                    <p>
-                        A yoga experience designed to adapt to your body and your needs. YoYo lets you personalize your
-                        practice by considering mobility limitations, temporary conditions, or personal goals, offering
-                        guided paths created by yoga instructors and healthcare professionals to ensure safety, comfort,
-                        and balance in every session.
-                    </p>
-                </div>
-            </div>
-
-            <div>
-                <div></div>
-                <div>
-                    <h3>Inclusive By Design, Empowering By Nature</h3>
-                    <p>
-                        YoYo believes yoga should be accessible to everyone, not just a few. Through adaptive exercises,
-                        community challenges, and innovative digital tools, the platform removes physical and mental
-                        barriers, helping people reconnect with their bodies, improve well-being, and feel supported at
-                        every stage of their journey.
-                    </p>
-                </div>
-            </div>
-
+            
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4 pb-8 ">
                 {nftData.map(nft => (
                     <NftCard key={nft.tokenId} {...nft} onClick={tokenId => dispatch(setSelectedNft(tokenId))} />

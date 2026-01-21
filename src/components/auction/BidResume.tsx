@@ -44,18 +44,18 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
         }
         if (userBalance <= bidPlacedInWei) {
             //set not enough balance true on redux
-            dispatch(setInsufficientBalance());
+            dispatch(setInsufficientBalance(true));
         }
 
         if (higherBidder === address) {
             //set already higher bidder true on redux
-            dispatch(setAlreadyHigherBidder());
+            dispatch(setAlreadyHigherBidder(true));
         }
 
         //mannca il check per gli unclaimed tokens
         const hasUnclaimedToken: boolean = unclaimedNftId !== null; 
         if (hasUnclaimedToken) {
-            dispatch(setHasUnclaimedTokens());
+            dispatch(setHasUnclaimedTokens(true));
         }
     }, [bidAmount, dispatch, higherBid, higherBidder, unclaimedNftId]);
 

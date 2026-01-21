@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { RootState } from './store';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState,  } from './store';
 
 interface ConfirmPlaceBidState {
     isConfirmBidPanelOpen: boolean;
@@ -19,30 +19,37 @@ export const confirmPlaceBidSlice = createSlice({
     name: 'confirmPlaceBid',
     initialState,
     reducers: {
-        setIsConfirmBidPanelOpen: state => {
-            state.isConfirmBidPanelOpen = true;
+        setIsConfirmBidPanelOpen: (state, action: PayloadAction<boolean>) => {
+            state.isConfirmBidPanelOpen = action.payload;
         },
-        setAlreadyHigherBidder: state => {
-            state.alreadyHigherBidder = true;
+        setAlreadyHigherBidder: (state, action: PayloadAction<boolean>) => {
+            state.alreadyHigherBidder = action.payload;
         },
-        setInsufficientBalance: state => {
-            state.insufficientBalance = true;
+        setInsufficientBalance: (state, action: PayloadAction<boolean>) => {
+            state.insufficientBalance = action.payload;
         },
-        setHasUnclaimedTokens: state => {
-            state.hasUnclaimedTokens = true;
+        setHasUnclaimedTokens: (state, action: PayloadAction<boolean>) => {
+            state.hasUnclaimedTokens = action.payload;
         },
-        resetConfirmPlaceBid: state => {
-            state.isConfirmBidPanelOpen = false;
-            state.alreadyHigherBidder = false;
-            state.insufficientBalance = false;
-            state.hasUnclaimedTokens = false;
-        },
+        resetConfirmPlaceBid: () => initialState,
     },
 });
 
-export const { setIsConfirmBidPanelOpen, setAlreadyHigherBidder, setInsufficientBalance, setHasUnclaimedTokens, resetConfirmPlaceBid } =
-    confirmPlaceBidSlice.actions;
+//Actions
+export const {
+    setIsConfirmBidPanelOpen,
+    setAlreadyHigherBidder,
+    setInsufficientBalance,
+    setHasUnclaimedTokens,
+    resetConfirmPlaceBid,
+} = confirmPlaceBidSlice.actions;
 
+//Selectors
+export const selectIsConfirmBidPanelOpen = (state: RootState) => state.confirmPlaceBid.isConfirmBidPanelOpen;
+export const selectAlreadyHigherBidder = (state: RootState) => state.confirmPlaceBid.alreadyHigherBidder;
+export const selectInsufficientBalance = (state: RootState) => state.confirmPlaceBid.insufficientBalance;
+export const selectHasUnclaimedTokens = (state: RootState) => state.confirmPlaceBid.hasUnclaimedTokens;
 export const selectConfirmPlaceBid = (state: RootState) => state.confirmPlaceBid;
 
+//Reducer
 export const confirmPlaceBidReducer = confirmPlaceBidSlice.reducer;

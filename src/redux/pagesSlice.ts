@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './store';
+import type { PageState } from '../types/pageTypes';    
 
-export type PageState = 'gallery' | 'myNfts' | 'currentAuction' | 'aboutUs';
+
 
 interface CurrentPageState {
     currentPage: PageState;
@@ -21,8 +22,13 @@ export const currentPageSlice = createSlice({
     },
 });
 
+//Actions
 export const { setCurrentPage } = currentPageSlice.actions;
 
+//Selectors
+export const selectCurrentPage = (state: RootState) => state.currentPage.currentPage;
+
+//Reducer
 export const currentPageReducer = currentPageSlice.reducer;
 
-export const selectCurrentPage = (state: RootState) => state.currentPage.currentPage;
+

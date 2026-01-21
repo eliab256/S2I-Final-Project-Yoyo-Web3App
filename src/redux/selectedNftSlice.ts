@@ -12,7 +12,7 @@ const initialState: SelectedNftState = {
 };
 
 export const selectedNftSlice = createSlice({
-    name: 'selectedNftSlice',
+    name: 'selectedNft',
     initialState,
     reducers: {
         setSelectedNft: (state, action: PayloadAction<NftTokenId>) => {
@@ -24,8 +24,13 @@ export const selectedNftSlice = createSlice({
     },
 });
 
+//Actions
 export const { setSelectedNft, clearSelectedNft } = selectedNftSlice.actions;
 
+//Selectors
+export const selectSelectedNftId = (state: RootState) => state.selectedNft.id;
+
+//Reducer
 export const selectedNftReducer = selectedNftSlice.reducer;
 
-export const selectSelectedNftId = (state: RootState) => state.selectedNft.id;
+
