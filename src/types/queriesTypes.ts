@@ -87,7 +87,7 @@ export interface BidderRefundsResponse {
     };
 }
 
-export interface BidderFailedRefundRensponse {
+export interface BidderFailedRefundResponse {
     allYoyoAuctionBidderRefundFaileds: {
         nodes: BidderRefund[];
     };

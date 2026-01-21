@@ -14,12 +14,11 @@ import { useBalance, useAccount } from 'wagmi';
 import BidStatusCheck from '../auction/BidStatusCheck';
 import ErrorBox from '../ui/ErrorBox';
 import SuccessBox from '../ui/SuccessBox';
-//creare l' hook che verifica dai log se l'utente ha degli nft da claimare
+import  useClaimNft  from '../../hooks/useClaimNft';
 
 interface BidResumeProps {
     bidAmount: string;
 }
-//serve recuperare se ha nft da claimare
 
 const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     const dispatch = useDispatch();
@@ -31,6 +30,7 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
     const { auction, isLoading } = useCurrentAuction();
     const { insufficientBalance, alreadyHigherBidder, hasUnclaimedTokens } = useSelector(selectConfirmPlaceBid);
     const { placeBid, isWritePending, isConfirming, isConfirmed, hash, error } = usePlaceBid();
+    const { unclaimedNftId } = useClaimNft();
 
     const { higherBidder, higherBid } = auction || {};
 
@@ -53,11 +53,11 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
         }
 
         //mannca il check per gli unclaimed tokens
-        const hasUnclaimedToken: boolean = false; //da implementare hook per verificare se ha unclaimed token
+        const hasUnclaimedToken: boolean = unclaimedNftId !== null; 
         if (hasUnclaimedToken) {
             dispatch(setHasUnclaimedTokens());
         }
-    }, [bidAmount, dispatch, higherBid, higherBidder]);
+    }, [bidAmount, dispatch, higherBid, higherBidder, unclaimedNftId]);
 
     const handleConfirmBid = () => {
         if (!auction?.auctionId) return;

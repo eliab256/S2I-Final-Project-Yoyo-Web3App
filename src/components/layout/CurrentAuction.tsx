@@ -9,7 +9,6 @@ import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen } from '../../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
-//import type { AuctionState } from '../types/contractsTypes';
 import ErrorBox from '../ui/ErrorBox';
 
 const CurrentAuction: React.FC = () => {

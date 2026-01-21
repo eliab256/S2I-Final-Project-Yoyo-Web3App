@@ -7,7 +7,7 @@ import type {
     AuctionsLifecycleResponse,
     BidderRefundsResponse,
     BidderRefund,
-    BidderFailedRefundRensponse,
+    BidderFailedRefundResponse,
     FinalizedAuction,
     FinalizedAuctionsResponse,
     FailedMint,
@@ -24,7 +24,7 @@ import {
     GET_ALL_MINT_FAILED,
 } from './queries';
 
-const GRAPHQL_ENDPOINT = import.meta.env.VITE_INDEXER_URL_PROD || import.meta.env.VITE_INDEXER_URL_DEV;
+const GRAPHQL_ENDPOINT = /*import.meta.env.VITE_INDEXER_URL_PROD ||*/ import.meta.env.VITE_INDEXER_URL_DEV;
 
 async function fetchGraphQL(query: string, variables: Record<string, any> = {}) {
     const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -79,7 +79,7 @@ export async function getBidderRefundsByAddress(address: Address): Promise<Bidde
 export async function getBidderFailedRefundsByAddress(address: Address): Promise<BidderRefund[]> {
     const data = (await fetchGraphQL(GET_BIDDER_FAILED_REFUNDS, {
         addr: address.toLowerCase(),
-    })) as BidderFailedRefundRensponse;
+    })) as BidderFailedRefundResponse;
     return data.allYoyoAuctionBidderRefundFaileds.nodes;
 }
 
