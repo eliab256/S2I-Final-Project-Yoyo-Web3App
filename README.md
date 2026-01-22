@@ -38,6 +38,8 @@
         - [useClaimNft:](#useclaimnft)
         - [useClaimRefund](#useclaimrefund)
         - [useCurrentAuction](#usecurrentauction)
+        - [useEthereumPrice](#useethereumprice)
+        - [usePlaceBid](#useplacebid)
     - [5.5. Redux For Global State](#55-redux-for-global-state)
 - [6. Performance, Gas Optimization And Security](#6-performance-gas-optimization-and-security)
     - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
@@ -174,44 +176,30 @@ The hook structure is as follows: first, it uses queries to fetch events; then, 
 
 ### useClaimNft:
 
-**_Purpose_**
-
 - Allows users who won an auction but experienced a failed NFT mint to claim their NFT
 - Checks if the user has an unclaimed NFT and returns the tokenId
 
-**_Usage_**
-
-- Use `claimNft()` to execute the claim transaction
-- Monitor `isWritePending` and `isConfirming` for loading states
-- Use `hash` to generate Etherscan links after successful execution
-- Validate with `unclaimedNftId` before allowing the transaction
-
 ### useClaimRefund
-
-**_Purpose_**
 
 - Allows users who experienced a failed Ether refund to claim their funds
 - Checks if the user has unclaimed refunds and returns a boolean
 
-**_Usage_**
-
-- Use `claimRefund()` to execute the refund claim transaction
-- Monitor `isWritePending` and `isConfirming` for loading states
-- Use `hash` to generate Etherscan links after successful execution
-- Validate with `hasUnclaimedRefund` before allowing the transaction
-
 ### useCurrentAuction
-
-**_Purpose_**
 
 - Fetches and monitors the current active auction data from the blockchain
 - Implements a hybrid approach balancing security and performance optimization
 
-**_Usage_**
+### useEthereumPrice
 
-- Use `auction` to access the current auction data structure
-- Monitor `isLoading` for initial data loading state
-- Use `refetch()` to manually trigger a blockchain data refresh when needed
+- Fetches the current Ethereum price in USD from CoinGecko API for display purposes only
+- Implements global caching to minimize API calls and improve performance
+- **Note**: The price is used solely for UI estimation and does not interact with smart contracts or perform any critical calculations
+
+### usePlaceBid
+
+- Allows users to place bids on active auctions by sending ETH to the smart contract
+- Handles bid amount conversion from ETH to Wei and manages transaction states
+- Automatically refreshes auction data and bid history after successful bid placement
 
 ## 5.5. Redux For Global State
 

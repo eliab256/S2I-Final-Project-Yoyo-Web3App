@@ -1,5 +1,43 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * Custom hook to fetch and cache the current Ethereum price in USD.
+ *
+ * @remarks
+ * This hook provides real-time Ethereum pricing data with intelligent caching to optimize
+ * API usage and provide resilient fallback mechanisms. It implements:
+ *
+ * **Global Cache Strategy**: Uses a module-level cache object that persists across component
+ * re-renders and remounts. The cache stores the price, timestamp, and any error state,
+ * ensuring that multiple instances of this hook share the same data and don't trigger
+ * redundant API calls.
+ *
+ * **10-Minute Cache Duration**: Cached prices remain valid for 10 minutes (600000ms).
+ * Within this window, the hook immediately returns cached data without making API requests,
+ * significantly reducing API load and preventing rate limiting issues.
+ *
+ * **Graceful Error Handling**: If the API call fails but a cached price exists, the hook
+ * returns the cached price with an error message indicating cached data is being used.
+ * This ensures the UI can still display pricing information even during API outages or
+ * network issues.
+ *
+ * **CoinGecko API Integration**: Fetches data from the CoinGecko public API endpoint
+ * for Ethereum price in USD. The endpoint is lightweight and returns only the necessary
+ * pricing data.
+ *
+ * **Single Fetch on Mount**: The hook fetches data only once when the component mounts,
+ * relying on the cache for subsequent renders or component remounts within the cache window.
+ *
+ * @used-in
+ *  - `CurrentAuction.tsx` - To display the current auction price in ETH and USD.
+ *
+ * @returns Object containing the ETH price, loading state, error status, and cache indicator
+ * @returns {number} price - The current Ethereum price in USD (0 if not yet loaded)
+ * @returns {boolean} loading - True while fetching data from the API
+ * @returns {string | null} error - Error message if fetch failed, null on success
+ * @returns {boolean} isCached - True if the returned price is from cache and still valid
+ */
+
 // Global Cache
 const cache = {
     price: null as number | null,
