@@ -40,6 +40,8 @@
         - [useCurrentAuction](#usecurrentauction)
         - [useEthereumPrice](#useethereumprice)
         - [usePlaceBid](#useplacebid)
+        - [useTransferNft](#usetransfernft)
+        - [useUserNFTs](#useusernfts)
     - [5.5. Redux For Global State](#55-redux-for-global-state)
 - [6. Performance, Gas Optimization And Security](#6-performance-gas-optimization-and-security)
     - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
@@ -200,6 +202,17 @@ The hook structure is as follows: first, it uses queries to fetch events; then, 
 - Allows users to place bids on active auctions by sending ETH to the smart contract
 - Handles bid amount conversion from ETH to Wei and manages transaction states
 - Automatically refreshes auction data and bid history after successful bid placement
+
+### useTransferNft
+
+- Allows NFT owners to transfer their YoYo NFTs to another wallet address
+- Handles the complete transfer transaction lifecycle with state management
+
+### useUserNFTs
+
+- Fetches and tracks all YoYo NFTs currently owned by a wallet address
+- Calculates ownership by analyzing NFT transfer history (received vs sent)
+- Supports checking NFTs for both the connected wallet and custom addresses
 
 ## 5.5. Redux For Global State
 
