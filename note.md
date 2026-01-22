@@ -7,3 +7,8 @@ UI:
 Domande:
 
 -   perchè non ho fatto un mapping per evitare il refund? sicurezza avendo meno eth sul contratto possibili e poi perchè comunque una seconda transazione deve essere fatta se si vuole rilanciare
+-   
+
+hoook
+- cosa fa
+- dove viene usato --> per cosa

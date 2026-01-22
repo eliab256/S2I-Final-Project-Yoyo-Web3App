@@ -29,12 +29,17 @@ import getCurrentOpenAuction from '../utils/currentOpenAuction';
  *
  * This approach minimizes unnecessary blockchain reads while maintaining security and ensuring
  * the UI stays up-to-date with auction state changes.
+ * 
+ * * @used-in
+ * - `AuctionPage.tsx` - Displays current auction details and bidding interface
+ * - `BidResume.tsx` - Shows bid status and summary information
  *
- * @returns Object containing the current auction data and loading state
+ * @returns Object containing the current auction data and loading state, refetch function.
  * @returns {AuctionStruct} auction - The current auction data read from the blockchain
  * @returns {boolean} isLoading - Loading state of the blockchain read operation
+ * @returns {() => void} refetch - Function to manually refetch the blockchain read operation
  */
-function useCurrentAuction() {
+const useCurrentAuction = () => {
     const queryClient = useQueryClient();
     const chainId = useChainId();
     const yoyoAuctionAddress = chainsToContractAddress[chainId]?.yoyoAuctionAddress;

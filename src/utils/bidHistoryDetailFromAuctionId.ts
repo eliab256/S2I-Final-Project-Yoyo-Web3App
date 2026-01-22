@@ -15,7 +15,7 @@ async function getBidHistoryDetailFromAuctionId(auctionId: string): Promise<Proc
     if (!orderedBids || orderedBids.length === 0) {
         return null;
     }
-    console.log('orderedBids in util:', orderedBids);
+
     // 1. Find the bid with the highest bidAmount
     const highestBid = orderedBids.reduce((max, bid) => (BigInt(bid.bidAmount) > BigInt(max.bidAmount) ? bid : max));
 

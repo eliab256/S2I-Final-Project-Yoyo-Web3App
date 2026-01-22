@@ -88,11 +88,9 @@ const Header: React.FC = () => {
                     </button>
                 </div>
             </div>
-
-            {isConnected && <ClaimFailedRefundButton />}
-            {isConnected && <ClaimNftButton />}
-
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-end h-full gap-2 sm:gap-4 ml-auto">
+                {isConnected && <ClaimFailedRefundButton />}
+                {isConnected && <ClaimNftButton />}
                 <ConnectButton
                     accountStatus={{
                         smallScreen: 'avatar',

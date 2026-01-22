@@ -19,26 +19,29 @@
 - [Index](#index)
 - [1. About The Project](#1-about-the-project)
 - [2. Clone and Configuration](#2-clone-and-configuration)
-  - [2.1. Initialize React Project](#21-initialize-react-project)
-  - [2.2. Initialize Foundry Project](#22-initialize-foundry-project)
-  - [2.3. Local Environment Variables](#23-local-environment-variables)
+    - [2.1. Initialize React Project](#21-initialize-react-project)
+    - [2.2. Initialize Foundry Project](#22-initialize-foundry-project)
+    - [2.3. Local Environment Variables](#23-local-environment-variables)
 - [3. Smart Contracts](#3-smart-contracts)
-  - [3.1. Smart Contracts Details](#31-smart-contracts-details)
-  - [3.2. Read From Smart Contracts](#32-read-from-smart-contracts)
-  - [3.3. Write on Smart Contracts](#33-write-on-smart-contracts)
+    - [3.1. Smart Contracts Details](#31-smart-contracts-details)
+    - [3.2. Read From Smart Contracts](#32-read-from-smart-contracts)
+    - [3.3. Write on Smart Contracts](#33-write-on-smart-contracts)
 - [4. Event Indexing](#4-event-indexing)
-  - [4.1. Rindexer with graphql](#41-rindexer-with-graphql)
-  - [4.2. Indexed Events](#42-indexed-events)
-  - [4.3. Queries](#43-queries)
+    - [4.1. Rindexer with graphql](#41-rindexer-with-graphql)
+    - [4.2. Indexed Events](#42-indexed-events)
+    - [4.3. Queries](#43-queries)
 - [5. Front End](#5-front-end)
-  - [5.1. Providers](#51-providers)
-  - [5.2. Wallet Connection](#52-wallet-connection)
-  - [5.3. App Structure](#53-app-structure)
-  - [5.4. Custom Hooks](#54-custom-hooks)
-  - [5.5. Redux For Global State](#55-redux-for-global-state)
+    - [5.1. Providers](#51-providers)
+    - [5.2. Wallet Connection](#52-wallet-connection)
+    - [5.3. App Structure](#53-app-structure)
+    - [5.4. Custom Hooks](#54-custom-hooks)
+        - [useClaimNft:](#useclaimnft)
+        - [useClaimRefund](#useclaimrefund)
+        - [useCurrentAuction](#usecurrentauction)
+    - [5.5. Redux For Global State](#55-redux-for-global-state)
 - [6. Performance, Gas Optimization And Security](#6-performance-gas-optimization-and-security)
-  - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
-  - [6.2. Use Events To Trigger Read Contract](#62-use-events-to-trigger-read-contract)
+    - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
+    - [6.2. Use Events To Trigger Read Contract](#62-use-events-to-trigger-read-contract)
 - [7. Further development](#7-further-development)
 - [8. Contacts](#8-contacts)
 - [9. Copyright](#9-copyright)
@@ -158,10 +161,57 @@ Key points:
 - Once connected, the app can read the user's address, balance, and interact with smart contracts on the selected network.
 - The connection status and wallet information are available throughout the app via context providers.
 
-
 ## 5.3. App Structure
 
 ## 5.4. Custom Hooks
+
+I created a custom hook for each interaction with smart contracts and queries.
+In the hooks that need to read from contracts, I implemented a refetch logic based on event changes in order to optimize resource usage and costs. The contract state is treated as the final source of truth; however, before querying it directly, I rely on events to monitor state changes that indicate when a new contract read is required.
+
+In the hooks that perform write operations on the contract, I use queries on indexed events to prevent transactions that would otherwise fail.
+
+The hook structure is as follows: first, it uses queries to fetch events; then, it passes those events to a utility function that returns the condition to be checked. If the state has changed, the hook re-reads the contract; otherwise, it avoids an unnecessary refetch.
+
+### useClaimNft:
+
+**_Purpose_**
+
+- Allows users who won an auction but experienced a failed NFT mint to claim their NFT
+- Checks if the user has an unclaimed NFT and returns the tokenId
+
+**_Usage_**
+
+- Use `claimNft()` to execute the claim transaction
+- Monitor `isWritePending` and `isConfirming` for loading states
+- Use `hash` to generate Etherscan links after successful execution
+- Validate with `unclaimedNftId` before allowing the transaction
+
+### useClaimRefund
+
+**_Purpose_**
+
+- Allows users who experienced a failed Ether refund to claim their funds
+- Checks if the user has unclaimed refunds and returns a boolean
+
+**_Usage_**
+
+- Use `claimRefund()` to execute the refund claim transaction
+- Monitor `isWritePending` and `isConfirming` for loading states
+- Use `hash` to generate Etherscan links after successful execution
+- Validate with `hasUnclaimedRefund` before allowing the transaction
+
+### useCurrentAuction
+
+**_Purpose_**
+
+- Fetches and monitors the current active auction data from the blockchain
+- Implements a hybrid approach balancing security and performance optimization
+
+**_Usage_**
+
+- Use `auction` to access the current auction data structure
+- Monitor `isLoading` for initial data loading state
+- Use `refetch()` to manually trigger a blockchain data refresh when needed
 
 ## 5.5. Redux For Global State
 

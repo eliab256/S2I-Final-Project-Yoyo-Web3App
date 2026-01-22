@@ -90,8 +90,6 @@ const CurrentAuction: React.FC = () => {
         minimumBidChangeAmount,
     } = auction || {};
 
-    console.log('User Bid Status:', userHasBid, userIsWinning, userBidStatusError, address, auction?.auctionId.toString());
-
     return (
         <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
             <h1 className="text-center">Current Auction</h1>
@@ -103,7 +101,9 @@ const CurrentAuction: React.FC = () => {
                 <>
                     <h2 className="text-center">Auction ID: {auctionId}</h2>
                     <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
-                        <NftCard tokenId={Number(tokenId)} />
+                        <div className="mb-4 lg:mb-0 lg:mr-8">
+                            <NftCard tokenId={Number(tokenId)} />
+                        </div>
 
                         {/* Bid Placement Section */}
                         <div
@@ -202,8 +202,8 @@ const CurrentAuction: React.FC = () => {
                                                     ? `${formatEther(higherBid + minimumBidChangeAmount)} ETH`
                                                     : '0 ETH'
                                                 : higherBid
-                                                ? `${formatEther(higherBid)} ETH`
-                                                : '0 ETH'
+                                                  ? `${formatEther(higherBid)} ETH`
+                                                  : '0 ETH'
                                         }
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                     />
