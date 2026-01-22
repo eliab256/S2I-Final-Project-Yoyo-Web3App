@@ -144,6 +144,8 @@ This file exports an object where each key is a chain ID (e.g., 11155111 for Sep
 
 # 5. Front End
 
+The frontend of Yoyo Web3App is built using **React** and **TypeScript**, providing a modern, scalable, and maintainable architecture. For the graphical interface, **Tailwind CSS** is used to quickly create responsive and visually appealing components. Communication between the frontend and the blockchain is managed by the **Wagmi** library, which offers robust hooks and utilities for interacting with Ethereum smart contracts and handling wallet connections. This combination ensures a seamless user experience, secure blockchain interactions, and efficient development workflows.
+
 ## 5.1. Providers
 
 The `Providers.tsx` component is a wrapper that sets up all the main context providers required by the application. It includes:
@@ -167,6 +169,52 @@ Key points:
 
 ## 5.3. App Structure
 
+```
+root/
+├── foundry/                    # Smart Contracts, script and tests
+├── src/
+│   ├── assets/                 # Static assets
+│   │   ├── fonts/              # Fonts import
+│   │   ├── images/             # Nft Images and Logos
+│   │   └── styles/             # Font settings and main Css
+│   │
+│   ├── components/             # React components
+│   │   ├── auction/            # Auction-related components
+│   │   ├── layout/             # Layout components
+│   │   ├── nft/                # NFT components
+│   │   └── ui/                 # UI components
+│   │
+│   ├── contracts/              # Smart contract ABIs and addresses
+│   ├── data/                   # Static data and configurations
+│   ├── graphql/                # GraphQL queries and schemas
+│   ├── hooks/                  # Custom React hooks
+│   ├── redux/                  # Redux store, actions, and reducers
+│   ├── types/                  # TypeScript type definitions
+│   ├── utils/                  # Utility functions and helpers
+│   ├── App.tsx                 # Main application component
+│   ├── main.tsx                # Application entry point
+│   ├── providers.tsx           # Context providers configuration
+│   ├── rainbowkitConfig.tsx    # RainbowKit wallet configuration
+│   └── vite-env.d.ts           # Vite environment type definitions
+│
+├── yoyoIndexer/                # Rindexer and graphql settings folder
+│   ├── abis/                   # Contracts abis on json format
+│   ├── .env                    # Environment variables for indexer
+│   ├── .gitignore              # Git ignore rules
+│   ├── docker-compose.yml      # docker settings
+│   └── rindexer.yaml           # rindexer settings
+│
+├── public/                     # Public static files
+├── node_modules/               # Dependencies
+├── .env                        # Environment variables
+├── .gitignore                  # Git ignore rules
+├── eslint.config.js            # ESLint configuration
+├── index.html                  # HTML entry point
+├── package.json                # Project dependencies and scripts
+├── tsconfig.json               # TypeScript configuration
+└── vite.config.ts              # Vite build configuration
+```
+
 ## 5.4. Custom Hooks
 
 I created a custom hook for each interaction with smart contracts and queries.
@@ -175,6 +223,8 @@ In the hooks that need to read from contracts, I implemented a refetch logic bas
 In the hooks that perform write operations on the contract, I use queries on indexed events to prevent transactions that would otherwise fail.
 
 The hook structure is as follows: first, it uses queries to fetch events; then, it passes those events to a utility function that returns the condition to be checked. If the state has changed, the hook re-reads the contract; otherwise, it avoids an unnecessary refetch.
+
+Each hook is documented with a NatSpec comment describing its internal logic and the components in which it is used.
 
 ### useClaimNft:
 
