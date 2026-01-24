@@ -207,6 +207,17 @@ Network-specific configuration handler that:
 - Configures base URIs and mint prices per network
 - Creates mock Keepers for local testing
 
+### AutomationRegistration.sol
+
+This contract streamlines the automatic registration of a new upkeep on Chainlink Automation. It allows you to:
+
+- Transfer LINK tokens from the admin and approve them for the registrar
+- Prepare the registration parameters for the upkeep (name, contract to be automated, gas limit, admin, etc.)
+- Perform the upkeep registration and initial funding in a single function call
+- Handle common errors such as invalid parameters or failed LINK transfers
+
+In short, AutomationRegistration.sol automates and simplifies the onboarding process for new upkeeps used to manage auctions automatically via Chainlink Automation.
+
 #### YoyoAuction.sol
 
 The main auction management contract with:
