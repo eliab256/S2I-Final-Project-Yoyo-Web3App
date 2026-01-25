@@ -1,6 +1,8 @@
 # Compiler files
 foundry/cache/
 foundry/out/
+!out/YoyoAuction.sol/
+!out/YoyoNft.sol/
 
 # ignore development broadcast logs
 foundry/!/broadcast/
