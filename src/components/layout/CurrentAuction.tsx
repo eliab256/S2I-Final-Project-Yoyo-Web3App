@@ -90,144 +90,167 @@ const CurrentAuction: React.FC = () => {
         minimumBidChangeAmount,
     } = auction || {};
 
-    return (
-        <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
-            <h1 className="text-center">Current Auction</h1>
-            {isLoading || isUserBidStatusLoading ? (
+    // Loading State
+    if (isLoading || isUserBidStatusLoading) {
+        return (
+            <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <h1 className="text-center">Current Auction</h1>
                 <div className="flex items-center justify-center min-h-[50vh]">
                     <div className="text-xl">Loading current auction...</div>
                 </div>
-            ) : state == 1 ? (
-                <>
-                    <h2 className="text-center">Auction ID: {auctionId}</h2>
-                    <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
-                        <div className="mb-4 lg:mb-0 lg:mr-8">
-                            <NftCard tokenId={Number(tokenId)} />
-                        </div>
+            </div>
+        );
+    }
 
-                        {/* Bid Placement Section */}
-                        <div
-                            className="max-w-md w-full p-4 bg-white rounded-xl"
-                            style={{
-                                boxShadow:
-                                    '0 10px 25px -5px rgba(130, 95, 170, 0.5), 0 8px 10px -6px rgba(130, 95, 170, 0.3)',
-                            }}
-                        >
-                            <h2 className="text-2xl font-bold text-center mb-2">Place Your Bid Here</h2>
-                            <p className="text-lg text-center mb-3 w-full">
-                                This is {auctionType === 0 ? 'an English' : 'a Dutch'} auction
-                                <br></br>
-                                {auctionType === 0
-                                    ? 'In an English auction, bidders compete by placing increasingly higher bids. The highest bidder wins.'
-                                    : "In a Dutch auction the price drops over time, the first bidder wins. Don't wait."}
-                            </p>
+    // Error State
+    if (userBidStatusError) {
+        return (
+            <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <h1 className="text-center">Current Auction</h1>
+                <ErrorBox
+                    title="Error Loading Bid Status"
+                    message={`There was an error retrieving your bid status: ${userBidStatusError.message}`}
+                />
+            </div>
+        );
+    }
 
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-semibold">Starting Price:</span>
-                                    <span className="text-lg">
-                                        {startPrice ? formatEther(startPrice) : '0'} ETH ≈ ${getUsdPrice(startPrice)}
-                                    </span>
-                                </div>
-
-                                {auctionType === 0 && (
-                                    <>
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-semibold">Min. Bid Increment:</span>
-                                            <span className="text-lg">
-                                                {minimumBidChangeAmount ? formatEther(minimumBidChangeAmount) : '0'} ETH
-                                                ≈ ${getUsdPrice(minimumBidChangeAmount)}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-semibold">Current Highest Bid:</span>
-                                            <span className="text-lg font-bold text-green-600">
-                                                {higherBid ? formatEther(higherBid) : '0'} ETH ≈ $
-                                                {getUsdPrice(higherBid)}
-                                            </span>
-                                        </div>
-
-                                        {/* User Bid Status Box */}
-                                        {(userHasBid || userIsWinning) && (
-                                            <div
-                                                className={`mt-3 p-3 rounded-lg text-center ${
-                                                    userIsWinning
-                                                        ? 'bg-green-50 border-2 border-green-500'
-                                                        : 'bg-yellow-50 border-2 border-yellow-500'
-                                                }`}
-                                            >
-                                                {userIsWinning ? (
-                                                    <p className="text-green-700 font-semibold animate-pulse">
-                                                        🎉 You are the highest bidder now.
-                                                    </p>
-                                                ) : (
-                                                    <div>
-                                                        <p className="text-yellow-700 font-semibold">
-                                                            ⚠️ Your bid was surpassed.
-                                                        </p>
-                                                        <p className="text-yellow-600 text-sm mt-1">
-                                                            Submit a higher bid to claim the item.
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-
-                                {auctionType === 1 && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-semibold">Current Price:</span>
-                                        <span className="text-lg font-bold text-blue-600">
-                                            {higherBid ? formatEther(higherBid) : '0'} ETH ≈ ${getUsdPrice(higherBid)}
-                                        </span>
-                                    </div>
-                                )}
-
-                                <div className="mt-6 pt-4 border-t border-gray-200">
-                                    <label className="block font-semibold mb-2">Your Offer:</label>
-                                    <input
-                                        type="number"
-                                        step="0.001"
-                                        value={bidValue}
-                                        onChange={e => setBidValue(e.target.value)}
-                                        onClick={() => {
-                                            if (!bidValue) {
-                                                setBidValue(minimumRequiredBid.toString());
-                                            }
-                                        }}
-                                        placeholder={
-                                            auctionType === 0
-                                                ? higherBid && minimumBidChangeAmount
-                                                    ? `${formatEther(higherBid + minimumBidChangeAmount)} ETH`
-                                                    : '0 ETH'
-                                                : higherBid
-                                                  ? `${formatEther(higherBid)} ETH`
-                                                  : '0 ETH'
-                                        }
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">≈ ${userBidUsd} USD</p>
-                                    <button
-                                        className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
-                                        onClick={() => dispatch(setIsConfirmBidPanelOpen(true))}
-                                        disabled={!isBidValid || !isConnected}
-                                    >
-                                        Enter the Auction
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <CountDown startTime={startTime} endTime={endTime} />
-                    {openConfirmPanel && <BidResume bidAmount={bidValue} />}
-                </>
-            ) : (
+    // No Active Auction
+    if (state !== 1) {
+        return (
+            <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <h1 className="text-center">Current Auction</h1>
                 <ErrorBox
                     title="No Active Auction"
                     message="There is currently no active auction. Please check back later."
                 />
-            )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+            <h1 className="text-center">Current Auction</h1>
+            <h2 className="text-center">Auction ID: {auctionId}</h2>
+            <div className="flex flex-col lg:flex-row items-center justify-center mt-3 w-full max-w-6xl">
+                <div className="mb-4 lg:mb-0 lg:mr-8">
+                    <NftCard tokenId={Number(tokenId)} />
+                </div>
+
+                {/* Bid Placement Section */}
+                <div
+                    className="max-w-md w-full p-4 bg-white rounded-xl"
+                    style={{
+                        boxShadow: '0 10px 25px -5px rgba(130, 95, 170, 0.5), 0 8px 10px -6px rgba(130, 95, 170, 0.3)',
+                    }}
+                >
+                    <h2 className="text-2xl font-bold text-center mb-2">Place Your Bid Here</h2>
+                    <p className="text-lg text-center mb-3 w-full">
+                        This is {auctionType === 0 ? 'an English' : 'a Dutch'} auction
+                        <br></br>
+                        {auctionType === 0
+                            ? 'In an English auction, bidders compete by placing increasingly higher bids. The highest bidder wins.'
+                            : "In a Dutch auction the price drops over time, the first bidder wins. Don't wait."}
+                    </p>
+
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold">Starting Price:</span>
+                            <span className="text-lg">
+                                {startPrice ? formatEther(startPrice) : '0'} ETH ≈ ${getUsdPrice(startPrice)}
+                            </span>
+                        </div>
+
+                        {auctionType === 0 && (
+                            <>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold">Min. Bid Increment:</span>
+                                    <span className="text-lg">
+                                        {minimumBidChangeAmount ? formatEther(minimumBidChangeAmount) : '0'} ETH ≈ $
+                                        {getUsdPrice(minimumBidChangeAmount)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold">Current Highest Bid:</span>
+                                    <span className="text-lg font-bold text-green-600">
+                                        {higherBid ? formatEther(higherBid) : '0'} ETH ≈ ${getUsdPrice(higherBid)}
+                                    </span>
+                                </div>
+
+                                {/* User Bid Status Box */}
+                                {(userHasBid || userIsWinning) && (
+                                    <div
+                                        className={`mt-3 p-3 rounded-lg text-center ${
+                                            userIsWinning
+                                                ? 'bg-green-50 border-2 border-green-500'
+                                                : 'bg-yellow-50 border-2 border-yellow-500'
+                                        }`}
+                                    >
+                                        {userIsWinning ? (
+                                            <p className="text-green-700 font-semibold animate-pulse">
+                                                🎉 You are the highest bidder now.
+                                            </p>
+                                        ) : (
+                                            <div>
+                                                <p className="text-yellow-700 font-semibold">
+                                                    ⚠️ Your bid was surpassed.
+                                                </p>
+                                                <p className="text-yellow-600 text-sm mt-1">
+                                                    Submit a higher bid to claim the item.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {auctionType === 1 && (
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold">Current Price:</span>
+                                <span className="text-lg font-bold text-blue-600">
+                                    {higherBid ? formatEther(higherBid) : '0'} ETH ≈ ${getUsdPrice(higherBid)}
+                                </span>
+                            </div>
+                        )}
+
+                        <div className="mt-6 pt-4 border-t border-gray-200">
+                            <label className="block font-semibold mb-2">Your Offer:</label>
+                            <input
+                                type="number"
+                                step="0.001"
+                                value={bidValue}
+                                onChange={e => setBidValue(e.target.value)}
+                                onClick={() => {
+                                    if (!bidValue) {
+                                        setBidValue(minimumRequiredBid.toString());
+                                    }
+                                }}
+                                placeholder={
+                                    auctionType === 0
+                                        ? higherBid && minimumBidChangeAmount
+                                            ? `${formatEther(higherBid + minimumBidChangeAmount)} ETH`
+                                            : '0 ETH'
+                                        : higherBid
+                                          ? `${formatEther(higherBid)} ETH`
+                                          : '0 ETH'
+                                }
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">≈ ${userBidUsd} USD</p>
+                            <button
+                                className="w-full mt-4 px-6 py-3 bg-[#825FAA] hover:bg-[#6d4d8a] active:bg-[#5a3d6f] text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                                onClick={() => dispatch(setIsConfirmBidPanelOpen(true))}
+                                disabled={!isBidValid || !isConnected}
+                            >
+                                Enter the Auction
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <CountDown startTime={startTime} endTime={endTime} />
+            {openConfirmPanel && <BidResume bidAmount={bidValue} />}
         </div>
     );
 };
