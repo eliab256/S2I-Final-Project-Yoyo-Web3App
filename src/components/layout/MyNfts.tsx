@@ -32,44 +32,56 @@ const MyNfts: React.FC = () => {
     const tokenIds = nfts?.map(nft => nft.tokenId) ?? [];
     const hasNfts = tokenIds.length > 0;
 
+    // Wallet is not connected
+    if (!isConnected) {
+        return (
+            <div className="w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <div className="px-2 sm:px-4 text-center">
+                    <h1>My Nfts</h1>
+                </div>
+
+                <ErrorBox title="Wallet not connected" message="Please connect your wallet to view your products." />
+            </div>
+        );
+    }
+
+    // Loading state
+    if (isConnected && isLoading) {
+        return (
+            <div className="w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <div className="px-2 sm:px-4 text-center">
+                    <h1>My Nfts</h1>
+                </div>
+
+                <div className="relative flex justify-center items-center min-h-[50vh] px-4">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4 mx-auto"></div>
+                        <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-2">Loading your NFTs...</h2>
+                        <p className="text-gray-600">Please wait while we fetch your collection.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if(isConnected && error && !isLoading) {
+        return (
+            <div className="w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
+                <div className="px-2 sm:px-4 text-center">
+                    <h1>My Nfts</h1>
+                </div>
+                 <ErrorBox title="Error loading NFTs" message={`${error}. Please try again later.`} />
+            </div>
+        );
+    }
+
     return (
         <div className="w-full lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
             <div className="px-2 sm:px-4 text-center">
                 <h1>My Nfts</h1>
             </div>
             <div>
-                {/* wallet is not connected */}
-                {!isConnected && (
-                    // <div className="relative flex justify-center items-center min-h-[50vh] px-4 animate-pulse ">
-                    //     <div className="border-red-500 border-2 bg-white  rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                    //         <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">
-                    //             Wallet not connected
-                    //         </h2>
-                    //         <p className="text-red-600">Please connect your wallet to view your products.</p>
-                    //     </div>
-                    // </div>
-
-                    <ErrorBox
-                        title="Wallet not connected"
-                        message="Please connect your wallet to view your products."
-                    />
-                )}
-                {/* loading state */}
-                {isConnected && isLoading && (
-                    <div className="relative flex justify-center items-center min-h-[50vh] px-4">
-                        <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4 mx-auto"></div>
-                            <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-2">
-                                Loading your NFTs...
-                            </h2>
-                            <p className="text-gray-600">Please wait while we fetch your collection.</p>
-                        </div>
-                    </div>
-                )}
-                {/* error state */}
-                {isConnected && error && !isLoading && (
-                    <ErrorBox title="Error loading NFTs" message={`${error}. Please try again later.`} />
-                )}
                 {/* wallet is connected but the user hasn't never bought a product */}
                 {isConnected && address && !hasNfts && !isLoading && !error && (
                     <ErrorBox

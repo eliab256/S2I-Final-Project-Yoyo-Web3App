@@ -9,7 +9,7 @@
   <p align="center">
     Yoyo is a blockchain-based auction inclusive yoga platform and NFT marketplace that personalizes accessible practice paths for everyone.
     <br />
-    <a href=""><strong>Visit the website</strong></a>
+    <a href="https://yoyo-nft-auction.vercel.app/"><strong>Visit the website</strong></a>
     <br />
   </p>
 </div>
@@ -19,36 +19,36 @@
 - [Index](#index)
 - [1. About The Project](#1-about-the-project)
 - [2. Clone and Configuration](#2-clone-and-configuration)
-  - [2.1. Initialize React Project](#21-initialize-react-project)
-  - [2.2. Initialize Foundry Project](#22-initialize-foundry-project)
-  - [2.3. Local Environment Variables](#23-local-environment-variables)
+    - [2.1. Initialize React Project](#21-initialize-react-project)
+    - [2.2. Initialize Foundry Project](#22-initialize-foundry-project)
+    - [2.3. Local Environment Variables](#23-local-environment-variables)
 - [3. Smart Contracts](#3-smart-contracts)
-  - [3.1. Smart Contracts Details](#31-smart-contracts-details)
-  - [3.2. Read From Smart Contracts](#32-read-from-smart-contracts)
-  - [3.3. Write on Smart Contracts](#33-write-on-smart-contracts)
+    - [3.1. Smart Contracts Details](#31-smart-contracts-details)
+    - [3.2. Read From Smart Contracts](#32-read-from-smart-contracts)
+    - [3.3. Write on Smart Contracts](#33-write-on-smart-contracts)
 - [4. Event Indexing](#4-event-indexing)
-  - [4.1. Rindexer with GraphQL](#41-rindexer-with-graphql)
-  - [4.2. Indexed Events](#42-indexed-events)
-  - [4.3. Queries](#43-queries)
+    - [4.1. Rindexer with GraphQL](#41-rindexer-with-graphql)
+    - [4.2. Indexed Events](#42-indexed-events)
+    - [4.3. Queries](#43-queries)
 - [5. Front End](#5-front-end)
-  - [5.1. Providers](#51-providers)
-  - [5.2. Wallet Connection](#52-wallet-connection)
-  - [5.3. App Structure](#53-app-structure)
-  - [5.4. Custom Hooks](#54-custom-hooks)
-    - [useClaimNft:](#useclaimnft)
-    - [useClaimRefund](#useclaimrefund)
-    - [useCurrentAuction](#usecurrentauction)
-    - [useEthereumPrice](#useethereumprice)
-    - [usePlaceBid](#useplacebid)
-    - [useTransferNft](#usetransfernft)
-    - [useUserNFTs](#useusernfts)
-  - [5.5. Redux For Global State](#55-redux-for-global-state)
-    - [Store Structure](#store-structure)
-    - [Example Slices](#example-slices)
-    - [Usage in Components](#usage-in-components)
+    - [5.1. Providers](#51-providers)
+    - [5.2. Wallet Connection](#52-wallet-connection)
+    - [5.3. App Structure](#53-app-structure)
+    - [5.4. Custom Hooks](#54-custom-hooks)
+        - [useClaimNft:](#useclaimnft)
+        - [useClaimRefund](#useclaimrefund)
+        - [useCurrentAuction](#usecurrentauction)
+        - [useEthereumPrice](#useethereumprice)
+        - [usePlaceBid](#useplacebid)
+        - [useTransferNft](#usetransfernft)
+        - [useUserNFTs](#useusernfts)
+    - [5.5. Redux For Global State](#55-redux-for-global-state)
+        - [Store Structure](#store-structure)
+        - [Example Slices](#example-slices)
+        - [Usage in Components](#usage-in-components)
 - [6. Performance, Gas Optimization And Security](#6-performance-gas-optimization-and-security)
-  - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
-  - [6.2. Use Events To Trigger Read Contract](#62-use-events-to-trigger-read-contract)
+    - [6.1. Read Contract vs Read Events](#61-read-contract-vs-read-events)
+    - [6.2. Use Events To Trigger Read Contract](#62-use-events-to-trigger-read-contract)
 - [7. Further development](#7-further-development)
 - [8. Contacts](#8-contacts)
 - [9. Copyright](#9-copyright)
@@ -191,7 +191,6 @@ Key configuration points:
 
 railway domain for rindexer
 https://rindexer-sepolia-yoyo-production.up.railway.app
-
 
 ## 4.2. Indexed Events
 
