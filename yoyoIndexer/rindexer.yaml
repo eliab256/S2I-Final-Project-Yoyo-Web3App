@@ -7,10 +7,18 @@ networks:
       chain_id: 11155111
       rpc: ${SEPOLIA_RPC_URL}
       block_poll_interval: 5000
-      compute_units_per_second: 10
+      compute_units_per_second: 300
 storage:
     postgres:
         enabled: true
+
+indexing:
+    batch_size: 50
+    max_retries: 5
+    retry_delay: 2000 
+    throttle: 200 
+    mode: incremental 
+
 native_transfers:
     enabled: false
 contracts:
