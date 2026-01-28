@@ -11,6 +11,8 @@ foundry/broadcast/**/dry-run/
 docs/
 
 .env
+.env.production
+.env.development
 /node_modules
 foundry/lib
 
