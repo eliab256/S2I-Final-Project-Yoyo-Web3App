@@ -4,6 +4,7 @@ import nftData from '../../data/nftCardData';
 import type { NftData } from '../../types/nftTypes';
 import useUserNFTs from '../../hooks/useUserNFTs';
 import ErrorBox from '../ui/ErrorBox';
+import LoadingBox from '../ui/LoadingBox';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { selectSelectedNftId, setSelectedNft } from '../../redux/selectedNftSlice';
@@ -53,13 +54,10 @@ const MyNfts: React.FC = () => {
                     <h1>My Nfts</h1>
                 </div>
 
-                <div className="relative flex justify-center items-center min-h-[50vh] px-4">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4 mx-auto"></div>
-                        <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-2">Loading your NFTs...</h2>
-                        <p className="text-gray-600">Please wait while we fetch your collection.</p>
-                    </div>
-                </div>
+                <LoadingBox
+                    title="Loading your NFTs..."
+                    message="Please wait while we fetch your collection."
+                />
             </div>
         );
     }

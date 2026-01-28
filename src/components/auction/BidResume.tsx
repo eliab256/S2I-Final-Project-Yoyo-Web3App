@@ -87,6 +87,7 @@ const BidResume: React.FC<BidResumeProps> = ({ bidAmount }) => {
                 onClose={() => dispatch(resetConfirmPlaceBid())}
             />
         );
+        
     }
 
     //otherwise show modal with bid resume

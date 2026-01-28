@@ -7,6 +7,8 @@ interface ErrorBoxProps {
 }
 
 const ErrorBox: React.FC<ErrorBoxProps> = ({ title, message, onClose }) => {
+    console.log(`${title} Error :`, message);
+
     // When onClose is provided, render a modal with overlay
     if (onClose) {
         return (
@@ -23,7 +25,7 @@ const ErrorBox: React.FC<ErrorBoxProps> = ({ title, message, onClose }) => {
                         </button>
 
                         <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">{title}</h2>
-                        <p className="text-red-600">{message}</p>
+                        <p className="text-red-600">{'Check console for more details.'}</p>
                     </div>
                 </div>
             </div>
@@ -35,7 +37,7 @@ const ErrorBox: React.FC<ErrorBoxProps> = ({ title, message, onClose }) => {
         <div className="mx-auto my-8 max-w-md px-4">
             <div className="relative border-red-500 border-2 bg-white rounded-2xl shadow-lg p-6 text-center animate-pulse">
                 <h2 className="text-xl md:text-2xl font-semibold text-red-700 mb-2">{title}</h2>
-                <p className="text-red-600">{message}</p>
+                <p className="text-red-600">{'Check console for more details.'}</p>
             </div>
         </div>
     );

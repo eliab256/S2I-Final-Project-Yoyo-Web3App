@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsConfirmBidPanelOpen, selectIsConfirmBidPanelOpen } from '../../redux/confirmPlaceBidSlice';
 import { useAccount } from 'wagmi';
 import ErrorBox from '../ui/ErrorBox';
+import LoadingBox from '../ui/LoadingBox';
 
 const CurrentAuction: React.FC = () => {
     const dispatch = useDispatch();
@@ -95,9 +96,11 @@ const CurrentAuction: React.FC = () => {
         return (
             <div className="w-full flex flex-col items-center px-2 sm:px-4 lg:min-h-[calc(100vh-var(--headerAndFooterHeight)*2)]">
                 <h1 className="text-center">Current Auction</h1>
-                <div className="flex items-center justify-center min-h-[50vh]">
-                    <div className="text-xl">Loading current auction...</div>
-                </div>
+
+                <LoadingBox
+                    title="Loading current auction..."
+                    message="Please wait while we fetch the current auction details."
+                />
             </div>
         );
     }
